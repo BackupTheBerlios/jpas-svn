@@ -23,86 +23,21 @@
  */
 package org.jpas.gui.model;
 
-import javax.swing.*;
-import java.util.*;
-import org.jpas.model.*;
-import org.jpas.util.JpasDataChange;
-import org.jpas.util.JpasObservable;
+import org.jpas.model.Account;
 import org.jpas.util.JpasObserver;
 
 /**
  * @author Justin W Smith
  *
  */
-public class AccountListModel extends AbstractListModel
+public class AccountListModel extends JpasListModel<Account>
 {
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
-    private static final long serialVersionUID = -4606379655223716167L;
-
-    final List<Account> data = new ArrayList<Account>();
-    
-    final JpasObserver<Account> observer = new JpasObserver<Account>()
-    {
-        public void update(JpasObservable<Account> obs, JpasDataChange<Account> change)
-        {
-            synchronized(AccountListModel.this)
-            {
-                data.clear();
-                populateData();
-            }
-            final Runnable runnable = new Runnable()
-            {
-                public void run()
-                {
-                    AccountListModel.this.fireContentsChanged(AccountListModel.this, 0, data.size());
-                }
-            };
-            if(SwingUtilities.isEventDispatchThread())
-            {
-                runnable.run();
-            }
-            else
-            {
-                SwingUtilities.invokeLater(runnable);
-            }
-        }
-    };
-    /**
-     * 
-     */
-    public AccountListModel()
-    {
-        populateData();
-        Account.getObservable().addObserver(observer);
-    }
-    
-    private void populateData()
-    {
-        for(Account a : Account.getAllAccounts())
-        {
-            data.add(a);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see javax.swing.ListModel#getSize()
-     */
-    public synchronized int getSize()
-    {
-        return data.size();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.swing.ListModel#getElementAt(int)
-     */
-    public synchronized Object getElementAt(int index)
-    {
-        return data.get(index);
-    }
-
-    public static void main(String[] args)
-    {
-    }
+	protected void initObserver(final JpasObserver<Account> observer)
+	{
+		Account.getObservable().addObserver(observer);
+	}
+	protected Account[] loadData()
+	{
+		return Account.getAllAccounts();
+	}
 }
