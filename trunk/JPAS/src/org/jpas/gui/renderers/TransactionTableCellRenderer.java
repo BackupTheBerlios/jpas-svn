@@ -158,10 +158,10 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         	numLabel.setText(trans.getNum());
             balanceLabel.setText("");
             memoLabel.setText(trans.getMemo());
+            payeeLabel.setText(trans.getPayee());
             
         	if(trans.getAccount().equals(account))
         	{
-	            payeeLabel.setText(trans.getPayee());
 	            final long amount = trans.getAmount();
 	            if(amount >= 0)
 	            {
@@ -191,8 +191,9 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         	}
         	else
         	{
-	            payeeLabel.setText(trans.getPayee());
-	            final long amount = trans.getAmount();
+        	    final Category cat = Category.getCategoryForAccount(account);
+	            final long amount = trans.getTransfer(cat).getAmount();
+
 	            if(amount >= 0)
 	            {
 		            withdrawLabel.setText(String.valueOf(amount));
@@ -204,20 +205,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 		            depositLabel.setText(String.valueOf(amount));
 	            }
 	            
-	            
-	            final TransactionTransfer[] transfers = trans.getAllTransfers();
-	            if(transfers.length == 0)
-	            {
-	            	categoryLabel.setText("[NONE]");
-	            }
-	            else if(transfers.length == 1)
-	            {
-	            	categoryLabel.setText(transfers[0].getCategory().getName());
-	            }
-	            else
-	            {
-	            	categoryLabel.setText("[SPLIT]");
-	            }
+            	categoryLabel.setText(cat.getName());
         	}
         }
         return this;
