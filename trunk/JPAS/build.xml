@@ -1,0 +1,50 @@
+<project name="JPAS" default="dist" basedir=".">
+    <description>
+        Java Personal Accounting Spftware
+    </description>
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="build"/>
+  <property name="dist"  value="dist"/>
+  <property name="lib" value="lib"/>
+  <property name="log4j.jar" value="log4j-1.2.8.jar"/>
+  <property name="hsqldb.jar" value="hsqldb.jar"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile the source " >
+    <javac srcdir="${src}" destdir="${build}">
+    	<classpath>
+        	<fileset dir="${lib}">
+        	  <filename name="**/*.jar"/>
+        	</fileset>
+    	</classpath>
+  	</javac>
+  </target>
+
+  <target name="dist" depends="compile"
+        description="generate the application jar" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/JPAS-${DSTAMP}.jar" >
+    	<fileset dir="${lib}">
+    	  <filename name="**/*.jar"/>
+    	  <filename name="**/*.txt*"/>
+    	</fileset>
+    </jar>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>
