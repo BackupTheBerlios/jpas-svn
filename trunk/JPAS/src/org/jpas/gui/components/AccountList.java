@@ -23,7 +23,7 @@
  */
 package org.jpas.gui.components;
 
-import java.awt.Color;
+import java.awt.*;
 
 import javax.swing.JList;
 
@@ -53,7 +53,13 @@ public class AccountList extends JList
         setBackground(new Color(239, 239, 239));
     }
     
-    
+    public Dimension getPreferredSize()
+    {
+        final Dimension dim = getCellRenderer().getListCellRendererComponent(this, "WWWWWWWWWWWW", 0, false, false).getPreferredSize();
+        dim.height *= getModel().getSize();
+        return dim;
+        
+    }
     
     public static void main(String[] args)
     {
