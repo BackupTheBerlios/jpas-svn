@@ -71,8 +71,6 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
         accountAmount.setOpaque(true);
         inner.add(accountAmount);
         
-        inner.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        
         add(inner);
 
     }
@@ -86,10 +84,12 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
         accountAmount.setText(includeAmount ?  createAmountText(a.getBalance()) : "");
         if(isSelected)
         {
+            setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
             accountAmount.setBackground(highlightColor);
         }
         else
         {
+            setBorder(BorderFactory.createEmptyBorder());
             accountAmount.setBackground(backgroundColor);
         }
         return this;
