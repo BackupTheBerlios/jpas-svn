@@ -25,6 +25,9 @@ package org.jpas.da;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
@@ -72,6 +75,32 @@ public class ReminderAccountMappingDA
             throw new RuntimeException(sqlStr, sqle);
         }
     }
+    
+    public Integer[] getAllReminderAccountTranfers(final Integer reminderID)
+    {
+        final String sqlStr = "SELECT " + DBNames.CN_RAM_ACCOUNT_ID + " FROM "
+                + DBNames.TN_REMINDER_ACCOUNT_MAP + " WHERE "
+                + DBNames.CN_RAM_REMINDER_ID + " IS '" + reminderID + "'";
+
+        try
+        {
+            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final List<Integer> idList = new ArrayList<Integer>();
+            while (rs.next())
+            {
+                idList.add((Integer) rs.getObject(DBNames.CN_RAM_ACCOUNT_ID));
+            }
+            return idList.toArray(new Integer[idList.size()]);
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(
+                    "SQLException while loading Reminder-Account Mapping!", sqle);
+            throw new RuntimeException("Unable to load Reminder-Account Mapping!",
+                    sqle);
+        }
+    }
+
     
     public void loadReminderAccountMapping(final Integer reminderID, final Integer accountID, final ReminderAccountTranferHandler handler)
     {
