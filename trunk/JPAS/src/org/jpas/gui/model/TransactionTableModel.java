@@ -96,7 +96,6 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public String getColumnName(int columnIndex)
     {
-        // TODO Auto-generated method stub
         return "Transaction";
     }
 
@@ -113,7 +112,7 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public boolean isCellEditable(int rowIndex, int columnIndex)
     {
-        return true;
+        return rowIndex <= transactionList.size();
     }
 
     /* (non-Javadoc)
