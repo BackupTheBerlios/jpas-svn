@@ -108,7 +108,7 @@ public class InitDB
 										  + " INTEGER PRIMARY KEY, "
 										  + DBNames.CN_ACCOUNT_NAME
 										  + " VARCHAR(64), "
-										  + DBNames.CN_ACCOUNT_PRIMARY
+										  + DBNames.CN_ACCOUNT_IS_BANK
 										  + " BOOLEAN )";
 
 		final String sqlSequenceStr = "CREATE SEQUENCE "
