@@ -14,11 +14,4 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>build.xml</name>
-			<type>1</type>
-			<location>C:/sourcecode/JPAS/build.xml</location>
-		</link>
-	</linkedResources>
 </projectDescription>
