@@ -44,20 +44,23 @@ public class Category extends JpasObservable<Category>
 
     public static Category[] getAllCategories()
     {
-        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
-        final Category[] categories = new Category[ids.length];
-        for (int i = 0; i < ids.length; i++)
-        {
-            categories[i] = getCategoryForID(ids[i]);
-        }
-
-        return categories;
+    	synchronized(categoryCache)
+		{
+	        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
+	        final Category[] categories = new Category[ids.length];
+	        for (int i = 0; i < ids.length; i++)
+	        {
+	            categories[i] = getCategoryForID(ids[i]);
+	        }
+	
+	        return categories;
+		}
     }
 
     public static Category createCategory(final String name)
     {
         return getCategoryForID(
-                AccountDA.getInstance().createAccount(name, true));
+                AccountDA.getInstance().createAccount(name, AccountDA.AccountType.CATEGORY));
     }
 
     static Category getCategoryForID(final Integer id)
@@ -80,7 +83,7 @@ public class Category extends JpasObservable<Category>
     private boolean isLoaded = false;
 
     private String name;
-    private boolean isBankAccount;
+    private AccountDA.AccountType type;
     
     private Category(final Integer id)
     {
@@ -89,20 +92,32 @@ public class Category extends JpasObservable<Category>
     }
     
     public void delete()
-    {
+	{
+	    delete(true);
+	}
+	
+	void delete(final boolean callDA)
+{
+        /*
+         * TODO: This should probably not immediately delete this category.
+         * All refering transfers must be altered.
+         */
     	synchronized(this)
 		{
     		synchronized(categoryCache)
 			{
-		        AccountDA.getInstance().deleteAccount(id);
+	    	    if(callDA)
+	    	    {
+	    	        AccountDA.getInstance().deleteAccount(id);
+	    	    }
 		        categoryCache.remove(id);
-		        isDeleted = true;
 			}
+	        isDeleted = true;
 		}
     	announceDelete();
     }
 
-    private void announceDelete()
+    void announceDelete()
     {
     	final JpasDataChange<Category> change = new JpasDataChange.Delete<Category>(this);
     	observable.notifyObservers(change);
@@ -110,11 +125,16 @@ public class Category extends JpasObservable<Category>
 		deleteObservers();
     }
 
-    private void announceModify()
+    void announceModify()
     {
     	final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(this);
     	observable.notifyObservers(change);
 		notifyObservers(change);
+    }
+
+    void amountChanged()
+    {
+        announceModify();
     }
 
     
@@ -125,7 +145,8 @@ public class Category extends JpasObservable<Category>
         {
             loadData();
         }
-        return isBankAccount ? "TRANSFER to [" + name + "]" : name;
+        return (type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK)
+        		? "TRANSFER to [" + name + "]" : name;
     }
 
     public synchronized boolean isTranfer()
@@ -135,17 +156,17 @@ public class Category extends JpasObservable<Category>
         {
             loadData();
         }
-        return isBankAccount;
+        return type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK;
     }
     
     private void loadData()
     {
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
-            public void setData(final String name, final boolean isBankAccount)
+            public void setData(final String name, final AccountDA.AccountType isBankAccount)
             {
                 Category.this.name = name;
-                Category.this.isBankAccount = isBankAccount;
+                Category.this.type = type;
                 isLoaded = true;
             }
         });

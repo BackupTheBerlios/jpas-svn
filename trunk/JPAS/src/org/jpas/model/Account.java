@@ -46,7 +46,7 @@ public class Account extends JpasObservable<Account>
     public static Account createAccount(final String name)
     {
         final Account account = getAccountForID(AccountDA.getInstance()
-                .createAccount(name, true));
+                .createAccount(name, AccountDA.AccountType.BANK));
         
         observable.notifyObservers(new JpasDataChange.Add<Account>(account));
         
@@ -69,13 +69,16 @@ public class Account extends JpasObservable<Account>
 
     public static Account[] getAllAccounts()
     {
-        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(true);
-        final Account[] accounts = new Account[ids.length];
-        for (int i = 0; i < ids.length; i++)
-        {
-            accounts[i] = getAccountForID(ids[i]);
-        }
-        return accounts;
+        synchronized(accountCache)
+		{
+	        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(true);
+	        final Account[] accounts = new Account[ids.length];
+	        for (int i = 0; i < ids.length; i++)
+	        {
+	            accounts[i] = getAccountForID(ids[i]);
+	        }
+	        return accounts;
+		}
     }
 
     final Integer id;
@@ -91,19 +94,32 @@ public class Account extends JpasObservable<Account>
 
     public void delete()
     {
+        delete(true);
+    }
+    
+    void delete(final boolean callDA)
+    {
+        /*
+         * TODO: This should probably not immediately delete this account.
+         * all refering tranfers must be altered and all transactions belong to this account
+         * must also be deleted.
+         */
     	synchronized(this)
 		{
 	    	synchronized(accountCache)
 			{
-		        AccountDA.getInstance().deleteAccount(id);
+	    	    if(callDA)
+	    	    {
+	    	        AccountDA.getInstance().deleteAccount(id);
+	    	    }
 		        accountCache.remove(id);
-		        isDeleted = true;
 			}
+	        isDeleted = true;
 		}
     	announceDelete();
     }
 
-    private void announceDelete()
+    void announceDelete()
     {
     	final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(this);
     	observable.notifyObservers(dataChange);
@@ -111,11 +127,16 @@ public class Account extends JpasObservable<Account>
     	deleteObservers();
     }
     
-    private void announceModify()
+    void announceModify()
     {
     	final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(this);
     	observable.notifyObservers(dataChange);
     	notifyObservers(dataChange);    	
+    }
+    
+    void amountChanged()
+    {
+        announceModify();
     }
     
     public synchronized String getName()
@@ -132,7 +153,7 @@ public class Account extends JpasObservable<Account>
     {
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
-            public void setData(final String name, final boolean isBankAccount)
+            public void setData(final String name, final AccountDA.AccountType type)
             {
                 Account.this.name = name;
                 isLoaded = true;
