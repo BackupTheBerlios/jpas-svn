@@ -371,21 +371,39 @@ public class InitDB
 		}
 	}
 
-
-	public static void main(final String[] args)
+	public static void unitTest_dropAll()
 	{
-		BasicConfigurator.configure();
-
 		instance.deleteTransAccountMapTable();
 		instance.deleteRemAccountMapTable();
 		instance.deleteReminderTable();
 		instance.deleteTransactionTable();
 		instance.deleteAccountTable();
-
+	}
+	
+	public static void unitTest_createAll()
+	{
 		instance.createAccountTable();
 		instance.createTransactionTable();
 		instance.createReminderTable();
 		instance.createTransAccountMapTable();
 		instance.createRemAccountMapTable();
+	}
+	
+	public static void unitTest_populateAll()
+	{
+	    AccountDA.unitTest_Create();
+	    TransactionDA.unitTest_Create();
+	    TransAccountMappingDA.unitTest_Create();
+	}
+	
+	public static void main(final String[] args)
+	{
+		BasicConfigurator.configure();
+
+		unitTest_dropAll();
+		
+		unitTest_createAll();
+		
+		unitTest_populateAll();
 	}
 }
