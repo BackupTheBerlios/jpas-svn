@@ -65,6 +65,7 @@ public class Category
     
     private Category(final Integer id)
     {
+        defaultLogger.debug("Constructing Category: " + id);
         this.id = id;
     }
     
