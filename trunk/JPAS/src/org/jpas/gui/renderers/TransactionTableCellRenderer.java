@@ -194,9 +194,9 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         	    final Category cat = Category.getCategoryForAccount(account);
 	            final long amount = trans.getTransfer(cat).getAmount();
 
-	            if(amount >= 0)
+	            if(amount <= 0)
 	            {
-		            withdrawLabel.setText(String.valueOf(amount));
+		            withdrawLabel.setText(String.valueOf(-amount));
 		            depositLabel.setText("");
 	            }
 	            else
@@ -205,7 +205,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 		            depositLabel.setText(String.valueOf(amount));
 	            }
 	            
-            	categoryLabel.setText(cat.getName());
+            	categoryLabel.setText(Category.getCategoryForAccount(trans.getAccount()).getName());
         	}
         }
         return this;
