@@ -150,6 +150,27 @@ public class ReminderDA
 		return id;
 	}
 
+	public void deleteReminder(final Integer id)
+	{
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(
+											  "DELETE FROM " + DBNames.TN_REMINDER
+											 + " WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS '" + id + "'");
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: "+ id +"!");
+				throw new RuntimeException("Unable to update Reminder for id: " + id);
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while deleting Reminder for id: " + id + "!", sqle);
+			throw new RuntimeException("Unable to deleting Reminder for id: " + id, sqle);
+		}
+	}
+
 	
 	public void loadReminder(final Integer id, final ReminderHandler handler)
 	{
