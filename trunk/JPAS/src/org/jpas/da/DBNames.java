@@ -44,7 +44,7 @@ public class DBNames
 	public static String TN_ACCOUNT = "account_tbl";
 	public static String CN_ACCOUNT_ID = "id";
 	public static String CN_ACCOUNT_NAME = "name";
-	public static String CN_ACCOUNT_IS_BANK = "bank";
+	public static String CN_ACCOUNT_TYPE = "type";
 	public static String SEQ_ACCOUNT_ID = "account_seq";
 
 	public static String TN_REMINDER_ACCOUNT_MAP = "rem_account_map_tbl";

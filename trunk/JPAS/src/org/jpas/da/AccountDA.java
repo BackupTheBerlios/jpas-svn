@@ -36,11 +36,33 @@ public class AccountDA
 		return instance;
 	}
 
+	public static class AccountType
+	{
+	    private static final Map<Integer, AccountType> valueMap = new HashMap<Integer, AccountType>();
+	    
+	    private final int dbValue;
+	    private AccountType(final int value)
+	    {
+	        this.dbValue = value;
+	        valueMap.put(new Integer(value), this);
+	    }
+	    
+	    private static AccountType getAccountTypeFor(final int value)
+	    {
+	        return valueMap.get(new Integer(value));
+	    }
+	    
+	    public static final AccountType BANK = new AccountType(0);
+	    public static final AccountType CATEGORY = new AccountType(1);
+	    public static final AccountType DELETED_BANK = new AccountType(2);
+	    public static final AccountType UNKNOWN_CATEGORY = new AccountType(3); 
+	}
+	
 	private AccountDA(){}
 
 	public static interface AccountHandler
 	{
-		public void setData(String name, boolean bankAccount);
+		public void setData(String name, AccountType bankAccount);
 	}
 
 	public void loadAccount(final Integer id, final AccountHandler handler)
@@ -55,7 +77,7 @@ public class AccountDA
 			if(rs.next())
 			{
 				handler.setData(rs.getString(DBNames.CN_ACCOUNT_NAME),
-								rs.getBoolean(DBNames.CN_ACCOUNT_IS_BANK));
+				        		AccountType.getAccountTypeFor(rs.getInt(DBNames.CN_ACCOUNT_TYPE)));
 			}
 			else
 			{
@@ -76,7 +98,7 @@ public class AccountDA
 		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
 										 + " SET " + DBNames.CN_ACCOUNT_NAME
 										 + " = '" + name + "' , "
-										 + DBNames.CN_ACCOUNT_IS_BANK
+										 + DBNames.CN_ACCOUNT_TYPE
 										 + " = '" + isBankAccount
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
 											 + " IS " + id;
@@ -124,7 +146,7 @@ public class AccountDA
 	public void updateAccountIsBank(final Integer id, final boolean isBank)
 	{
 		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
-										 + " SET " + DBNames.CN_ACCOUNT_IS_BANK
+										 + " SET " + DBNames.CN_ACCOUNT_TYPE
 										 + " = '" + isBank
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
 											 + " IS " + id;
@@ -145,7 +167,7 @@ public class AccountDA
 		}
 	}
 
-	public Integer createAccount(final String name, boolean isBankAccount)
+	public Integer createAccount(final String name, final AccountType type)
 	{
 		final String sqlSequenceStr = "CALL NEXT VALUE FOR " + DBNames.SEQ_ACCOUNT_ID;
 
@@ -169,10 +191,10 @@ public class AccountDA
 		final String sqlStr = "INSERT INTO " + DBNames.TN_ACCOUNT
 										 + " ( " + DBNames.CN_ACCOUNT_ID
 										 + " , " + DBNames.CN_ACCOUNT_NAME
-										 + " , " + DBNames.CN_ACCOUNT_IS_BANK
+										 + " , " + DBNames.CN_ACCOUNT_TYPE
 										 + " ) VALUES ( '"
 										 + id + "' , '" + name + "' , '"
-										 + isBankAccount + "')";
+										 + type.dbValue + "')";
 
 
 		try
@@ -235,7 +257,7 @@ public class AccountDA
 	{
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 							+ " FROM " + DBNames.TN_ACCOUNT
-							+ " WHERE " + DBNames.CN_ACCOUNT_IS_BANK
+							+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
 							+ " IS '" +  isBankAccount
 							+ "' ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
@@ -279,10 +301,10 @@ public class AccountDA
 
 	public static void unitTest_Create()
 	{
-		instance.createAccount("Checking", true);
-		instance.createAccount("Savings", true);
-		instance.createAccount("Utility", false);
-		instance.createAccount("Entertainment", false);
+		instance.createAccount("Checking", AccountType.BANK);
+		instance.createAccount("Savings", AccountType.BANK);
+		instance.createAccount("Utility", AccountType.CATEGORY);
+		instance.createAccount("Entertainment", AccountType.CATEGORY);
 	}
 	
 	public static void main(final String[] args)

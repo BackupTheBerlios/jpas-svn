@@ -121,8 +121,8 @@ public class InitDB
 										  + " INTEGER PRIMARY KEY, "
 										  + DBNames.CN_ACCOUNT_NAME
 										  + " VARCHAR(64), "
-										  + DBNames.CN_ACCOUNT_IS_BANK
-										  + " BOOLEAN )";
+										  + DBNames.CN_ACCOUNT_TYPE
+										  + " INTEGER )";
 
 		final String sqlSequenceStr = "CREATE SEQUENCE "
 										  + DBNames.SEQ_ACCOUNT_ID
