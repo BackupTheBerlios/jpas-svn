@@ -5,6 +5,7 @@ import java.util.WeakHashMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;
+import org.jpas.da.TransAccountMappingDA;
 
 /**
  * 
@@ -79,6 +80,7 @@ public class Account
 
     private void loadData()
     {
+    	assert(!isDeleted);
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
             public void setData(final String name, final boolean isBankAccount)
@@ -99,6 +101,20 @@ public class Account
         }
     }
 
+    public long getBalance()
+    {
+    	return TransAccountMappingDA.getInstance().getAccountBalance(id);
+    }
+    
+    public boolean isDeleted()
+    {
+        return isDeleted;
+    }
+    
+    public boolean isLoaded()
+    {
+        return isLoaded;
+    }
     
     public static void unitTest_rename()
     {
