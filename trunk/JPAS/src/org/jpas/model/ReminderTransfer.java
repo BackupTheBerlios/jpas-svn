@@ -27,7 +27,6 @@ import org.jpas.da.ReminderAccountMappingDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
-import org.jpas.util.JpasDataChange.Delete;
 
 /**
  * @author Justin W Smith
@@ -48,7 +47,7 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
     private boolean isLoaded = false;
 
     final Integer reminderID;
-    final Integer accountID;
+    Integer accountID;
 
     private long amount;
     
@@ -80,12 +79,12 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
         this.accountID = accountID;
     }
     
-    public Account getAccount()
+    public synchronized Category getCategory()
     {
-        return Account.getAccountForID(accountID);
+        return Category.getCategoryForID(accountID);
     }
     
-    public Reminder getTransaction()
+    public synchronized Reminder getTransaction()
     {
         return Reminder.getReminderForID(reminderID);
     }
@@ -104,6 +103,7 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
             });
     }
     
+    
     public synchronized long getAmount()
     {
         if(!isLoaded)
@@ -115,7 +115,7 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
     
     public void setAmount(final long amount)
     {
-    	synchronized(this)
+     	synchronized(this)
 		{
 	        assert(!isDeleted);
 	        ReminderAccountMappingDA.getInstance().updateReminderAccountMapping(reminderID, accountID, amount);
@@ -125,9 +125,10 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
 	        }
 		}
     	announceModify();
+        Reminder.getReminderForID(reminderID).announceModify();
     }
 
-    private void announceDelete()
+    void announceDelete()
     {
     	final JpasDataChange<ReminderTransfer> change = new JpasDataChange.Delete<ReminderTransfer>(this);
     	observable.notifyObservers(change);
@@ -135,7 +136,7 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
 		deleteObservers();
     }
     
-    private void announceModify()
+    void announceModify()
     {
     	final JpasDataChange<ReminderTransfer> change = new JpasDataChange.Modify<ReminderTransfer>(this);
     	observable.notifyObservers(change);
@@ -143,33 +144,42 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
 		deleteObservers();
     }
     
-    public boolean isDeleted()
+    public synchronized boolean isDeleted()
     {
         return isDeleted;
     }
     
-    public boolean isLoaded()
+    public synchronized boolean isLoaded()
     {
         return isLoaded;
     }
     
     public void delete()
+	{
+	    delete(true);
+	}
+	
+	void delete(final boolean callDA)
     {
     	synchronized(this)
 		{
         	synchronized(remTransferCache)
 			{
-		    	ReminderAccountMappingDA.getInstance().deleteReminderAccountMapping(reminderID, accountID);
+	    	    if(callDA)
+	    	    {
+	    	        ReminderAccountMappingDA.getInstance().deleteReminderAccountMapping(reminderID, accountID);
+	    	    }
 		    	final WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
 		    	map.remove(accountID);
 		    	if(map.size() == 0)
 		    	{
 		    	    remTransferCache.remove(reminderID);
 		    	}
-		    	isDeleted = true;
 			}
+	    	isDeleted = true;
 		}
     	announceDelete();
+        Reminder.getReminderForID(reminderID).amountChanged();
     }
     
     public static void main(String[] args)
