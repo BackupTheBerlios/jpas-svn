@@ -105,9 +105,24 @@ public class Category
         }
     }
     
+    public long getTotal()
+    {
+    	return TransAccountMappingDA.getInstance().getAccountBalance(id);
+    }
+    
     public boolean isTranfer()
     {
         return isBankAccount;
+    }
+    
+    public boolean isDeleted()
+    {
+        return isDeleted;
+    }
+    
+    public boolean isLoaded()
+    {
+        return isLoaded;
     }
     
     private static void unitTest_List()
