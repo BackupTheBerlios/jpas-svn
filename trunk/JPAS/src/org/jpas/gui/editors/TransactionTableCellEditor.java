@@ -79,7 +79,6 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	memoField = new JTextField();
     	balanceLabel = new JLabel();
     	categoryList = new CategoryComboBox();
-    	categoryList.setEditable(true);
         
         init();
     }
