@@ -1,8 +1,14 @@
 package org.jpas.da;
 
-import java.sql.*;
-import org.apache.log4j.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 /**
  * Title: JPAS
  * Description: Java based Personal Accounting System
@@ -369,6 +375,33 @@ public class AccountDA
 			throw new RuntimeException("Unable to load account id's!", sqle);
 		}
 	}
+	
+	public String[] getAllPayeesForAccount(final Integer accountId)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_TRANSACTION_PAYEE + " FROM "
+				+ DBNames.TN_TRANSACTION + " WHERE "
+				+ DBNames.CN_TRANSACTION_ACCOUNT + " = " + accountId
+				+ " ORDER BY " + DBNames.CN_TRANSACTION_DATE;
+		try 
+		{
+			final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+			final List<String> idList = new ArrayList<String>();
+			
+			while (rs.next()) 
+			{
+				idList.add(rs.getString(DBNames.CN_TRANSACTION_PAYEE));
+			}
+			
+			return idList.toArray(new String[idList.size()]);
+		} 
+		catch (final SQLException sqle) 
+		{
+			defaultLogger.error("SQLException while loading account name!",
+					sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
+		}
+	}
+
 	
 	public Integer[] getAllAccountIDs()
 	{
