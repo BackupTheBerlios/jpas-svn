@@ -20,7 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package org.jpas.model;
 
 import org.apache.log4j.BasicConfigurator;
@@ -35,50 +34,42 @@ public class Account extends JpasObservable<Account>
 {
     private static WeakValueMap<Integer, Account> accountCache = new WeakValueMap<Integer, Account>();
     private static final Logger defaultLogger = Logger.getLogger(Account.class);
-
     private static final JpasObservable<Account> observable = new JpasObservable<Account>();
-    
+
     public static JpasObservable<Account> getObservable()
     {
-    	return observable;
+        return observable;
     }
-    
+
     public static Account createAccount(final String name)
     {
         final Account account = getAccountForID(AccountDA.getInstance()
                 .createAccount(name, AccountDA.AccountType.BANK));
-        
         observable.notifyObservers(new JpasDataChange.Add<Account>(account));
-        
         return account;
     }
 
     static Account getAccountForID(final Integer id)
     {
-        synchronized(accountCache)
-		{
-	    	Account account = accountCache.get(id);
-	        if (account == null)
-	        {
-	            account = new Account(id);
-	            accountCache.put(id, account);
-	        }
-	        return account;
-		}
+        Account account = accountCache.get(id);
+        if (account == null)
+        {
+            account = new Account(id);
+            accountCache.put(id, account);
+        }
+        return account;
     }
 
     public static Account[] getAllAccounts()
     {
-        synchronized(accountCache)
-		{
-	        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(AccountDA.AccountType.BANK);
-	        final Account[] accounts = new Account[ids.length];
-	        for (int i = 0; i < ids.length; i++)
-	        {
-	            accounts[i] = getAccountForID(ids[i]);
-	        }
-	        return accounts;
-		}
+        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(
+                AccountDA.AccountType.BANK);
+        final Account[] accounts = new Account[ids.length];
+        for (int i = 0; i < ids.length; i++)
+        {
+            accounts[i] = getAccountForID(ids[i]);
+        }
+        return accounts;
     }
 
     final Integer id;
@@ -96,50 +87,46 @@ public class Account extends JpasObservable<Account>
     {
         delete(true);
     }
-    
+
     void delete(final boolean callDA)
     {
         /*
-         * TODO: This should probably not immediately delete this account.
-         * all refering tranfers must be altered and all transactions belong to this account
-         * must also be deleted.
+         * TODO: This should probably not immediately delete this account. all
+         * refering tranfers must be altered and all transactions belong to this
+         * account must also be deleted.
          */
-    	synchronized(this)
-		{
-	    	synchronized(accountCache)
-			{
-	    	    if(callDA)
-	    	    {
-	    	        AccountDA.getInstance().deleteAccount(id);
-	    	    }
-		        accountCache.remove(id);
-			}
-	        isDeleted = true;
-		}
-    	announceDelete();
+        if (callDA)
+        {
+            AccountDA.getInstance().deleteAccount(id);
+        }
+        accountCache.remove(id);
+        isDeleted = true;
+        announceDelete();
     }
 
     void announceDelete()
     {
-    	final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(this);
-    	observable.notifyObservers(dataChange);
-    	notifyObservers(dataChange);
-    	deleteObservers();
+        final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(
+                this);
+        observable.notifyObservers(dataChange);
+        notifyObservers(dataChange);
+        deleteObservers();
     }
-    
+
     void announceModify()
     {
-    	final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(this);
-    	observable.notifyObservers(dataChange);
-    	notifyObservers(dataChange);    	
+        final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(
+                this);
+        observable.notifyObservers(dataChange);
+        notifyObservers(dataChange);
     }
-    
+
     void amountChanged()
     {
         announceModify();
     }
-    
-    public synchronized String getName()
+
+    public String getName()
     {
         assert (!isDeleted);
         if (!isLoaded)
@@ -153,7 +140,8 @@ public class Account extends JpasObservable<Account>
     {
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
-            public void setData(final String name, final AccountDA.AccountType type)
+            public void setData(final String name,
+                    final AccountDA.AccountType type)
             {
                 Account.this.name = name;
                 isLoaded = true;
@@ -163,33 +151,30 @@ public class Account extends JpasObservable<Account>
 
     public void setName(final String name)
     {
-    	synchronized(this)
-		{
-	        assert (!isDeleted);
-	        AccountDA.getInstance().updateAccountName(id, name);
-	        if (isLoaded)
-	        {
-	            loadData();
-	        }
-		}
-    	announceModify();
+        assert (!isDeleted);
+        AccountDA.getInstance().updateAccountName(id, name);
+        if (isLoaded)
+        {
+            loadData();
+        }
+        announceModify();
     }
 
     public long getBalance()
     {
-    	return TransAccountMappingDA.getInstance().getAccountBalance(id);
+        return TransAccountMappingDA.getInstance().getAccountBalance(id);
     }
-    
+
     public boolean isDeleted()
     {
         return isDeleted;
     }
-    
+
     public boolean isLoaded()
     {
         return isLoaded;
     }
-    
+
     public static void unitTest_rename()
     {
         final Account[] accounts = getAllAccounts();
@@ -203,17 +188,15 @@ public class Account extends JpasObservable<Account>
     public static void unitTest_List()
     {
         final Account[] accs = Account.getAllAccounts();
-        for(int i = 0; i < accs.length; i++)
+        for (int i = 0; i < accs.length; i++)
         {
             System.out.println(accs[i].getName());
         }
     }
 
-    
     public static void main(final String[] args)
     {
-		BasicConfigurator.configure();
+        BasicConfigurator.configure();
         unitTest_List();
     }
-
 }

@@ -31,105 +31,91 @@ import org.jpas.util.WeakValueMap;
 
 public class Category extends JpasObservable<Category>
 {
-	private static final Logger defaultLogger = Logger.getLogger(Category.class);
-	
-	private static WeakValueMap<Integer, Category> categoryCache = new WeakValueMap<Integer, Category>();
-	
-	private static JpasObservable<Category> observable = new JpasObservable<Category>();
-	
-	public static  JpasObservable<Category> getObservable()
-	{
-		return observable;
-	}
+    private static final Logger defaultLogger = Logger
+            .getLogger(Category.class);
+    private static WeakValueMap<Integer, Category> categoryCache = new WeakValueMap<Integer, Category>();
+    private static JpasObservable<Category> observable = new JpasObservable<Category>();
+
+    public static JpasObservable<Category> getObservable()
+    {
+        return observable;
+    }
 
     public static Category[] getAllCategories()
     {
-    	synchronized(categoryCache)
-		{
-	        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
-	        final Category[] categories = new Category[ids.length];
-	        for (int i = 0; i < ids.length; i++)
-	        {
-	            categories[i] = getCategoryForID(ids[i]);
-	        }
-	
-	        return categories;
-		}
+        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
+        final Category[] categories = new Category[ids.length];
+        for (int i = 0; i < ids.length; i++)
+        {
+            categories[i] = getCategoryForID(ids[i]);
+        }
+        return categories;
     }
 
     public static Category createCategory(final String name)
     {
-        return getCategoryForID(
-                AccountDA.getInstance().createAccount(name, AccountDA.AccountType.CATEGORY));
+        return getCategoryForID(AccountDA.getInstance().createAccount(name,
+                AccountDA.AccountType.CATEGORY));
     }
 
     static Category getCategoryForID(final Integer id)
     {
-    	synchronized(categoryCache)
-		{
-	        Category category = categoryCache.get(id);
-	        if (category == null)
-	        {
-	            category = new Category(id);
-	            categoryCache.put(id, category);
-	        }
-	        return category;
-		}
+        Category category = categoryCache.get(id);
+        if (category == null)
+        {
+            category = new Category(id);
+            categoryCache.put(id, category);
+        }
+        return category;
     }
-    
-   
+
     final Integer id;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
-
     private String name;
     private AccountDA.AccountType type;
-    
+
     private Category(final Integer id)
     {
         defaultLogger.debug("Constructing Category: " + id);
         this.id = id;
     }
-    
+
     public void delete()
-	{
-	    delete(true);
-	}
-	
-	void delete(final boolean callDA)
-{
+    {
+        delete(true);
+    }
+
+    void delete(final boolean callDA)
+    {
         /*
-         * TODO: This should probably not immediately delete this category.
-         * All refering transfers must be altered.
+         * TODO: This should probably not immediately delete this category. All
+         * refering transfers must be altered.
          */
-    	synchronized(this)
-		{
-    		synchronized(categoryCache)
-			{
-	    	    if(callDA)
-	    	    {
-	    	        AccountDA.getInstance().deleteAccount(id);
-	    	    }
-		        categoryCache.remove(id);
-			}
-	        isDeleted = true;
-		}
-    	announceDelete();
+        if (callDA)
+        {
+            AccountDA.getInstance().deleteAccount(id);
+        }
+        categoryCache.remove(id);
+        isDeleted = true;
+        announceDelete();
     }
 
     void announceDelete()
     {
-    	final JpasDataChange<Category> change = new JpasDataChange.Delete<Category>(this);
-    	observable.notifyObservers(change);
-		notifyObservers(change);
-		deleteObservers();
+        final JpasDataChange<Category> change = new JpasDataChange.Delete<Category>(
+                this);
+        observable.notifyObservers(change);
+        notifyObservers(change);
+        deleteObservers();
     }
 
     void announceModify()
     {
-    	final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(this);
-    	observable.notifyObservers(change);
-		notifyObservers(change);
+        final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(
+                this);
+        observable.notifyObservers(change);
+        notifyObservers(change);
     }
 
     void amountChanged()
@@ -137,33 +123,35 @@ public class Category extends JpasObservable<Category>
         announceModify();
     }
 
-    
-    public synchronized String getName()
+    public String getName()
     {
         assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
         }
-        return (type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK)
-        		? "TRANSFER to [" + name + "]" : name;
+        return (type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK) ? "TRANSFER to ["
+                + name + "]"
+                : name;
     }
 
-    public synchronized boolean isTranfer()
+    public boolean isTranfer()
     {
-    	assert(!isDeleted);
+        assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
         }
-        return type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK;
+        return type == AccountDA.AccountType.BANK
+                || type == AccountDA.AccountType.DELETED_BANK;
     }
-    
+
     private void loadData()
     {
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
-            public void setData(final String name, final AccountDA.AccountType isBankAccount)
+            public void setData(final String name,
+                    final AccountDA.AccountType isBankAccount)
             {
                 Category.this.name = name;
                 Category.this.type = type;
@@ -174,45 +162,42 @@ public class Category extends JpasObservable<Category>
 
     public void setName(final String name)
     {
-    	synchronized(this)
-		{
-	        assert (!isDeleted);
-	        AccountDA.getInstance().updateAccountName(id, name);
-	        if (isLoaded)
-	        {
-	            loadData();
-	        }
-		}
-    	announceModify();
-	}
-    
+        assert (!isDeleted);
+        AccountDA.getInstance().updateAccountName(id, name);
+        if (isLoaded)
+        {
+            loadData();
+        }
+        announceModify();
+    }
+
     public long getTotal()
     {
-    	return TransAccountMappingDA.getInstance().getAccountBalance(id);
+        return TransAccountMappingDA.getInstance().getAccountBalance(id);
     }
-    
+
     public boolean isDeleted()
     {
         return isDeleted;
     }
-    
+
     public boolean isLoaded()
     {
         return isLoaded;
     }
-    
+
     private static void unitTest_List()
     {
         final Category[] cats = Category.getAllCategories();
-        for(int i = 0; i < cats.length; i++)
+        for (int i = 0; i < cats.length; i++)
         {
             System.out.println(cats[i].getName());
         }
     }
-    
-    public static void main(String[] args) 
-	{
-		BasicConfigurator.configure();
+
+    public static void main(String[] args)
+    {
+        BasicConfigurator.configure();
         unitTest_List();
-	}
+    }
 }

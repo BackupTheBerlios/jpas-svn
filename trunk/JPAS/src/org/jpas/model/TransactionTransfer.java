@@ -21,13 +21,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 package org.jpas.model;
 
 import org.jpas.da.TransAccountMappingDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
+
 /**
  * @author Justin W Smith
  *  
@@ -35,161 +35,148 @@ import org.jpas.util.WeakValueMap;
 public class TransactionTransfer extends JpasObservable<TransactionTransfer>
 {
     private static WeakValueMap<Integer, WeakValueMap<Integer, TransactionTransfer>> transTransferCache = new WeakValueMap<Integer, WeakValueMap<Integer, TransactionTransfer>>();
-    
     private static JpasObservable<TransactionTransfer> observable = new JpasObservable<TransactionTransfer>();
-    
+
     public static JpasObservable<TransactionTransfer> getObservable()
     {
         return observable;
     }
-    
+
     private boolean isDeleted = false;
     private boolean isLoaded = false;
-
     final Integer transactionID;
     final Integer accountID;
-
     private long amount;
-    
-    static TransactionTransfer getTransactionTransferforIDs(final Integer transactionID, final Integer accountID)
+
+    static TransactionTransfer getTransactionTransferforIDs(
+            final Integer transactionID, final Integer accountID)
     {
-        synchronized(transTransferCache)
+        WeakValueMap<Integer, TransactionTransfer> map = transTransferCache
+                .get(transactionID);
+        if (map == null)
         {
-	    	WeakValueMap<Integer, TransactionTransfer> map = transTransferCache.get(transactionID);
-	        if(map == null)
-	        {
-	            map = new WeakValueMap<Integer, TransactionTransfer>();
-	            transTransferCache.put(transactionID, map);
-	        }
-	        
-	        TransactionTransfer tt = map.get(accountID);
-	        if(tt == null)
-	        {
-	            tt = new TransactionTransfer(transactionID, accountID);
-	            map.put(accountID, tt);
-	        }
-	        
-	        return tt;
+            map = new WeakValueMap<Integer, TransactionTransfer>();
+            transTransferCache.put(transactionID, map);
         }
+        TransactionTransfer tt = map.get(accountID);
+        if (tt == null)
+        {
+            tt = new TransactionTransfer(transactionID, accountID);
+            map.put(accountID, tt);
+        }
+        return tt;
     }
-    
-    private TransactionTransfer(final Integer transactionID, final Integer accountID)
+
+    private TransactionTransfer(final Integer transactionID,
+            final Integer accountID)
     {
         this.transactionID = transactionID;
         this.accountID = accountID;
     }
-    
-    public synchronized Category getCategory()
+
+    public Category getCategory()
     {
         return Category.getCategoryForID(accountID);
     }
-    
+
     public Transaction getTransaction()
     {
         return Transaction.getTransactionForID(transactionID);
     }
-    
+
     private void loadData()
     {
-        assert(!isDeleted);
-        TransAccountMappingDA.getInstance().loadTransAccountMapping(transactionID, accountID, 
-            new TransAccountMappingDA.TransAccountTranferHandler()
-            {
-        		public void setData(final long amount)
-        		{
-        		    TransactionTransfer.this.amount = amount;
-        		    isLoaded = true;
-        		}
-            });
+        assert (!isDeleted);
+        TransAccountMappingDA.getInstance().loadTransAccountMapping(
+                transactionID, accountID,
+                new TransAccountMappingDA.TransAccountTranferHandler()
+                {
+                    public void setData(final long amount)
+                    {
+                        TransactionTransfer.this.amount = amount;
+                        isLoaded = true;
+                    }
+                });
     }
-    
-    public synchronized long getAmount()
+
+    public long getAmount()
     {
-        if(!isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
         return amount;
     }
-    
+
     void announceDelete()
     {
-        final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Delete<TransactionTransfer>(this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
-    }
-    
-    void announceModify()
-    {
-        final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Modify<TransactionTransfer>(this);
+        final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Delete<TransactionTransfer>(
+                this);
         observable.notifyObservers(change);
         notifyObservers(change);
     }
 
-    
+    void announceModify()
+    {
+        final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Modify<TransactionTransfer>(
+                this);
+        observable.notifyObservers(change);
+        notifyObservers(change);
+    }
+
     public void setAmount(final long amount)
     {
-        final Transaction trans = Transaction.getTransactionForID(transactionID);
-        synchronized(trans)
+        assert (!isDeleted);
+        TransAccountMappingDA.getInstance().updateTransAccountMapping(
+                transactionID, accountID, amount);
+        if (isLoaded)
         {
-	        synchronized(this)
-	        {
-		        assert(!isDeleted);
-		        TransAccountMappingDA.getInstance().updateTransAccountMapping(transactionID, accountID, amount);
-		        if(isLoaded)
-		        {
-		            loadData();
-		        }
-	        }
-	        trans.amountChanged();
+            loadData();
         }
-        
+        final Transaction trans = Transaction
+                .getTransactionForID(transactionID);
+        trans.amountChanged();
         announceModify();
         Category.getCategoryForID(accountID).amountChanged();
         Account.getAccountForID(accountID).amountChanged();
     }
-    
-    public synchronized boolean isDeleted()
+
+    public boolean isDeleted()
     {
         return isDeleted;
     }
-    
-    public synchronized boolean isLoaded()
+
+    public boolean isLoaded()
     {
         return isLoaded;
     }
-    
+
     public void delete()
     {
         delete(true);
     }
-    
+
     void delete(final boolean callDA)
     {
-        synchronized(this)
+        if (callDA)
         {
-            synchronized(transTransferCache)
-            {
-                if(callDA)
-                {
-                    TransAccountMappingDA.getInstance().deleteTransAccountMapping(transactionID, accountID);
-                }
-		    	final WeakValueMap<Integer, TransactionTransfer> map = transTransferCache.get(transactionID);
-		    	map.remove(accountID);
-		    	if(map.size() == 0)
-		    	{
-		    	    transTransferCache.remove(transactionID);
-		    	}
-            }
-            isDeleted = true;
+            TransAccountMappingDA.getInstance().deleteTransAccountMapping(
+                    transactionID, accountID);
         }
+        final WeakValueMap<Integer, TransactionTransfer> map = transTransferCache
+                .get(transactionID);
+        map.remove(accountID);
+        if (map.size() == 0)
+        {
+            transTransferCache.remove(transactionID);
+        }
+        isDeleted = true;
         announceDelete();
         Transaction.getTransactionForID(transactionID).amountChanged();
         Category.getCategoryForID(accountID).amountChanged();
         Account.getAccountForID(accountID).amountChanged();
-
     }
-    
+
     public static void main(String[] args)
     {
     }
