@@ -35,7 +35,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
 
+import org.jpas.gui.components.CategoryComboBox;
+import org.jpas.gui.components.PayeeComboBox;
 import org.jpas.gui.layouts.FlexGridLayout;
+import org.jpas.model.Account;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -43,27 +46,37 @@ import com.toedter.calendar.JDateChooser;
  * @author jsmith
  *
  */
-public class TransactionTableCellEditor extends AbstractCellEditor implements TableCellEditor {
-
-    final JPanel cellPanel = new JPanel();
+public class TransactionTableCellEditor extends AbstractCellEditor implements TableCellEditor 
+{
+	private final JPanel cellPanel = new JPanel();
     
-    final JDateChooser dateChooser = new JDateChooser();
-	final JComboBox numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
-    final JComboBox payeeList = new JComboBox(new String[]{"Payee1", "Payee2"});
-    final JTextField withdrawField = new JTextField("0000.00", 8);
-    final JTextField depositField = new JTextField("0000.00", 8);
-    final JLabel balanceLabel = new JLabel("0000.00");
-    final JComboBox categoryList = new JComboBox(new String[]{"cat1", "cat2"});
+	private final JDateChooser dateChooser;
+	private final JComboBox numList;
+	private final JComboBox payeeList;
+	private final JTextField withdrawField;
+	private final JTextField depositField;
+	private final JLabel balanceLabel;
+	private final JComboBox categoryList;
 	
-	final JLabel label = new JLabel(" ");
+	//final JLabel label = new JLabel(" ");
 
     /**
      * 
      */
-    public TransactionTableCellEditor()
+    public TransactionTableCellEditor(final Account account)
     {
         cellPanel.setOpaque(true);
         cellPanel.setBackground(Color.white);
+
+    	dateChooser = new JDateChooser();
+    	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
+    	payeeList = new PayeeComboBox(account);
+    	withdrawField = new JTextField("0000.00");
+    	depositField = new JTextField("0000.00");
+    	balanceLabel = new JLabel("0000.00");
+    	categoryList = new CategoryComboBox();
+
+        
         init();
     }
     
@@ -92,25 +105,6 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	final JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createLineBorder(Color.gray));
     	return panel;
-    }
-    
-
-    public Component getTableCellRendererComponent(JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column)
-    {
-        if(value == null)
-        {
-//            label.setText(" ");
-        }
-        else
-        {
-            //label.setText(((Transaction)value).getPayee());
-        }
-        return cellPanel;
     }
     
     public Component getTableCellEditorComponent(JTable table,
