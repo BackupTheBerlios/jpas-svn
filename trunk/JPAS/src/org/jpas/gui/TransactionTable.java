@@ -45,6 +45,7 @@ public class TransactionTable extends JTable
     {
         this.setModel(new TransactionTableModel(account));
         this.setDefaultRenderer(Transaction.class, new TransactionTableCellRenderer());
+        this.setDefaultEditor(Transaction.class, new TransactionTableCellRenderer());
         this.setRowHeight(35);
     }
 
