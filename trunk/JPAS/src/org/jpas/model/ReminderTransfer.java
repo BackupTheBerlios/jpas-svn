@@ -24,15 +24,25 @@
 package org.jpas.model;
 
 import org.jpas.da.ReminderAccountMappingDA;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
+import org.jpas.util.JpasDataChange.Delete;
 
 /**
  * @author Justin W Smith
  * 
  */
-public class ReminderTransfer
+public class ReminderTransfer extends JpasObservable<ReminderTransfer>
 {
     private static WeakValueMap<Integer, WeakValueMap<Integer, ReminderTransfer>> remTransferCache = new WeakValueMap<Integer, WeakValueMap<Integer, ReminderTransfer>>();
+    
+    private static JpasObservable<ReminderTransfer> observable = new  JpasObservable<ReminderTransfer>();
+
+    public static JpasObservable<ReminderTransfer> getObservable()
+	{
+    	return observable;
+	}
     
     private boolean isDeleted = false;
     private boolean isLoaded = false;
@@ -44,21 +54,24 @@ public class ReminderTransfer
     
     static ReminderTransfer getReminderTransferforIDs(final Integer reminderID, final Integer accountID)
     {
-    	WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
-        if(map == null)
-        {
-            map = new WeakValueMap<Integer, ReminderTransfer>();
-            remTransferCache.put(reminderID, map);
-        }
-        
-        ReminderTransfer rt = map.get(accountID);
-        if(rt == null)
-        {
-            rt = new ReminderTransfer(reminderID, accountID);
-            map.put(accountID, rt);
-        }
-        
-        return rt;
+    	synchronized(remTransferCache)
+		{
+	    	WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
+	        if(map == null)
+	        {
+	            map = new WeakValueMap<Integer, ReminderTransfer>();
+	            remTransferCache.put(reminderID, map);
+	        }
+	        
+	        ReminderTransfer rt = map.get(accountID);
+	        if(rt == null)
+	        {
+	            rt = new ReminderTransfer(reminderID, accountID);
+	            map.put(accountID, rt);
+	        }
+	        
+	        return rt;
+		}
     }
     
     private ReminderTransfer(final Integer reminderID, final Integer accountID)
@@ -91,7 +104,7 @@ public class ReminderTransfer
             });
     }
     
-    public long getAmount()
+    public synchronized long getAmount()
     {
         if(!isLoaded)
         {
@@ -102,12 +115,32 @@ public class ReminderTransfer
     
     public void setAmount(final long amount)
     {
-        assert(!isDeleted);
-        ReminderAccountMappingDA.getInstance().updateReminderAccountMapping(reminderID, accountID, amount);
-        if(isLoaded)
-        {
-            loadData();
-        }
+    	synchronized(this)
+		{
+	        assert(!isDeleted);
+	        ReminderAccountMappingDA.getInstance().updateReminderAccountMapping(reminderID, accountID, amount);
+	        if(isLoaded)
+	        {
+	            loadData();
+	        }
+		}
+    	announceModify();
+    }
+
+    private void announceDelete()
+    {
+    	final JpasDataChange<ReminderTransfer> change = new JpasDataChange.Delete<ReminderTransfer>(this);
+    	observable.notifyObservers(change);
+		notifyObservers(change);
+		deleteObservers();
+    }
+    
+    private void announceModify()
+    {
+    	final JpasDataChange<ReminderTransfer> change = new JpasDataChange.Modify<ReminderTransfer>(this);
+    	observable.notifyObservers(change);
+		notifyObservers(change);
+		deleteObservers();
     }
     
     public boolean isDeleted()
@@ -122,14 +155,21 @@ public class ReminderTransfer
     
     public void delete()
     {
-    	ReminderAccountMappingDA.getInstance().deleteReminderAccountMapping(reminderID, accountID);
-    	final WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
-    	map.remove(accountID);
-    	if(map.size() == 0)
-    	{
-    	    remTransferCache.remove(reminderID);
-    	}
-    	isDeleted = true;
+    	synchronized(this)
+		{
+        	synchronized(remTransferCache)
+			{
+		    	ReminderAccountMappingDA.getInstance().deleteReminderAccountMapping(reminderID, accountID);
+		    	final WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
+		    	map.remove(accountID);
+		    	if(map.size() == 0)
+		    	{
+		    	    remTransferCache.remove(reminderID);
+		    	}
+		    	isDeleted = true;
+			}
+		}
+    	announceDelete();
     }
     
     public static void main(String[] args)

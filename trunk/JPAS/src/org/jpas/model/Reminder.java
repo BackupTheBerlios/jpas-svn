@@ -38,7 +38,7 @@ import org.jpas.util.JpasDataChange.Delete;
  * @author jsmith
  *
  */
-public class Reminder extends JpasObservable<Reminder> implements JpasObserver<ReminderTransfer>
+public class Reminder extends JpasObservable<Reminder> 
 {
     /** TODO covert this to an enum. */
     public static class AmountMethod 
@@ -163,6 +163,22 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 		        isDeleted = true;
 			}
 		}
+    	announceModify();
+    }
+    
+    private void announceDelete()
+    {
+    	final JpasDataChange<Reminder> change = new JpasDataChange.Delete<Reminder>(this);
+    	observable.notifyObservers(change);
+    	notifyObservers(change);
+    	deleteObservers();
+    }
+
+    private void announceModify()
+    {
+    	final JpasDataChange<Reminder> change = new JpasDataChange.Modify<Reminder>(this);
+    	observable.notifyObservers(change);
+    	notifyObservers(change);
     }
     
     public synchronized Account getAccount()
@@ -251,7 +267,8 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
-    }
+    	announceModify();
+	}
 
     public void setMemo(final String memo)
     {
@@ -264,6 +281,7 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
+    	announceModify();
     }
 
     public void setDate(final Date date)
@@ -277,6 +295,7 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
+    	announceModify();
     }
     
     public void setAccount(final Integer accountID)
@@ -290,6 +309,7 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
+    	announceModify();
     }
 
     public void setAmountMethod(final AmountMethod amountMethod)
@@ -303,6 +323,7 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
+    	announceModify();
     }
 
     public void setRepeatMethod(final RepeatMethod repeatMethod)
@@ -316,6 +337,7 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
+    	announceModify();
     }
 
     public void setRepeatValue(final int repeatValue)
@@ -329,11 +351,7 @@ public class Reminder extends JpasObservable<Reminder> implements JpasObserver<R
 	            loadData();
 	        }
 		}
-    	final JpasDataChange<Reminder> change = new JpasDataChange.Delete<Reminder>(this);
-    	observable.notifyObservers(change);
-		notifyObservers(change);
-		deleteObservers();
-
+    	announceModify();
     }
     
     public long getAmount()

@@ -100,13 +100,24 @@ public class Account extends JpasObservable<Account>
 		        isDeleted = true;
 			}
 		}
-    	
+    	announceDelete();
+    }
+
+    private void announceDelete()
+    {
     	final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(this);
     	observable.notifyObservers(dataChange);
     	notifyObservers(dataChange);
     	deleteObservers();
     }
-
+    
+    private void announceModify()
+    {
+    	final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(this);
+    	observable.notifyObservers(dataChange);
+    	notifyObservers(dataChange);    	
+    }
+    
     public synchronized String getName()
     {
         assert (!isDeleted);
@@ -140,9 +151,7 @@ public class Account extends JpasObservable<Account>
 	            loadData();
 	        }
 		}
-    	final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(this);
-    	observable.notifyObservers(dataChange);
-    	notifyObservers(dataChange);    	
+    	announceModify();
     }
 
     public long getBalance()

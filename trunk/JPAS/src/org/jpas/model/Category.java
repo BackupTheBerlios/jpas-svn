@@ -99,12 +99,25 @@ public class Category extends JpasObservable<Category>
 		        isDeleted = true;
 			}
 		}
+    	announceDelete();
+    }
+
+    private void announceDelete()
+    {
     	final JpasDataChange<Category> change = new JpasDataChange.Delete<Category>(this);
     	observable.notifyObservers(change);
 		notifyObservers(change);
 		deleteObservers();
     }
 
+    private void announceModify()
+    {
+    	final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(this);
+    	observable.notifyObservers(change);
+		notifyObservers(change);
+    }
+
+    
     public synchronized String getName()
     {
         assert (!isDeleted);
@@ -115,6 +128,16 @@ public class Category extends JpasObservable<Category>
         return isBankAccount ? "TRANSFER to [" + name + "]" : name;
     }
 
+    public synchronized boolean isTranfer()
+    {
+    	assert(!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
+        return isBankAccount;
+    }
+    
     private void loadData()
     {
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
@@ -139,24 +162,12 @@ public class Category extends JpasObservable<Category>
 	            loadData();
 	        }
 		}
-    	final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(this);
-    	observable.notifyObservers(change);
-		notifyObservers(change);
-    }
+    	announceModify();
+	}
     
     public long getTotal()
     {
     	return TransAccountMappingDA.getInstance().getAccountBalance(id);
-    }
-    
-    public synchronized boolean isTranfer()
-    {
-    	assert(!isDeleted);
-        if (!isLoaded)
-        {
-            loadData();
-        }
-        return isBankAccount;
     }
     
     public boolean isDeleted()
