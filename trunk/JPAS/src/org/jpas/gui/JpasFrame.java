@@ -33,6 +33,10 @@ import org.jpas.gui.util.*;
  */
 public class JpasFrame extends JFrame
 {
+    /**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 5829636598042046088L;
     private JButton btnReminder = new JButton("Reminders");
     
     public JpasFrame()

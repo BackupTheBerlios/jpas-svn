@@ -23,9 +23,12 @@
  */
 package org.jpas.gui.util;
 
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BoxLayout;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 
 /**
  * @author Justin W Smith
@@ -51,6 +54,11 @@ public class ActionFactory
     {
         return new AbstractAction("Exit")
         {
+            /**
+             * Comment for <code>serialVersionUID</code>
+             */
+            private static final long serialVersionUID = -2201297787213818018L;
+
             public void actionPerformed(final ActionEvent ae)
             {
                 System.exit(0);

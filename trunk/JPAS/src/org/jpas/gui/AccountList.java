@@ -25,7 +25,6 @@ package org.jpas.gui;
 
 import java.awt.Color;
 import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
 import org.jpas.gui.model.AccountListModel;
 import org.jpas.gui.renderers.AccountListCellRenderer;
 
@@ -38,6 +37,16 @@ public class AccountList extends JList
     //final ListSelectionModel model = new DefaultListSelectionModel();
     
  
+
+
+
+    /**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = -3493467009697384086L;
+
+
+
     public AccountList()
     {
         super(new AccountListModel());

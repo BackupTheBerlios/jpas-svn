@@ -36,6 +36,11 @@ import org.jpas.util.JpasObserver;
  */
 public class AccountListModel extends AbstractListModel
 {
+    /**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = -4606379655223716167L;
+
     final List<Account> data = new ArrayList<Account>();
     
     final JpasObserver<Account> observer = new JpasObserver<Account>()

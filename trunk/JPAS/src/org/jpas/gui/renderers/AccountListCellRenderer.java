@@ -34,6 +34,11 @@ import javax.swing.*;
  */
 public class AccountListCellRenderer extends JPanel implements ListCellRenderer
 {
+    /**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = -6269064867894182323L;
+
     private final boolean includeAmount;
     
     private final StringBuffer buff = new StringBuffer();
