@@ -191,6 +191,18 @@ public class Account extends JpasObservable<Account>
         return isLoaded;
     }
 
+    public static void unitTest_delete()
+    {
+        final Account[] accounts = getAllAccounts();
+        for (int i = 0; i < accounts.length; i++)
+        {
+            System.out.println("name: " + accounts[i].getName());
+            //if(accounts[i].id.equals(new Integer(3)))
+            	accounts[i].delete();
+        }
+    }
+
+    
     public static void unitTest_rename()
     {
         final Account[] accounts = getAllAccounts();
@@ -213,6 +225,7 @@ public class Account extends JpasObservable<Account>
     public static void main(final String[] args)
     {
         BasicConfigurator.configure();
-        unitTest_List();
+        //unitTest_List();
+        unitTest_delete();
     }
 }
