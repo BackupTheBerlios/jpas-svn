@@ -51,6 +51,10 @@ public abstract class JpasListCellRenderer<T> extends JLabel implements ListCell
 		{
 			setText("");
 		}
+		else if(value instanceof String)
+		{
+			setText((String)value);
+		}
 		else
 		{
 			setText(getTextFor((T)value));
