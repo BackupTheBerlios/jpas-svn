@@ -27,6 +27,7 @@ import java.awt.*;
 import java.awt.GridLayout;
 import org.jpas.model.*;
 import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  * @author Justin W Smith
@@ -45,6 +46,7 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     
     private final JButton accountName = new JButton();
     private final JEditorPane accountAmount = new JEditorPane("text/html", "");
+    private final Border border = accountName.getBorder();
     
     private final Color highlightColor = new Color(255, 255, 196);
     private final Color backgroundColor = new Color(239, 239, 239);
@@ -68,6 +70,8 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
 */      
         accountAmount.setOpaque(true);
         inner.add(accountAmount);
+        
+        inner.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         
         add(inner);
 
