@@ -84,7 +84,7 @@ public class WeakValueMap<K, V>
 			while(iter.hasNext())
 			{
 				final WeakReference<V> wr = map.get(iter.next());
-				if(wr != null || wr.get() == null)
+				if(wr == null || wr.get() == null)
 				{
 					iter.remove();
 				}
