@@ -1,4 +1,4 @@
-/*
+/**
  * Created on Oct 26, 2004
  *
  * Title: JPAS
@@ -32,9 +32,12 @@ import java.awt.event.MouseListener;
 import java.sql.Date;
 
 import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
 import javax.swing.table.TableCellEditor;
 
 import org.jpas.gui.components.*;
+import org.jpas.gui.data.TransactionData;
 import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.*;
@@ -71,7 +74,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final int[] rowHeights;
 	
 	private Account account;
-
+	
     /**
      * 
      */
@@ -121,6 +124,29 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	
     	withdrawField.setDocument(withdrawDoc);
     	depositField.setDocument(depositDoc);
+    
+    	createClearDocListener(withdrawDoc, depositDoc);
+    	createClearDocListener(depositDoc, withdrawDoc);
+    }
+    
+    private void createClearDocListener(final Document doc, final Document opposite)
+    {
+        doc.addDocumentListener(new DocumentListener()
+                {
+            		public void insertUpdate(DocumentEvent e)
+            		{
+            		    try
+            		    {
+            		        opposite.remove(0, opposite.getLength()) ;
+            		    }catch(BadLocationException ble){}
+            		}
+            		public void removeUpdate(DocumentEvent e)
+            		{
+            		}
+            		public void changedUpdate(DocumentEvent e)
+            		{
+            		}
+                });        
     }
     
     public void setAccount(final Account account)
@@ -160,7 +186,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
     public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column)
     {
-        if(value == null)
+        final Transaction currentTrans = (Transaction)value;
+        if(currentTrans == null)
         {
         	dateChooser.setDate(new java.util.Date());
         	numList.setSelectedItem("");
@@ -168,42 +195,41 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	withdrawField.setText("");
         	depositField.setText("");
         	balanceLabel.setText("");
+        	memoField.setText("");
         	categoryList.getModel().setSelectedItem(null);
     	    setCategoryPanel();
         }
         else
         {
-	        final Transaction trans = (Transaction)value;
-	        
-	        dateChooser.setDate(trans.getDate());
-        	numList.setSelectedItem(trans.getNum());
-        	payeeList.setSelectedItem(trans.getPayee());
+	        dateChooser.setDate(currentTrans.getDate());
+        	numList.setSelectedItem(currentTrans.getNum());
+        	payeeList.setSelectedItem(currentTrans.getPayee());
         	
-        	final long amount = trans.getAmount();
+        	final long amount = currentTrans.getAmount();
         	if(amount >= 0)
         	{
 	        	depositField.setText("");
-	        	withdrawDoc.setAmount(trans.getAmount());
+	        	withdrawDoc.setAmount(currentTrans.getAmount());
         	}
         	else
         	{
 	        	withdrawField.setText("");
-	        	depositDoc.setAmount(-trans.getAmount());
+	        	depositDoc.setAmount(-currentTrans.getAmount());
         	}
         	balanceLabel.setText("");
-        	
-        	final TransactionTransfer[] transfers = trans.getAllTransfers();
+        	memoField.setText(currentTrans.getMemo());
+        	final TransactionTransfer[] transfers = currentTrans.getAllTransfers();
         	if(transfers.length == 0)
         	{
         	    setCategoryPanel();
             	categoryList.setSelectedItem("");
         	}
-        	else if(!trans.getAccount().equals(account))
+        	else if(!currentTrans.getAccount().equals(account))
         	{
-        	    System.out.println(trans.getAccount().getName());
-        	    System.out.println(account.getName());
+        	    //System.out.println(currentTrans.getAccount().getName());
+        	    //System.out.println(account.getName());
         	    setCategoryPanel();
-        	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(trans.getAccount()).getName());
+        	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(currentTrans.getAccount()).getName());
         	}
         	else if(transfers.length == 1)
         	{
@@ -223,7 +249,13 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
     public Object getCellEditorValue()
     {
-        return null;
+        return new TransactionData((String)numList.getEditor().getItem(),
+                (String)payeeList.getEditor().getItem(),
+                withdrawField.getText(),
+                depositField.getText(),
+                (Category)categoryList.getModel().getSelectedItem(),
+                memoField.getText());
+        
     }
     
     public static void main(String[] args)
