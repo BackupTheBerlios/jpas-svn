@@ -49,7 +49,7 @@ public class Account
         return accounts;
     }
 
-    private final Integer id;
+    final Integer id;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
     private String name;
