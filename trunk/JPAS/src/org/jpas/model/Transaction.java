@@ -223,7 +223,7 @@ public class Transaction extends JpasObservable<Transaction>
         return date;
     }
 
-    public TransactionTransfer[] getTransfers()
+    public TransactionTransfer[] getAllTransfers()
     {
         final Integer[] accountIDs = TransAccountMappingDA.getInstance()
                 .getAllTranfersForTransaction(id);
@@ -234,6 +234,15 @@ public class Transaction extends JpasObservable<Transaction>
                     accountIDs[i]);
         }
         return ttArray;
+    }
+    
+    public TransactionTransfer getTransfer(final Category cat)
+    {
+    	if(affects(cat))
+    	{
+    		return TransactionTransfer.getTransactionTransferforIDs(id, cat.id);
+    	}
+    	return null;
     }
 
     public TransactionTransfer addTransfer(final Category category,
@@ -315,8 +324,14 @@ public class Transaction extends JpasObservable<Transaction>
         return isLoaded;
     }
 
+    public boolean affects(final Category category)
+    {
+        return TransactionDA.getInstance().doesTransactionAffectAccount(id, category.id);
+    }
+
     public boolean affects(final Account account)
     {
         return TransactionDA.getInstance().doesTransactionAffectAccount(id, account.id);
     }
+
 }
