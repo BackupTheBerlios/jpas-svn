@@ -12,10 +12,12 @@
 package org.jpas.da;
 
 import java.sql.Date;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-
-import java.util.*;
 
 /**
  * @author jsmith
@@ -81,23 +83,338 @@ public class ReminderDA
         public static final RepeatMethod WEEKLY = new RepeatMethod(1); 
         public static final RepeatMethod MONTHLY = new RepeatMethod(2);
         public static final RepeatMethod YEARLY = new RepeatMethod(3);
-        public static final RepeatMethod TWO_WEEKS = new RepeatMethod(4);
-        public static final RepeatMethod BIMONTHLY = new RepeatMethod(5);
-        public static final RepeatMethod BIYEARLY = new RepeatMethod(6);
-        public static final RepeatMethod TWO_MONTHS = new RepeatMethod(7);
-        public static final RepeatMethod THREE_MONTHS = new RepeatMethod(8);
-        public static final RepeatMethod FOUR_MONTHS = new RepeatMethod(9);
     }
 
     
 	public static interface ReminderHandler
 	{
-		public void setData(final Integer accountId, final String payee, final String memo, final Date date, final AmountMethod amountMethod, final RepeatMethod repeat);
+		public void setData(final Integer accountId, final String payee, final String memo, final Date date, final AmountMethod amountMethod, final RepeatMethod repeat, final int repeatValue);
 	}
     
-    
-    public static void main(String[] args)
+	public Integer createReminder(final Integer accountId, final String payee, final String memo, final Date date, final AmountMethod amountMethod, final RepeatMethod repeatMethod, final int repeatValue)
+	{
+		final String sqlSequenceStr = "CALL NEXT VALUE FOR " + DBNames.SEQ_REMINDER_ID;
+
+		final Integer id;
+		try
+		{
+			final ResultSet rs = ConnectionManager.getInstance().query(sqlSequenceStr);
+			if(!rs.next())
+			{
+				defaultLogger.error("Unable to get next reminder ID: \"" + sqlSequenceStr + "\"");
+				throw new RuntimeException("Unable to get next reminder ID: \"" + sqlSequenceStr + "\"");
+			}
+			id = (Integer)rs.getObject(1);
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlSequenceStr, sqle);
+			throw new RuntimeException(sqlSequenceStr, sqle);
+		}
+
+		final String sqlStr = "INSERT INTO " + DBNames.TN_REMINDER
+										 + " ( " + DBNames.CN_REMINDER_ID
+										 + " , " + DBNames.CN_REMINDER_ACCOUNT
+										 + " , '" + DBNames.CN_REMINDER_PAYEE
+										 + "' , '" + DBNames.CN_REMINDER_MEMO
+										 + "' , " + DBNames.CN_REMINDER_DATE
+										 + " , " + DBNames.CN_REMINDER_AMOUNT_METHOD
+										 + " , " + DBNames.CN_REMINDER_REPEAT_METHOD
+										 + " , " + DBNames.CN_REMINDER_REPEAT_VALUE
+										 + " ) VALUES ( "
+										 + id + " , " 
+										 + accountId + " , '"
+										 + payee + "' , '" 
+										 + memo + "' , "
+										 + date + " , "
+										 + amountMethod.dbValue + " , "
+										 + repeatMethod.dbValue + " , "
+										 + repeatValue + "')";
+
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Unable to create transaction: \"" + sqlStr + "\"");
+				throw new RuntimeException(sqlStr);
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+
+		return id;
+	}
+
+	
+	public void loadReminder(final Integer id, final ReminderHandler handler)
+	{
+		final String sqlStr = "SELECT * FROM " + DBNames.TN_REMINDER
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+										 + " IS " + id;
+		try
+		{
+			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+
+			if(rs.next())
+			{
+				handler.setData(new Integer(rs.getInt(DBNames.CN_REMINDER_ACCOUNT)),
+								rs.getString(DBNames.CN_REMINDER_PAYEE),
+								rs.getString(DBNames.CN_REMINDER_MEMO),
+								rs.getDate(DBNames.CN_REMINDER_DATE),
+								AmountMethod.getAmountMethodFor(rs.getInt(DBNames.CN_REMINDER_AMOUNT_METHOD)),
+								RepeatMethod.getRepeatMethodFor(rs.getInt(DBNames.CN_REMINDER_REPEAT_METHOD)),
+								rs.getInt(DBNames.CN_REMINDER_REPEAT_VALUE));
+			}
+			else
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+				
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminder(final Integer id, final Integer accountID, final String payee, final String memo, final Date date, final AmountMethod amountMethod, final RepeatMethod repeatMethod, final int repeatValue)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_ACCOUNT
+										 + " = " + accountID
+										 + " , " + DBNames.CN_REMINDER_PAYEE
+										 + " = '" + payee 
+										 + "' , " + DBNames.CN_REMINDER_MEMO
+										 + " = '" + memo
+										 + "' , " + DBNames.CN_REMINDER_DATE
+										 + " = " + date
+										 + " , " + DBNames.CN_REMINDER_AMOUNT_METHOD
+										 + " = " + amountMethod.dbValue
+										 + " , " + DBNames.CN_REMINDER_REPEAT_METHOD
+										 + " = " + repeatMethod.dbValue
+										 + " , " + DBNames.CN_REMINDER_REPEAT_VALUE
+										 + " = " + repeatValue
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminderAccount(final Integer id, final Integer accountID)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_ACCOUNT
+										 + " = " + accountID 
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+										 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	
+	public void updateReminderPayee(final Integer id, final String payee)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_PAYEE
+										 + " = '" + payee 
+										 + "' WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminderMemo(final Integer id, final String memo)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_MEMO
+										 + " = '" + memo 
+										 + "' WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminderDate(final Integer id, final Date date)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_DATE
+										 + " = " + date 
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminderAmountMethod(final Integer id, final AmountMethod amountMethod)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_AMOUNT_METHOD
+										 + " = " + amountMethod.dbValue
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminderRepeatMethod(final Integer id, final RepeatMethod repeatMethod)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_REPEAT_METHOD
+										 + " = " + repeatMethod.dbValue 
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public void updateReminderRepeatValue(final Integer id, final int repeatValue)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_REMINDER
+										 + " SET " + DBNames.CN_REMINDER_REPEAT_VALUE
+										 + " = " + repeatValue 
+										 + " WHERE " + DBNames.CN_REMINDER_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Reminder id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+	
+	public boolean doesReminderExist(final Integer id)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_REMINDER_ID
+								+ " FROM " + DBNames.TN_REMINDER
+								+ " WHERE " + DBNames.CN_REMINDER_ID
+								+ " IS " + id;
+		try
+		{
+			return ConnectionManager.getInstance().query(sqlStr).next();
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
+		}	
+	}
+
+    public static void unitTest_Create()
     {
-        final AmountMethod am = AmountMethod.FIXED;
+        getInstance().createReminder(new Integer(0), "Joe`s bar and grill", "memo", new Date(System.currentTimeMillis()), AmountMethod.FIXED, RepeatMethod.WEEKLY, 1);
+    }
+    
+    
+    public static void main(final String[] args)
+    {
+		BasicConfigurator.configure();
+		unitTest_Create();
     }
 }
