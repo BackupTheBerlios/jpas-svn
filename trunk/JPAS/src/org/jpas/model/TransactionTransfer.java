@@ -46,7 +46,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
     private boolean isDeleted = false;
     private boolean isLoaded = false;
     final Integer transactionID;
-    final Integer accountID;
+    Integer accountID;
     private long amount;
 
     static TransactionTransfer getTransactionTransferforIDs(
@@ -147,6 +147,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         assert (!isDeleted);
         TransAccountMappingDA.getInstance().updateTAMAccount(
                 transactionID, accountID, category.id);
+        this.accountID = category.id;
         
         if (isLoaded)
         {

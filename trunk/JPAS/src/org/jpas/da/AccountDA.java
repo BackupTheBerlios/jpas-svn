@@ -80,7 +80,7 @@ public class AccountDA
 	{
 		final String sqlStr = "SELECT * FROM " + DBNames.TN_ACCOUNT
 										 + " WHERE " + DBNames.CN_ACCOUNT_ID
-										 + " IS " + id;
+										 + " = " + id;
 		try
 		{
 			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
@@ -112,7 +112,7 @@ public class AccountDA
 										 + DBNames.CN_ACCOUNT_TYPE
 										 + " = '" + isBankAccount
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -136,7 +136,7 @@ public class AccountDA
 										 + " SET " + DBNames.CN_ACCOUNT_NAME
 										 + " = '" + name
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -160,7 +160,7 @@ public class AccountDA
 										 + " SET " + DBNames.CN_ACCOUNT_TYPE
 										 + " = '" + isBank
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -182,7 +182,7 @@ public class AccountDA
 	{
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID + " FROM "
                 + DBNames.TN_ACCOUNT + " WHERE " + DBNames.CN_ACCOUNT_TYPE
-                + " IS " + AccountType.DELETED_BANK.dbValue;
+                + " = " + AccountType.DELETED_BANK.dbValue;
         try
         {
             return (Integer)ConnectionManager.getInstance().query(sqlStr).getObject(DBNames.CN_ACCOUNT_ID);
@@ -199,14 +199,16 @@ public class AccountDA
 	{
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID + " FROM "
                 + DBNames.TN_ACCOUNT + " WHERE " + DBNames.CN_ACCOUNT_TYPE
-                + " IS " + AccountType.UNKNOWN_CATEGORY.dbValue;
+                + " = " + AccountType.UNKNOWN_CATEGORY.dbValue;
         try
         {
-            return (Integer)ConnectionManager.getInstance().query(sqlStr).getObject(DBNames.CN_ACCOUNT_ID);
+            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            rs.next();
+            return (Integer)rs.getObject(DBNames.CN_ACCOUNT_ID);
         }
         catch (final SQLException sqle)
         {
-            defaultLogger.error("SQLException while loading account name!",
+            defaultLogger.error("SQLException while loading \"unknown category\"!",
                     sqle);
             throw new RuntimeException("Unable to load account id's!", sqle);
         }	
@@ -268,7 +270,7 @@ public class AccountDA
 			final int result = ConnectionManager.getInstance().update(
 											  "DELETE FROM " + DBNames.TN_ACCOUNT
 											 + " WHERE " + DBNames.CN_ACCOUNT_ID
-											 + " IS '" + id + "'");
+											 + " = " + id);
 			if(result < 1)
 			{
 				defaultLogger.error("Account id not found: "+ id +"!");
@@ -287,7 +289,7 @@ public class AccountDA
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 								+ " FROM " + DBNames.TN_ACCOUNT
 								+ " WHERE " + DBNames.CN_ACCOUNT_ID
-								+ " IS " + id;
+								+ " = " + id;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();
@@ -304,7 +306,7 @@ public class AccountDA
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 								+ " FROM " + DBNames.TN_ACCOUNT
 								+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
-								+ " IS " + type.dbValue;
+								+ " = " + type.dbValue;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();
@@ -347,7 +349,7 @@ public class AccountDA
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 							+ " FROM " + DBNames.TN_ACCOUNT
 							+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
-							+ " IS " +  type.dbValue
+							+ " = " +  type.dbValue
 							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
 		{

@@ -285,9 +285,9 @@ public class TransAccountMappingDA
 
     public Integer[] getAllTranfersForAccount(final Integer accountID)
     {
-        final String sqlStr = "SELECT " + DBNames.CN_TAM_ACCOUNT_ID + " FROM "
+        final String sqlStr = "SELECT " + DBNames.CN_TAM_TRANSACTION_ID + " FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_TAM_ACCOUNT_ID + " IS '" + accountID + "'";
+                + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
 
         try
         {
@@ -295,7 +295,7 @@ public class TransAccountMappingDA
             final List<Integer> idList = new ArrayList<Integer>();
             while (rs.next())
             {
-                idList.add((Integer) rs.getObject(DBNames.CN_TAM_ACCOUNT_ID));
+                idList.add((Integer) rs.getObject(DBNames.CN_TAM_TRANSACTION_ID));
             }
             return idList.toArray(new Integer[idList.size()]);
         }
@@ -355,9 +355,9 @@ public class TransAccountMappingDA
     
     public static void unitTest_Create()
     {
-        getInstance().createTransAccountMapping(new Integer(0), new Integer(2),
-                435);
         getInstance().createTransAccountMapping(new Integer(0), new Integer(3),
+                435);
+        getInstance().createTransAccountMapping(new Integer(0), new Integer(4),
                 755);
     }
 

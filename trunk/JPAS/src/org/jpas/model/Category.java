@@ -77,6 +77,8 @@ public class Category extends JpasObservable<Category>
     
     static Category getCategoryForID(final Integer id)
     {
+        assert(id != null);
+        
         Category category = categoryCache.get(id);
         if (category == null)
         {
@@ -111,7 +113,10 @@ public class Category extends JpasObservable<Category>
     {
         if (!internalCall)
         {
-            AccountDA.getInstance().deleteAccount(id);
+            if(!canBeDeleted())
+            {
+                throw new RuntimeException("This category cannot be deleted!");
+            }
             
             final Category cat = getUnknownCategory();
             final Integer[] transferIDs = TransAccountMappingDA.getInstance().getAllTranfersForAccount(id);
@@ -119,6 +124,8 @@ public class Category extends JpasObservable<Category>
             {
                 TransactionTransfer.getTransactionTransferforIDs(transferIDs[i], id).setCategory(cat);
             }
+            
+            AccountDA.getInstance().deleteAccount(id);
         }
         categoryCache.remove(id);
         isDeleted = true;
@@ -175,7 +182,7 @@ public class Category extends JpasObservable<Category>
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
             public void setData(final String name,
-                    final AccountDA.AccountType isBankAccount)
+                    final AccountDA.AccountType type)
             {
                 Category.this.name = name;
                 Category.this.type = type;
@@ -205,6 +212,15 @@ public class Category extends JpasObservable<Category>
         return total;
     }
 
+    public boolean canBeDeleted()
+    {
+        if(!isLoaded)
+        {
+            loadData();
+        }
+        return type != AccountDA.AccountType.DELETED_BANK && type != AccountDA.AccountType.UNKNOWN_CATEGORY && type != AccountDA.AccountType.BANK;
+    }
+    
     public boolean isDeleted()
     {
         return isDeleted;
@@ -215,6 +231,18 @@ public class Category extends JpasObservable<Category>
         return isLoaded;
     }
 
+    private static void unitTest_Delete()
+    {
+        final Category[] cats = Category.getAllCategories();
+        for (int i = 0; i < cats.length; i++)
+        {
+            if(cats[i].canBeDeleted())
+            {
+                cats[i].delete();
+            }
+        }
+    }
+    
     private static void unitTest_List()
     {
         final Category[] cats = Category.getAllCategories();
@@ -227,6 +255,7 @@ public class Category extends JpasObservable<Category>
     public static void main(String[] args)
     {
         BasicConfigurator.configure();
-        unitTest_List();
+        //unitTest_List();
+        unitTest_Delete();
     }
 }

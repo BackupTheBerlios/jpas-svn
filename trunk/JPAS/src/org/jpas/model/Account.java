@@ -50,6 +50,7 @@ public class Account extends JpasObservable<Account>
 
     static Account getAccountForID(final Integer id)
     {
+        assert(id != null);
         Account account = accountCache.get(id);
         if (account == null)
         {
