@@ -322,10 +322,15 @@ public class TransactionDA
 		}
 	}
 
-    
+    private static void unitTest_Create()
+    {
+        getInstance().createTransaction(new Integer(0), "Joe`s bar and grill", "memo", "23", new Date(2004, 03, 03));
+    }
     
     
     public static void main(final String[] args)
     {
+		BasicConfigurator.configure();
+		unitTest_Create();
     }
 }
