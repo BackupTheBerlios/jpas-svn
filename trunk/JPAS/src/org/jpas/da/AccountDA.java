@@ -185,7 +185,9 @@ public class AccountDA
                 + " = " + AccountType.DELETED_BANK.dbValue;
         try
         {
-            return (Integer)ConnectionManager.getInstance().query(sqlStr).getObject(DBNames.CN_ACCOUNT_ID);
+        	final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+        	rs.next();
+            return (Integer)rs.getObject(DBNames.CN_ACCOUNT_ID);
         }
         catch (final SQLException sqle)
         {
