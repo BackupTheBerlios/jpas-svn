@@ -39,7 +39,7 @@ public class JpasMain
 	/**
      * Installs the Kunststoff and Plastic Look And Feels if available in classpath.
      */
-    private static void initializeLookAndFeels() {
+    private static void initializeLookAndFeel() {
     	// if in classpath thry to load JGoodies Plastic Look & Feel
         try {
             UIManager.installLookAndFeel("JGoodies Plastic 3D",
@@ -57,7 +57,7 @@ public class JpasMain
     public static void main(String[] args)
     {
         BasicConfigurator.configure();
-        initializeLookAndFeels();
+        initializeLookAndFeel();
         
     	final JFrame frame = new JpasFrame(); 
         
