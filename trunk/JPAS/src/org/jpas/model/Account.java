@@ -29,9 +29,9 @@ public class Account
 		return accounts;
 	}
 
-	public static Account createAccount(final String name)
+	public static Account createAccount(final String name, final boolean isBankAccount)
 	{
-		return new Account(AccountDA.getInstance().createAccount(name));
+		return new Account(AccountDA.getInstance().createAccount(name, isBankAccount));
 	}
 
 
@@ -40,6 +40,7 @@ public class Account
 	private boolean isDeleted = false;
 
 	private String name;
+	private boolean bankAccount;
 
 	private Account(final Integer id)
 	{
@@ -52,9 +53,10 @@ public class Account
 			 id,
 			 new AccountDA.AccountHandler()
 				{
-					public void setData(final String name)
+					public void setData(final String name, final boolean isBankAccount)
 					{
 						Account.this.name = name;
+						Account.this.bankAccount = isBankAccount;
 						isLoaded = true;
 					}
 				});
@@ -71,11 +73,20 @@ public class Account
 		return name;
 	}
 
+	public boolean isBankAccount()
+	{
+		if(!isLoaded)
+		{
+			loadData();
+		}
+		return bankAccount;
+	}
+	
 	public void setName(final String name)
 	{
 		//assert(!isDeleted);
 
-		AccountDA.getInstance().updateAccount(id, name);
+		AccountDA.getInstance().updateAccountName(id, name);
 		if(isLoaded)
 		{
 			loadData();

@@ -27,26 +27,29 @@ public class AccountDA
 
 	public static interface AccountHandler
 	{
-		public void setData(final String name);
+		public void setData(String name, boolean bankAccount);
 	}
 
 	public void loadAccount(final Integer id, final AccountHandler handler)
 	{
-		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_NAME
-										 + " FROM " + DBNames.TN_ACCOUNT
+		final String sqlStr = "SELECT * FROM " + DBNames.TN_ACCOUNT
 										 + " WHERE " + DBNames.CN_ACCOUNT_ID
 										 + " IS " + id;
 		try
 		{
 			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
 
-			final String name = rs.next() ? rs.getString(DBNames.CN_ACCOUNT_NAME) : null;
-			if(name == null)
+			if(rs.next())
+			{
+				handler.setData(rs.getString(DBNames.CN_ACCOUNT_NAME),
+								rs.getBoolean(DBNames.CN_ACCOUNT_IS_BANK));
+			}
+			else
 			{
 				defaultLogger.error("Account id not found: \""+ sqlStr +"\"");
 				throw new RuntimeException("Account id not found: \""+ sqlStr +"\"");
 			}
-			handler.setData(name);
+				
 		}
 		catch(final SQLException sqle)
 		{
@@ -55,11 +58,13 @@ public class AccountDA
 		}
 	}
 
-	public void updateAccount(final Integer id, final String name)
+	public void updateAccount(final Integer id, final String name, final boolean isBankAccount)
 	{
 		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
 										 + " SET " + DBNames.CN_ACCOUNT_NAME
-											 + " = '" + name
+										 + " = '" + name + "' , "
+										 + DBNames.CN_ACCOUNT_IS_BANK
+										 + " = '" + isBankAccount
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
 											 + " IS " + id;
 
@@ -79,7 +84,31 @@ public class AccountDA
 		}
 	}
 
-	public Integer createAccount(final String name)
+	public void updateAccountName(final Integer id, final String name)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
+										 + " SET " + DBNames.CN_ACCOUNT_NAME
+										 + " = '" + name
+										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Account id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Account id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
+	public Integer createAccount(final String name, boolean isBankAccount)
 	{
 		final String sqlSequenceStr = "CALL NEXT VALUE FOR " + DBNames.SEQ_ACCOUNT_ID;
 
@@ -103,8 +132,10 @@ public class AccountDA
 		final String sqlStr = "INSERT INTO " + DBNames.TN_ACCOUNT
 										 + " ( " + DBNames.CN_ACCOUNT_ID
 										 + " , " + DBNames.CN_ACCOUNT_NAME
+										 + " , " + DBNames.CN_ACCOUNT_IS_BANK
 										 + " ) VALUES ( '"
-										 + id + "' , '" + name + "' )";
+										 + id + "' , '" + name + "' , '"
+										 + isBankAccount + "')";
 
 
 		try
@@ -171,8 +202,8 @@ public class AccountDA
 	public static void main(final String[] args)
 	{
 		BasicConfigurator.configure();
-		final Integer id = instance.createAccount("Checking");
-		instance.updateAccount(id, "Share");
+		final Integer id = instance.createAccount("Checking", true);
+		instance.updateAccount(id, "Share", true);
 //		instance.deleteAccount(id);
 	}
 }
