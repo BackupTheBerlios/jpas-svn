@@ -42,13 +42,18 @@ public class Transaction extends JpasObservable<Transaction>
 
     private boolean isDeleted = false;
     private boolean isLoaded = false;
+    
     final Integer id;
-    Integer accountID;
-    String payee;
-    String memo;
-    String num;
-    Date date;
+    
+    private Integer accountID;
+    private String payee;
+    private String memo;
+    private String num;
+    private Date date;
 
+    private boolean amountLoaded = false;
+    private long amount;
+    
     public static Comparator<Transaction> getDateComparator()
     {
         return new Comparator<Transaction>()
@@ -145,6 +150,7 @@ public class Transaction extends JpasObservable<Transaction>
 
     void amountChanged()
     {
+        amountLoaded = false;
         announceModify();
         Category.getCategoryForID(accountID).amountChanged();
         Account.getAccountForID(accountID).amountChanged();
@@ -289,7 +295,12 @@ public class Transaction extends JpasObservable<Transaction>
 
     public long getAmount()
     {
-        return TransAccountMappingDA.getInstance().getTransactionAmount(id);
+        if(!amountLoaded)
+        {
+            amount = TransAccountMappingDA.getInstance().getTransactionAmount(id);
+            amountLoaded = true;
+        }
+        return amount;
     }
 
     public boolean isDeleted()
@@ -304,6 +315,6 @@ public class Transaction extends JpasObservable<Transaction>
 
     public boolean affects(final Account account)
     {
-        return true;
+        return TransactionDA.getInstance().doesTransactionAffectAccount(id, account.id);
     }
 }

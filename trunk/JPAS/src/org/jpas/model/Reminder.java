@@ -136,14 +136,17 @@ public class Reminder extends JpasObservable<Reminder>
     private boolean isDeleted = false;
     private boolean isLoaded = false;
     final Integer id;
-    Integer accountId;
-    String payee;
-    String memo;
-    Date date;
-    AmountMethod amountMethod;
-    RepeatMethod repeatMethod;
-    int repeatValue;
+    private Integer accountId;
+    private String payee;
+    private String memo;
+    private Date date;
+    private AmountMethod amountMethod;
+    private RepeatMethod repeatMethod;
+    private int repeatValue;
 
+    private boolean amountLoaded = false;
+    private long amount;
+    
     private Reminder(final Integer id)
     {
         this.id = id;
@@ -378,7 +381,12 @@ public class Reminder extends JpasObservable<Reminder>
 
     public long getAmount()
     {
-        return ReminderAccountMappingDA.getInstance().getReminderAmount(id);
+        if(!amountLoaded)
+        {
+            amount = ReminderAccountMappingDA.getInstance().getReminderAmount(id);
+            amountLoaded = true;
+        }
+        return amount;
     }
 
     public static void main(String[] args)
