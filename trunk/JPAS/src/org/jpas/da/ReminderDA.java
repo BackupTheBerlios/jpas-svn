@@ -27,7 +27,9 @@ package org.jpas.da;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -181,6 +183,28 @@ public class ReminderDA
 		{
 			defaultLogger.error("SQLException while deleting Reminder for id: " + id + "!", sqle);
 			throw new RuntimeException("Unable to deleting Reminder for id: " + id, sqle);
+		}
+	}
+
+	public Integer[] getAllReminderIDs()
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_REMINDER_ID
+							+ " FROM " + DBNames.TN_REMINDER
+							+ " ORDER BY " + DBNames.CN_REMINDER_DATE;
+		try
+		{
+			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final List<Integer> idList = new ArrayList<Integer>();
+			while(rs.next())
+			{
+				idList.add((Integer)rs.getObject(DBNames.CN_REMINDER_ID));
+			}
+			return idList.toArray(new Integer[idList.size()]);
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
 		}
 	}
 
