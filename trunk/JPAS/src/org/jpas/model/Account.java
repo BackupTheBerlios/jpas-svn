@@ -75,6 +75,10 @@ public class Account extends JpasObservable<Account>
     private boolean isDeleted = false;
     private boolean isLoaded = false;
     private String name;
+    
+    private boolean balanceLoaded = false;
+    private long balance;
+
 
     private Account(final Integer id)
     {
@@ -95,17 +99,17 @@ public class Account extends JpasObservable<Account>
             Transaction.getTransactionForID(transIDs[i]).delete(true);
         }
 
-        final Category cat = Category.getUnknownCategory();
+        final Category cat = Category.getDeletedBankCategory();
         final Integer[] transferIDs = TransAccountMappingDA.getInstance().getAllTranfersForAccount(id);
-        for(int i = 0; i < transIDs.length; i++)
+        for(int i = 0; i < transferIDs.length; i++)
         {
             TransactionTransfer.getTransactionTransferforIDs(transferIDs[i], id).setCategory(cat);
         }
         
         AccountDA.getInstance().deleteAccount(id);
-        
         accountCache.remove(id);
         isDeleted = true;
+        Category.getCategoryForID(id).delete(true);
         announceDelete();
     }
 
@@ -128,6 +132,7 @@ public class Account extends JpasObservable<Account>
 
     void amountChanged()
     {
+        balanceLoaded = false;
         announceModify();
     }
 
@@ -167,7 +172,12 @@ public class Account extends JpasObservable<Account>
 
     public long getBalance()
     {
-        return TransAccountMappingDA.getInstance().getAccountBalance(id);
+        if(!balanceLoaded)
+        {
+            balance = TransAccountMappingDA.getInstance().getAccountBalance(id);
+            balanceLoaded = true;
+        }
+        return balance;        
     }
 
     public boolean isDeleted()
