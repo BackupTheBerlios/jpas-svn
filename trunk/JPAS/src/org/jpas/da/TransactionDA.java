@@ -93,7 +93,7 @@ public class TransactionDA
 										 + "' , " + DBNames.CN_TRANSACTION_DATE
 										 + " = '" + date
 										 + "' WHERE " + DBNames.CN_TRANSACTION_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -117,7 +117,7 @@ public class TransactionDA
 										 + " SET " + DBNames.CN_TRANSACTION_PAYEE
 										 + " = '" + payee 
 										 + "' WHERE " + DBNames.CN_TRANSACTION_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -141,7 +141,7 @@ public class TransactionDA
 										 + " SET " + DBNames.CN_TRANSACTION_MEMO
 										 + " = '" + memo
 										 + "' WHERE " + DBNames.CN_TRANSACTION_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -165,7 +165,7 @@ public class TransactionDA
 										 + " SET " + DBNames.CN_TRANSACTION_NUM
 										 + " = '" + num
 										 + "' WHERE " + DBNames.CN_TRANSACTION_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -189,7 +189,7 @@ public class TransactionDA
 										 + " SET " + DBNames.CN_TRANSACTION_DATE
 										 + " = '" + date
 										 + "' WHERE " + DBNames.CN_TRANSACTION_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -235,9 +235,9 @@ public class TransactionDA
 										 + " , " + DBNames.CN_TRANSACTION_MEMO
 										 + " , " + DBNames.CN_TRANSACTION_NUM
 										 + " , " + DBNames.CN_TRANSACTION_DATE
-										 + " ) VALUES ( '"
-										 + id + "' , '" 
-										 + accountId + "' , '"
+										 + " ) VALUES ( "
+										 + id + " , " 
+										 + accountId + " , '"
 										 + payee + "' , '" 
 										 + memo + "' , '"
 										 + num + "' , '" 
@@ -270,7 +270,7 @@ public class TransactionDA
 			final int result = ConnectionManager.getInstance().update(
 											  "DELETE FROM " + DBNames.TN_TRANSACTION
 											 + " WHERE " + DBNames.CN_TRANSACTION_ID
-											 + " IS '" + id + "'");
+											 + " = " + id);
 			if(result < 1)
 			{
 				defaultLogger.error("Transaction id not found: "+ id +"!");
@@ -289,7 +289,7 @@ public class TransactionDA
 		final String sqlStr = "SELECT " + DBNames.CN_TRANSACTION_ID
 								+ " FROM " + DBNames.TN_TRANSACTION
 								+ " WHERE " + DBNames.CN_TRANSACTION_ID
-								+ " IS " + id;
+								+ " = " + id;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();
@@ -347,7 +347,7 @@ public class TransactionDA
 		final String sqlStr = "SELECT " + DBNames.CN_TRANSACTION_ID
 							+ " FROM " + DBNames.TN_TRANSACTION
 							+ " WHERE " + DBNames.CN_TRANSACTION_ACCOUNT
-							+ " IS " +  accountId
+							+ " = " +  accountId
 							+ " ORDER BY " + DBNames.CN_TRANSACTION_DATE;
 		try
 		{
@@ -387,7 +387,7 @@ public class TransactionDA
                 + " SELECT " + DBNames.CN_TRANSACTION_ID
 				+ " FROM " + DBNames.TN_TRANSACTION
 				+ " WHERE " + DBNames.CN_TRANSACTION_ACCOUNT
-				+ " IS " +  accountId;
+				+ " = " +  accountId;
 
         try
         {
