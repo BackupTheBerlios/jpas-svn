@@ -62,7 +62,7 @@ public class TransactionTable extends JTable
     	transactionEditor = new TransactionTableCellEditor(columnWidths, rowHeights);
     	this.setModel(model);
         this.setDefaultRenderer(Transaction.class, transactionRenderer);
-        this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(columnWidths, rowHeights));
+        this.setDefaultEditor(Transaction.class, transactionEditor);
         this.setRowHeight(total(rowHeights) + 1);
         this.setSurrendersFocusOnKeystroke(true);
         this.setBackground(bottomColor);
@@ -91,6 +91,7 @@ public class TransactionTable extends JTable
     
     public void setAccount(final Account account)
     {
+        assert(account != null);
         model.setAccount(account);
         transactionRenderer.setAccount(account);
         transactionEditor.setAccount(account);
