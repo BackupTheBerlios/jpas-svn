@@ -23,6 +23,7 @@
  */
 package org.jpas.model;
 
+import org.jpas.da.AccountDA;
 import org.jpas.da.TransAccountMappingDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
@@ -108,7 +109,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         return amount;
     }
 
-    void announceDelete()
+    private void announceDelete()
     {
         final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Delete<TransactionTransfer>(
                 this);
@@ -116,7 +117,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         notifyObservers(change);
     }
 
-    void announceModify()
+    private void announceModify()
     {
         final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Modify<TransactionTransfer>(
                 this);
@@ -127,7 +128,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
     public void setAmount(final long amount)
     {
         assert (!isDeleted);
-        TransAccountMappingDA.getInstance().updateTransAccountMapping(
+        TransAccountMappingDA.getInstance().updateTAMAmount(
                 transactionID, accountID, amount);
         if (isLoaded)
         {
@@ -135,12 +136,31 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         }
         final Transaction trans = Transaction
                 .getTransactionForID(transactionID);
-        trans.amountChanged();
         announceModify();
+        trans.amountChanged();
         Category.getCategoryForID(accountID).amountChanged();
         Account.getAccountForID(accountID).amountChanged();
     }
 
+    void setCategory(final Category category)
+    {
+        assert (!isDeleted);
+        TransAccountMappingDA.getInstance().updateTAMAccount(
+                transactionID, accountID, category.id);
+        
+        if (isLoaded)
+        {
+            loadData();
+        }
+
+        announceModify();
+        
+        Transaction.getTransactionForID(transactionID).amountChanged();
+        Category.getCategoryForID(accountID).amountChanged();
+        Account.getAccountForID(accountID).amountChanged();
+    }
+
+    
     public boolean isDeleted()
     {
         return isDeleted;
@@ -153,16 +173,17 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
 
     public void delete()
     {
-        delete(true);
+        delete(false);
     }
-
-    void delete(final boolean callDA)
+    
+    void delete(final boolean internalCall)
     {
-        if (callDA)
+        if (!internalCall)
         {
             TransAccountMappingDA.getInstance().deleteTransAccountMapping(
                     transactionID, accountID);
         }
+        
         final WeakValueMap<Integer, TransactionTransfer> map = transTransferCache
                 .get(transactionID);
         map.remove(accountID);
@@ -170,9 +191,15 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         {
             transTransferCache.remove(transactionID);
         }
+        
         isDeleted = true;
         announceDelete();
-        Transaction.getTransactionForID(transactionID).amountChanged();
+        
+        if (!internalCall)
+        {
+            Transaction.getTransactionForID(transactionID).amountChanged();
+        }
+        
         Category.getCategoryForID(accountID).amountChanged();
         Account.getAccountForID(accountID).amountChanged();
     }

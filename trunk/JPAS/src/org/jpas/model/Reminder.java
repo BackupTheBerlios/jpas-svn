@@ -177,21 +177,29 @@ public class Reminder extends JpasObservable<Reminder>
 
     public void delete()
     {
-        delete(true);
+        delete(false);
     }
 
-    void delete(final boolean callDA)
+    void delete(final boolean internalCall)
     {
-        if (callDA)
+        if (!internalCall)
         {
             ReminderDA.getInstance().deleteReminder(id);
         }
         reminderCache.remove(id);
+        
+        final Integer[] accountIDs = ReminderAccountMappingDA.getInstance()
+        	.getAllReminderAccountTranfers(id);
+		for (int i = 0; i < accountIDs.length; i++)
+		{
+		    ReminderTransfer.getReminderTransferforIDs(id, accountIDs[i]).delete(true);
+		}
+        
         isDeleted = true;
         announceDelete();
     }
 
-    void announceDelete()
+    private void announceDelete()
     {
         final JpasDataChange<Reminder> change = new JpasDataChange.Delete<Reminder>(
                 this);
@@ -200,7 +208,7 @@ public class Reminder extends JpasObservable<Reminder>
         deleteObservers();
     }
 
-    void announceModify()
+    private void announceModify()
     {
         final JpasDataChange<Reminder> change = new JpasDataChange.Modify<Reminder>(
                 this);

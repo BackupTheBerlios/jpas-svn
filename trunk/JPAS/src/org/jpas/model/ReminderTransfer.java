@@ -117,10 +117,26 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
             loadData();
         }
         announceModify();
-        Reminder.getReminderForID(reminderID).announceModify();
+        Reminder.getReminderForID(reminderID).amountChanged();
     }
 
-    void announceDelete()
+    public void setCategory(final Category category)
+    {
+        assert (!isDeleted);
+        ReminderAccountMappingDA.getInstance().updateReminderAccountMapping(
+                reminderID, accountID, amount);
+        if (isLoaded)
+        {
+            loadData();
+        }
+        
+        announceModify();
+        category.amountChanged();
+        Reminder.getReminderForID(reminderID).amountChanged();
+    }
+
+    
+    private void announceDelete()
     {
         final JpasDataChange<ReminderTransfer> change = new JpasDataChange.Delete<ReminderTransfer>(
                 this);
@@ -129,13 +145,12 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
         deleteObservers();
     }
 
-    void announceModify()
+    private void announceModify()
     {
         final JpasDataChange<ReminderTransfer> change = new JpasDataChange.Modify<ReminderTransfer>(
                 this);
         observable.notifyObservers(change);
         notifyObservers(change);
-        deleteObservers();
     }
 
     public boolean isDeleted()
@@ -150,12 +165,12 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
 
     public void delete()
     {
-        delete(true);
+        delete(false);
     }
 
-    void delete(final boolean callDA)
+    void delete(final boolean internalCall)
     {
-        if (callDA)
+        if (!internalCall)
         {
             ReminderAccountMappingDA.getInstance()
                     .deleteReminderAccountMapping(reminderID, accountID);
@@ -168,8 +183,12 @@ public class ReminderTransfer extends JpasObservable<ReminderTransfer>
             remTransferCache.remove(reminderID);
         }
         isDeleted = true;
+        
         announceDelete();
-        Reminder.getReminderForID(reminderID).amountChanged();
+        if (!internalCall)
+        {
+            Reminder.getReminderForID(reminderID).amountChanged();
+        }
     }
 
     public static void main(String[] args)

@@ -52,12 +52,29 @@ public class Category extends JpasObservable<Category>
         return categories;
     }
 
-    public static Category createCategory(final String name)
+    public static Category getDeletedBankCategory()
+    {
+        return getCategoryForID(AccountDA.getInstance().getDeletedBankAccountID());
+    }
+    
+    public static Category getUnknownCategory()
+    {
+        return getCategoryForID(AccountDA.getInstance().getUnknownCategoryID());
+    }
+    
+    public static Category createIncomeCategory(final String name)
     {
         return getCategoryForID(AccountDA.getInstance().createAccount(name,
-                AccountDA.AccountType.CATEGORY));
+                AccountDA.AccountType.INCOME_CATEGORY));
     }
 
+    public static Category createExpenseCategory(final String name)
+    {
+        return getCategoryForID(AccountDA.getInstance().createAccount(name,
+                AccountDA.AccountType.EXPENSE_CATEGORY));
+    }
+
+    
     static Category getCategoryForID(final Integer id)
     {
         Category category = categoryCache.get(id);
@@ -83,16 +100,16 @@ public class Category extends JpasObservable<Category>
 
     public void delete()
     {
-        delete(true);
+        delete(false);
     }
 
-    void delete(final boolean callDA)
+    void delete(final boolean internalCall)
     {
         /*
          * TODO: This should probably not immediately delete this category. All
          * refering transfers must be altered.
          */
-        if (callDA)
+        if (!internalCall)
         {
             AccountDA.getInstance().deleteAccount(id);
         }
@@ -101,7 +118,7 @@ public class Category extends JpasObservable<Category>
         announceDelete();
     }
 
-    void announceDelete()
+    private void announceDelete()
     {
         final JpasDataChange<Category> change = new JpasDataChange.Delete<Category>(
                 this);
@@ -110,7 +127,7 @@ public class Category extends JpasObservable<Category>
         deleteObservers();
     }
 
-    void announceModify()
+    private void announceModify()
     {
         final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(
                 this);

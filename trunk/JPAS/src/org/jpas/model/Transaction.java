@@ -101,21 +101,33 @@ public class Transaction extends JpasObservable<Transaction>
 
     public void delete()
     {
-        delete(true);
+        delete(false);
     }
 
-    void delete(final boolean callDA)
+    void delete(final boolean internalCall)
     {
-        if (callDA)
+        if (!internalCall)
         {
             TransactionDA.getInstance().deleteTransaction(id);
         }
         transactionCache.remove(id);
+        
+        final Integer[] accountIDs = TransAccountMappingDA.getInstance().getAllTranfersForTransaction(id);
+		for (int i = 0; i < accountIDs.length; i++)
+		{
+		    TransactionTransfer.getTransactionTransferforIDs(id, accountIDs[i]).delete(true);
+		}
+
         isDeleted = true;
+        
         announceDelete();
+        if(!internalCall)
+        {
+	        Account.getAccountForID(accountID).amountChanged();
+        }
     }
 
-    void announceDelete()
+    private void announceDelete()
     {
         final JpasDataChange<Transaction> change = new JpasDataChange.Delete<Transaction>(
                 this);
@@ -123,7 +135,7 @@ public class Transaction extends JpasObservable<Transaction>
         notifyObservers(change);
     }
 
-    void announceModify()
+    private void announceModify()
     {
         final JpasDataChange<Transaction> change = new JpasDataChange.Modify<Transaction>(
                 this);
@@ -206,7 +218,7 @@ public class Transaction extends JpasObservable<Transaction>
     public TransactionTransfer[] getTransfers()
     {
         final Integer[] accountIDs = TransAccountMappingDA.getInstance()
-                .getAllTransAccountTranfers(id);
+                .getAllTranfersForTransaction(id);
         final TransactionTransfer[] ttArray = new TransactionTransfer[accountIDs.length];
         for (int i = 0; i < accountIDs.length; i++)
         {
@@ -223,7 +235,7 @@ public class Transaction extends JpasObservable<Transaction>
         if (TransAccountMappingDA.getInstance().doesTransAccountTransferExist(
                 id, category.id))
         {
-            TransAccountMappingDA.getInstance().updateTransAccountMapping(id,
+            TransAccountMappingDA.getInstance().updateTAMAmount(id,
                     category.id, amount);
         }
         else

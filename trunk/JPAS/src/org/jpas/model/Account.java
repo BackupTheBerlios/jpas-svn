@@ -24,8 +24,7 @@ package org.jpas.model;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.AccountDA;
-import org.jpas.da.TransAccountMappingDA;
+import org.jpas.da.*;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
@@ -83,28 +82,34 @@ public class Account extends JpasObservable<Account>
         this.id = id;
     }
 
+    public static Account getDeletedBankAccount()
+    {
+        return getAccountForID(AccountDA.getInstance().getDeletedBankAccountID());
+    }
+    
     public void delete()
     {
-        delete(true);
-    }
-
-    void delete(final boolean callDA)
-    {
-        /*
-         * TODO: This should probably not immediately delete this account. all
-         * refering tranfers must be altered and all transactions belong to this
-         * account must also be deleted.
-         */
-        if (callDA)
+        final Integer[] transIDs = TransactionDA.getInstance().getAllTransactionIDs(id);
+        for(int i = 0; i < transIDs.length; i++)
         {
-            AccountDA.getInstance().deleteAccount(id);
+            Transaction.getTransactionForID(transIDs[i]).delete(true);
         }
+
+        final Category cat = Category.getUnknownCategory();
+        final Integer[] transferIDs = TransAccountMappingDA.getInstance().getAllTranfersForAccount(id);
+        for(int i = 0; i < transIDs.length; i++)
+        {
+            TransactionTransfer.getTransactionTransferforIDs(transferIDs[i], id).setCategory(cat);
+        }
+        
+        AccountDA.getInstance().deleteAccount(id);
+        
         accountCache.remove(id);
         isDeleted = true;
         announceDelete();
     }
 
-    void announceDelete()
+    private void announceDelete()
     {
         final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(
                 this);
@@ -113,7 +118,7 @@ public class Account extends JpasObservable<Account>
         deleteObservers();
     }
 
-    void announceModify()
+    private void announceModify()
     {
         final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(
                 this);
