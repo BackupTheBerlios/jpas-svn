@@ -23,10 +23,7 @@
  */
 package org.jpas.gui.layouts;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.LayoutManager;
+import java.awt.*;
 
 /**
  * @author Justin W Smith
@@ -133,52 +130,56 @@ public class FlexGridLayout implements LayoutManager
      */
     public void layoutContainer(final Container parent)
     {
-        final Component[] components = parent.getComponents();
-        final Dimension parentDim = parent.getSize();
-        
-        int flexWidth = parentDim.width - dim.width;
-        int flexHeight = parentDim.height - dim.height;
-        int flexColumnsLeft = flexColumnCount;
-        int flexRowsLeft = flexRowCount;
-
-        final int origFlexWidth = flexWidth;
-        
-        int x = 0;
-        int y = 0;
-        int k = 0;
-        for(int i = 0; i < rowHeights.length; i++)
+        synchronized (parent.getTreeLock())
         {
-            int height = rowHeights[i];
-            if(flexRows[i] && flexHeight > 0)
-            {
-                int addedHeight = flexHeight / flexRowsLeft;
-                flexHeight -= addedHeight;
-                flexRowsLeft--;
-                height += addedHeight;
-            }
-
-            for(int j = 0; j < columnWidths.length; j++)
-            {
-                int width = columnWidths[j];
-                if(flexColumns[j] && flexWidth > 0)
-                {
-                    int addedWidth = flexWidth / flexColumnsLeft;
-                    flexWidth -= addedWidth;
-                    flexColumnsLeft--;
-                    width += addedWidth;
-                }
-                
-                final Component comp = k >= components.length ? null : components[k++];
-                if(comp != null)
-                {
-                    comp.setBounds(x, y, width, height);
-                }
-                x += width;
-            }
-            x = 0;
-            y += height; 
-            flexWidth = origFlexWidth;
-            flexColumnsLeft = flexColumnCount;
+	        final Component[] components = parent.getComponents();
+	        final Dimension parentDim = parent.getSize();
+	        final Insets insets = parent.getInsets();
+	        
+	        int flexWidth = parentDim.width - (dim.width + insets.left + insets.right);
+	        int flexHeight = parentDim.height - (dim.height + insets.top + insets.bottom);
+	        int flexColumnsLeft = flexColumnCount;
+	        int flexRowsLeft = flexRowCount;
+	
+	        final int origFlexWidth = flexWidth;
+	        
+	        int x = insets.left;
+	        int y = insets.top;
+	        int k = 0;
+	        for(int i = 0; i < rowHeights.length; i++)
+	        {
+	            int height = rowHeights[i];
+	            if(flexRows[i] && flexHeight > 0)
+	            {
+	                int addedHeight = flexHeight / flexRowsLeft;
+	                flexHeight -= addedHeight;
+	                flexRowsLeft--;
+	                height += addedHeight;
+	            }
+	
+	            for(int j = 0; j < columnWidths.length; j++)
+	            {
+	                int width = columnWidths[j];
+	                if(flexColumns[j] && flexWidth > 0)
+	                {
+	                    int addedWidth = flexWidth / flexColumnsLeft;
+	                    flexWidth -= addedWidth;
+	                    flexColumnsLeft--;
+	                    width += addedWidth;
+	                }
+	                
+	                final Component comp = k >= components.length ? null : components[k++];
+	                if(comp != null)
+	                {
+	                    comp.setBounds(x, y, width, height);
+	                }
+	                x += width;
+	            }
+	            x = insets.left;
+	            y += height; 
+	            flexWidth = origFlexWidth;
+	            flexColumnsLeft = flexColumnCount;
+	        }
         }
     }
 
