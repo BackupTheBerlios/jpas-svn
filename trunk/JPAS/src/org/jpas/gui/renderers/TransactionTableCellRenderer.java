@@ -26,6 +26,7 @@ package org.jpas.gui.renderers;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -36,7 +37,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.Transaction;
-import org.jpas.model.TransactionTransfer;
+import org.jpas.model.*;
 
 /**
  * @author Justin W Smith
@@ -46,28 +47,49 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 {
 	private static final Color borderColor = Color.gray;
 	
-    final JLabel dateLabel = new JLabel();
-	final JLabel numLabel = new JLabel();
-    final JLabel payeeLabel = new JLabel();
-    final JLabel withdrawLabel = new JLabel();
-    final JLabel depositLabel = new JLabel();
-    final JLabel balanceLabel = new JLabel();
-    final JLabel categoryLabel = new JLabel();
-    final JLabel memoLabel = new JLabel();
+	private final Account account;
+	
+	private final JLabel dateLabel = new JLabel();
+	private final JLabel numLabel = new JLabel();
+	private final JLabel payeeLabel = new JLabel();
+	private final JLabel withdrawLabel = new JLabel();
+	private final JLabel depositLabel = new JLabel();
+	private final JLabel balanceLabel = new JLabel();
+	private final JLabel categoryLabel = new JLabel();
+	private final JLabel memoLabel = new JLabel();
+    
+	private static int[] columnWidths = new int[]{105, 85, 125, 85, 85, 95};
+	private static int[] rowHeights = new int[]{18, 18};
+	
+	private final Dimension dim;
     
     /**
      * 
      */
-    public TransactionTableCellRenderer()
+    public TransactionTableCellRenderer(final Account account)
     {
+    	this.account = account;
         setOpaque(true);
         setBackground(Color.white);
+        
+        dim = new Dimension(total(columnWidths), total(rowHeights));
+        
         init();
+    }
+    
+    private int total(int[] values)
+    {
+    	int total = 0;
+    	for(int i = 0; i < values.length; i++)
+    	{
+    		total += values[i];
+    	}
+    	return total;
     }
     
     private void init()
     {
-        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 105, 85, 85, 95});
+        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 125, 85, 85, 95});
         layout.setFlexColumn(2, true);
         setLayout(layout);
     	add(dateLabel);
@@ -84,7 +106,6 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 //    	add(createEmptyPanel());
     	add(balanceLabel);
     	
-    	
         dateLabel.setBorder(BorderFactory.createLineBorder(borderColor));
     	numLabel.setBorder(BorderFactory.createLineBorder(borderColor));
         payeeLabel.setBorder(BorderFactory.createLineBorder(borderColor));
@@ -93,8 +114,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         balanceLabel.setBorder(BorderFactory.createLineBorder(borderColor));
         categoryLabel.setBorder(BorderFactory.createLineBorder(borderColor));
         memoLabel.setBorder(BorderFactory.createLineBorder(borderColor));
-
-}
+    }
     
     private JPanel createEmptyPanel()
     {
@@ -133,38 +153,86 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         else
         {
         	final Transaction trans = (Transaction)value;
-            dateLabel.setText(trans.getDate().toString());
+
+        	dateLabel.setText(trans.getDate().toString());
         	numLabel.setText(trans.getNum());
-            payeeLabel.setText(trans.getPayee());
-            final long amount = trans.getAmount();
-            if(amount >= 0)
-            {
-	            withdrawLabel.setText(String.valueOf(amount));
-	            depositLabel.setText("");
-            }
-            else
-            {
-	            withdrawLabel.setText("");
-	            depositLabel.setText(String.valueOf(amount));
-            }
             balanceLabel.setText("");
-            final TransactionTransfer[] transfers = trans.getTransfers();
-            if(transfers.length == 0)
-            {
-            	categoryLabel.setText("[NONE]");
-            }
-            else if(transfers.length == 1)
-            {
-            	categoryLabel.setText(transfers[0].getCategory().getName());
-            }
-            else
-            {
-            	categoryLabel.setText("[SPLIT]");
-            }
             memoLabel.setText(trans.getMemo());
+            
+        	if(trans.getAccount().equals(account))
+        	{
+	            payeeLabel.setText(trans.getPayee());
+	            final long amount = trans.getAmount();
+	            if(amount >= 0)
+	            {
+		            withdrawLabel.setText(String.valueOf(amount));
+		            depositLabel.setText("");
+	            }
+	            else
+	            {
+		            withdrawLabel.setText("");
+		            depositLabel.setText(String.valueOf(amount));
+	            }
+	            
+	            
+	            final TransactionTransfer[] transfers = trans.getAllTransfers();
+	            if(transfers.length == 0)
+	            {
+	            	categoryLabel.setText("[NONE]");
+	            }
+	            else if(transfers.length == 1)
+	            {
+	            	categoryLabel.setText(transfers[0].getCategory().getName());
+	            }
+	            else
+	            {
+	            	categoryLabel.setText("[SPLIT]");
+	            }
+        	}
+        	else
+        	{
+	            payeeLabel.setText(trans.getPayee());
+	            final long amount = trans.getAmount();
+	            if(amount >= 0)
+	            {
+		            withdrawLabel.setText(String.valueOf(amount));
+		            depositLabel.setText("");
+	            }
+	            else
+	            {
+		            withdrawLabel.setText("");
+		            depositLabel.setText(String.valueOf(amount));
+	            }
+	            
+	            
+	            final TransactionTransfer[] transfers = trans.getAllTransfers();
+	            if(transfers.length == 0)
+	            {
+	            	categoryLabel.setText("[NONE]");
+	            }
+	            else if(transfers.length == 1)
+	            {
+	            	categoryLabel.setText(transfers[0].getCategory().getName());
+	            }
+	            else
+	            {
+	            	categoryLabel.setText("[SPLIT]");
+	            }
+        	}
         }
         return this;
     }
+    
+    public Dimension getPreferredSize()
+    {
+    	return dim;
+    }
+    
+    public Dimension getMinimumSize()
+    {
+    	return dim;
+    }
+    
     
     public static void main(String[] args)
     {
