@@ -111,6 +111,7 @@ public class ConnectionManager
 		final Statement st = conn.createStatement();
 		try
 		{
+		    defaultLogger.debug("Query: " + sql);
 			return st.executeQuery(sql);
 		}
 		finally
@@ -124,6 +125,7 @@ public class ConnectionManager
 		final Statement st = conn.createStatement();
 		try
 		{
+		    defaultLogger.debug("Update: " + sql);
 			return st.executeUpdate(sql);
 		}
 		finally
