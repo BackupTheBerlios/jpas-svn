@@ -19,7 +19,7 @@
   </target>
 
   <target name="compile" depends="init" description="compile the source " >
-    <javac srcdir="${src}" destdir="${build}">
+    <javac srcdir="${src}" destdir="${build}" source="1.5">
     	<classpath>
         	<fileset dir="${lib}">
         	  <filename name="**/*.jar"/>
