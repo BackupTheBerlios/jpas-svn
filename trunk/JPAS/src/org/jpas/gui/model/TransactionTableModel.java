@@ -113,7 +113,7 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public boolean isCellEditable(int rowIndex, int columnIndex)
     {
-        return false;
+        return true;
     }
 
     /* (non-Javadoc)
