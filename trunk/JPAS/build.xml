@@ -7,7 +7,7 @@
   <property name="build" value="build"/>
   <property name="dist"  value="dist"/>
   <property name="lib" value="lib"/>
-  <property name="log4j.jar" value="log4j-1.2.8.jar"/>
+  <property name="log4j.jar" value="log4j-1.2.9.jar"/>
   <propertyfile file="jpas.properties"/>
   <property name="hsqldb.jar" value="hsqldb.jar"/>
 
