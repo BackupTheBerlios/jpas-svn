@@ -32,13 +32,13 @@ import java.util.*;
  */
 public class JpasObservable<V>
 {
-	private final Set<WeakReference<JpasObserver>> observerSet = new HashSet<WeakReference<JpasObserver>>();
+	private final Set<WeakReference<JpasObserver<V>>> observerSet = new HashSet<WeakReference<JpasObserver<V>>>();
 	
 	public void addObserver(final JpasObserver<V> o)
 	{
 		synchronized(observerSet)
 		{
-			observerSet.add(new WeakReference<JpasObserver>(o));
+			observerSet.add(new WeakReference<JpasObserver<V>>(o));
 		}
 	}
 	
@@ -54,9 +54,9 @@ public class JpasObservable<V>
 	{
 		synchronized(observerSet)
 		{
-			for(WeakReference<JpasObserver> wr : observerSet)
+			for(WeakReference<JpasObserver<V>> wr : observerSet)
 			{
-				final JpasObserver ob = wr.get();
+				final JpasObserver<V> ob = wr.get();
 				if(ob == null)
 				{
 					observerSet.remove(wr);

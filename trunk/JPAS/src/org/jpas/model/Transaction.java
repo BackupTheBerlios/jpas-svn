@@ -24,8 +24,6 @@
 package org.jpas.model;
 
 import java.sql.Date;
-import java.util.*;
-
 import org.jpas.da.*;
 import org.jpas.util.WeakValueMap;
 

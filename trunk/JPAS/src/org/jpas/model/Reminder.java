@@ -27,7 +27,6 @@ package org.jpas.model;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import org.jpas.da.*;
 import org.jpas.util.WeakValueMap;
 

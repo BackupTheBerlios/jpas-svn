@@ -23,8 +23,6 @@
 
 package org.jpas.model;
 
-import java.util.Map;
-import java.util.WeakHashMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;

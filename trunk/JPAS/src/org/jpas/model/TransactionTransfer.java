@@ -24,8 +24,6 @@
 
 package org.jpas.model;
 
-import java.util.*;
-
 import org.jpas.da.TransAccountMappingDA;
 import org.jpas.util.WeakValueMap;
 /**

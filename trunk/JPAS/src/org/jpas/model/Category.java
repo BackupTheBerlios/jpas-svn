@@ -27,8 +27,6 @@ import org.apache.log4j.*;
 import org.jpas.da.*;
 import org.jpas.util.WeakValueMap;
 
-import java.util.*;
-
 public class Category 
 {
 	private static final Logger defaultLogger = Logger.getLogger(Category.class);

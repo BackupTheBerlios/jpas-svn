@@ -23,9 +23,6 @@
  */
 package org.jpas.model;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
 import org.jpas.da.ReminderAccountMappingDA;
 import org.jpas.util.WeakValueMap;
 
