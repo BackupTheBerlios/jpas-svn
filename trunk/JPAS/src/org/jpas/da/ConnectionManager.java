@@ -1,6 +1,5 @@
 package org.jpas.da;
 
-import org.hsqldb.jdbcDriver;
 import org.jpas.util.PropertyManager;
 import org.apache.log4j.*;
 import java.sql.*;
