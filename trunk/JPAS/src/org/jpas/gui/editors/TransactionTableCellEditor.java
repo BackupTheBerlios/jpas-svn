@@ -52,9 +52,12 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final JTextField memoField;
 	private final JLabel balanceLabel;
 	private final JComboBox categoryList;
+	private final JLabel categoryLabel = new JLabel("[SPLIT]");
 	private final JButton btnEnter = new JButton("Enter");
 	private final JButton btnSplit = new JButton("Split");
 	private final JButton btnDelete = new JButton("Delete");
+	
+	private final JPanel splitPanel = new JPanel(new GridLayout(1, 2));
 	
 	
 	private final int[] columnWidths;
@@ -80,6 +83,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	memoField = new JTextField();
     	balanceLabel = new JLabel();
     	categoryList = new CategoryComboBox();
+    	
 
         init();
     }
@@ -97,7 +101,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	cellPanel.add(balanceLabel);
     	cellPanel.add(createEmptyPanel());
     	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(createSplitPanel());
+    	cellPanel.add(splitPanel);
     	cellPanel.add(btnEnter);
     	cellPanel.add(btnSplit);
     	cellPanel.add(btnDelete);
@@ -105,6 +109,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
     public void setAccount(final Account account)
     {
+        assert(account != null);
         this.account = account;
         payeeList.setAccount(account);
     }
@@ -114,13 +119,20 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         return account;
     }
 
-    
-    private JPanel createSplitPanel()
+    private void setCategoryPanel()
     {
-    	final JPanel panel = new JPanel(new GridLayout(1, 2));
-    	panel.add(categoryList);
-    	panel.add(memoField);
-    	return panel;
+        splitPanel.removeAll();
+        splitPanel.add(categoryList);
+        splitPanel.add(memoField);
+        splitPanel.invalidate();
+    }
+    
+    private void setSplitPanel()
+    {
+        splitPanel.removeAll();
+        splitPanel.add(categoryLabel);
+        splitPanel.add(memoField);
+        splitPanel.invalidate();
     }
     
     private JPanel createEmptyPanel()
@@ -140,7 +152,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	withdrawField.setText("");
         	depositField.setText("");
         	balanceLabel.setText("");
-        	categoryList.setSelectedItem("");
+        	categoryList.getModel().setSelectedItem(null);
+    	    setCategoryPanel();
         }
         else
         {
@@ -166,16 +179,26 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	final TransactionTransfer[] transfers = trans.getAllTransfers();
         	if(transfers.length == 0)
         	{
+        	    setCategoryPanel();
             	categoryList.setSelectedItem("");
+        	}
+        	else if(!trans.getAccount().equals(account))
+        	{
+        	    System.out.println(trans.getAccount().getName());
+        	    System.out.println(account.getName());
+        	    setCategoryPanel();
+        	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(trans.getAccount()).getName());
         	}
         	else if(transfers.length == 1)
         	{
+        	    setCategoryPanel();
         	    categoryList.setSelectedItem(transfers[0].getCategory());
         	}
         	else
         	{
+        	    setSplitPanel();
+        	    //categoryList.setSelectedItem("[SPLIT]");
         	    //categoryList.setEnabled(false);
-        	    categoryList.setSelectedItem("[SPLIT]");
         	}
 
         }
