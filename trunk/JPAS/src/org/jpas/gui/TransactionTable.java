@@ -28,6 +28,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import org.jpas.gui.editors.TransactionTableCellEditor;
 import org.jpas.gui.model.TransactionTableModel;
 import org.jpas.gui.renderers.TransactionTableCellRenderer;
 import org.jpas.model.*;
@@ -45,8 +47,9 @@ public class TransactionTable extends JTable
     {
         this.setModel(new TransactionTableModel(account));
         this.setDefaultRenderer(Transaction.class, new TransactionTableCellRenderer());
-        this.setDefaultEditor(Transaction.class, new TransactionTableCellRenderer());
-        this.setRowHeight(35);
+        this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor());
+        this.setRowHeight(36);
+        this.setSurrendersFocusOnKeystroke(true);
     }
 
     public static void main(String[] args)
