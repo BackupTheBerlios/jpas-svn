@@ -24,6 +24,7 @@
 package org.jpas.model;
 
 import java.sql.Date;
+import java.util.Comparator;
 import org.jpas.da.*;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
@@ -51,6 +52,32 @@ public class Transaction extends JpasObservable<Transaction>
     String num;
     Date date;
 
+    public static Comparator<Transaction> getDateComparator()
+    {
+        return new Comparator<Transaction>()
+        {
+            public int compare(final Transaction a, final Transaction b)
+            {
+                final int dateComp = a.date.compareTo(b.date);
+                return dateComp != 0 ? dateComp : a.id.intValue() - b.id.intValue();
+            }
+        };
+    }
+    
+    public static Transaction[] getAllTransactionsAffecting(final Account account)
+    {
+        synchronized(transactionCache)
+        {
+            final Integer[] ids = TransactionDA.getInstance().getAllAffectingTransactionIDs(account.id);
+            final Transaction[] trans = new Transaction[ids.length];
+            for(int i = 0; i < ids.length; i++)
+            {
+                trans[i] = getTransactionForID(ids[i]);
+            }
+            return trans;
+        }
+    }
+    
     static Transaction getTransactionForID(final Integer id)
     {
         synchronized(transactionCache)
@@ -275,5 +302,10 @@ public class Transaction extends JpasObservable<Transaction>
     public synchronized boolean isLoaded()
     {
         return isLoaded;
+    }
+    
+    public boolean affects(final Account account)
+    {
+        return true;
     }
 }
