@@ -53,9 +53,10 @@ public class AccountDA
 	    }
 	    
 	    public static final AccountType BANK = new AccountType(0);
-	    public static final AccountType CATEGORY = new AccountType(1);
-	    public static final AccountType DELETED_BANK = new AccountType(2);
-	    public static final AccountType UNKNOWN_CATEGORY = new AccountType(3); 
+	    public static final AccountType EXPENSE_CATEGORY = new AccountType(1);
+	    public static final AccountType INCOME_CATEGORY = new AccountType(2);
+	    public static final AccountType DELETED_BANK = new AccountType(3);
+	    public static final AccountType UNKNOWN_CATEGORY = new AccountType(4); 
 	}
 	
 	private AccountDA()
@@ -177,6 +178,41 @@ public class AccountDA
 		}
 	}
 
+	public Integer getDeletedBankAccountID()
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID + " FROM "
+                + DBNames.TN_ACCOUNT + " WHERE " + DBNames.CN_ACCOUNT_TYPE
+                + " IS " + AccountType.DELETED_BANK.dbValue;
+        try
+        {
+            return (Integer)ConnectionManager.getInstance().query(sqlStr).getObject(DBNames.CN_ACCOUNT_ID);
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error("SQLException while loading account name!",
+                    sqle);
+            throw new RuntimeException("Unable to load account id's!", sqle);
+        }	
+	}
+
+	public Integer getUnknownCategoryID()
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID + " FROM "
+                + DBNames.TN_ACCOUNT + " WHERE " + DBNames.CN_ACCOUNT_TYPE
+                + " IS " + AccountType.UNKNOWN_CATEGORY.dbValue;
+        try
+        {
+            return (Integer)ConnectionManager.getInstance().query(sqlStr).getObject(DBNames.CN_ACCOUNT_ID);
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error("SQLException while loading account name!",
+                    sqle);
+            throw new RuntimeException("Unable to load account id's!", sqle);
+        }	
+	}
+
+	
 	public Integer createAccount(final String name, final AccountType type)
 	{
 		final String sqlSequenceStr = "CALL NEXT VALUE FOR " + DBNames.SEQ_ACCOUNT_ID;
@@ -356,8 +392,8 @@ public class AccountDA
 	{
 		instance.createAccount("Checking", AccountType.BANK);
 		instance.createAccount("Savings", AccountType.BANK);
-		instance.createAccount("Utility", AccountType.CATEGORY);
-		instance.createAccount("Entertainment", AccountType.CATEGORY);
+		instance.createAccount("Utility", AccountType.EXPENSE_CATEGORY);
+		instance.createAccount("Entertainment", AccountType.EXPENSE_CATEGORY);
 	}
 	
 	public static void main(final String[] args)
