@@ -108,6 +108,30 @@ public class AccountDA
 		}
 	}
 
+	public void updateAccountIsBank(final Integer id, final boolean isBank)
+	{
+		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
+										 + " SET " + DBNames.CN_ACCOUNT_IS_BANK
+										 + " = '" + isBank
+										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
+											 + " IS " + id;
+
+		try
+		{
+			final int result = ConnectionManager.getInstance().update(sqlStr);
+			if(result < 1)
+			{
+				defaultLogger.error("Account id not found: \""+ sqlStr +"\"");
+				throw new RuntimeException("Account id not found: \""+ sqlStr +"\"");
+			}
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error(sqlStr, sqle);
+			throw new RuntimeException(sqlStr, sqle);
+		}
+	}
+
 	public Integer createAccount(final String name, boolean isBankAccount)
 	{
 		final String sqlSequenceStr = "CALL NEXT VALUE FOR " + DBNames.SEQ_ACCOUNT_ID;
