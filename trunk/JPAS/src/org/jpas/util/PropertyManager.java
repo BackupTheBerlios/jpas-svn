@@ -57,7 +57,7 @@ public class PropertyManager
 	{
 		final Properties systemProps = System.getProperties();
 		final String propFileName = systemProps.getProperty(
-			"properties.file", "jpac.properties");
+			"properties.file", "jpas.properties");
 	  	try
 		{
 			final InputStream in = new FileInputStream(propFileName);
