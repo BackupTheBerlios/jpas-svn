@@ -300,6 +300,47 @@ public class TransactionDA
 			throw new RuntimeException("Unable to load transaction id's!", sqle);
 		}	
 	}
+
+	public boolean doesTransactionAffectAccount(final Integer transId, final Integer accountId)
+	{
+		final String sqlStr = "SELECT " 
+	    	+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ID 
+	    	+ " FROM "
+            + DBNames.TN_TRANSACTION + " , " 
+            + DBNames.TN_ACCOUNT + " , "
+            + DBNames.TN_TRANSACTION_ACCOUNT_MAP
+            + " WHERE "
+            + DBNames.TN_TRANSACTION_ACCOUNT_MAP  + "." + DBNames.CN_TAM_TRANSACTION_ID
+            + " = " + DBNames.TN_TRANSACTION  + "." + DBNames.CN_TRANSACTION_ID
+            + " AND "
+            + DBNames.TN_TRANSACTION_ACCOUNT_MAP  + "." + DBNames.CN_TAM_ACCOUNT_ID
+            + " = "  + DBNames.TN_ACCOUNT  + "." + DBNames.CN_ACCOUNT_ID
+            + " AND "
+            + DBNames.TN_ACCOUNT  + "." + DBNames.CN_ACCOUNT_ID 
+            + " = " + accountId
+            + " AND "
+            + DBNames.TN_TRANSACTION  + "." + DBNames.CN_TRANSACTION_ID
+            + " = " + transId
+            + " UNION "
+            + " SELECT " + DBNames.CN_TRANSACTION_ID
+			+ " FROM " + DBNames.TN_TRANSACTION
+			+ " WHERE " + DBNames.CN_TRANSACTION_ACCOUNT
+			+ " = " +  accountId
+            + " AND "
+            + DBNames.CN_TRANSACTION_ID
+            + " = " + transId;
+
+		try
+		{
+			return ConnectionManager.getInstance().query(sqlStr).next();
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
+		}	
+	}
+
 	
 	public Integer[] getAllTransactionIDs(final Integer accountId)
 	{
@@ -327,14 +368,6 @@ public class TransactionDA
 
 	public Integer[] getAllAffectingTransactionIDs(final Integer accountId)
 	{
-	    /*
-	    select transaction_tbl.id from transaction_tbl, trans_account_map_tbl, account_tbl
-	    where trans_account_map_tbl.transaction_id = transaction_tbl.id
-	    and trans_account_map_tbl.account_id = account_tbl.id
-	    and account_tbl.id = 2
-	    union
-	    select id from transaction_tbl where account = 0
-	    */
 		final String sqlStr = "SELECT " 
 		    	+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ID 
 		    	+ " FROM "
