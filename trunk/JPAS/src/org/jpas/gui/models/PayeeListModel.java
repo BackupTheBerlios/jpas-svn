@@ -21,24 +21,45 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.jpas.gui.model;
+package org.jpas.gui.models;
 
-import org.jpas.model.Category;
+import org.jpas.model.Account;
 import org.jpas.util.JpasObserver;
-
 /**
  * @author jsmith
  *
  */
-public class CategoryListModel extends JpasListModel<Category>
+public class PayeeListModel extends JpasListModel<String>
 {
+	private Account account = null;
+	
+	public PayeeListModel()
+	{
+	}
+	
+	public void setAccount(final Account account)
+	{
+	    this.account = account;
+	    populateData();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jpas.gui.model.JpasListModel#initObserver(null)
+	 */
+	protected void initObserver(final JpasObserver<String> observer) 
+	{
+	}
 
-	protected void initObserver(final JpasObserver<Category> observer)
+	/* (non-Javadoc)
+	 * @see org.jpas.gui.model.JpasListModel#loadData()
+	 */
+	protected String[] loadData() 
 	{
-		Category.getObservable().addObserver(observer);
+	    if(account == null)
+	    {
+	        return new String[0];
+	    }
+		return account.getAllPayees();
 	}
-	protected Category[] loadData()
-	{
-		return Category.getAllCategories();
-	}
+
 }

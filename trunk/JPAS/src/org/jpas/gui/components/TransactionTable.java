@@ -30,7 +30,7 @@ import java.awt.*;
 import javax.swing.table.*;
 
 import org.jpas.gui.editors.TransactionTableCellEditor;
-import org.jpas.gui.model.TransactionTableModel;
+import org.jpas.gui.models.TransactionTableModel;
 import org.jpas.gui.renderers.TransactionTableCellRenderer;
 import org.jpas.model.Account;
 import org.jpas.model.Transaction;

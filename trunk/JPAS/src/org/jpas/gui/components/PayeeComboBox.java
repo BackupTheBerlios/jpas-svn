@@ -25,7 +25,7 @@ package org.jpas.gui.components;
 
 import javax.swing.JComboBox;
 
-import org.jpas.gui.model.PayeeListModel;
+import org.jpas.gui.models.PayeeListModel;
 import org.jpas.model.Account;
 
 /**

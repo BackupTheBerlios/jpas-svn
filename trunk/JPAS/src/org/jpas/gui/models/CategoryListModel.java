@@ -1,6 +1,6 @@
-/**
- * Created on Oct 4, 2004 - 6:35:57 PM
- * 
+/*
+ * Created on Oct 26, 2004
+ *
  * Title: JPAS
  * Description: Java based Personal Accounting System
  * Copyright: Copyright (c) 2004 Justin W Smith
@@ -21,23 +21,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.jpas.gui.model;
+package org.jpas.gui.models;
 
-import org.jpas.model.Account;
+import org.jpas.model.Category;
 import org.jpas.util.JpasObserver;
 
 /**
- * @author Justin W Smith
+ * @author jsmith
  *
  */
-public class AccountListModel extends JpasListModel<Account>
+public class CategoryListModel extends JpasListModel<Category>
 {
-	protected void initObserver(final JpasObserver<Account> observer)
+
+	protected void initObserver(final JpasObserver<Category> observer)
 	{
-		Account.getObservable().addObserver(observer);
+		Category.getObservable().addObserver(observer);
 	}
-	protected Account[] loadData()
+	protected Category[] loadData()
 	{
-		return Account.getAllAccounts();
+		return Category.getAllCategories();
 	}
 }

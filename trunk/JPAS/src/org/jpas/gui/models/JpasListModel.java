@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.jpas.gui.model;
+package org.jpas.gui.models;
 
 import java.util.ArrayList;
 import java.util.List;

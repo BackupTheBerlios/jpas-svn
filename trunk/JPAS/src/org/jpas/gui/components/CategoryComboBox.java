@@ -25,7 +25,7 @@ package org.jpas.gui.components;
 
 import javax.swing.JComboBox;
 
-import org.jpas.gui.model.CategoryListModel;
+import org.jpas.gui.models.CategoryListModel;
 import org.jpas.gui.renderers.CategoryListCellRenderer;
 
 /**

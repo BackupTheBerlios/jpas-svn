@@ -27,8 +27,8 @@ import java.awt.*;
 
 import javax.swing.JList;
 
-import org.jpas.gui.model.AccountListModel;
-import org.jpas.gui.model.JpasListModel;
+import org.jpas.gui.models.AccountListModel;
+import org.jpas.gui.models.JpasListModel;
 import org.jpas.gui.renderers.AccountListCellRenderer;
 
 /**
