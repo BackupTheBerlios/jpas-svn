@@ -79,7 +79,7 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public int getRowCount()
     {
-        return Math.max(transactionList.size(), 15);
+        return transactionList.size() +1;
     }
 
     /* (non-Javadoc)
