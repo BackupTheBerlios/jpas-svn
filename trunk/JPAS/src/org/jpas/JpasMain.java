@@ -25,6 +25,8 @@ package org.jpas;
 
 import java.awt.event.*;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
 import org.jpas.gui.*;
 import javax.swing.*;
 
@@ -34,9 +36,30 @@ import javax.swing.*;
  */
 public class JpasMain
 {
+	/**
+     * Installs the Kunststoff and Plastic Look And Feels if available in classpath.
+     */
+    private static void initializeLookAndFeels() {
+    	// if in classpath thry to load JGoodies Plastic Look & Feel
+        try {
+            UIManager.installLookAndFeel("JGoodies Plastic 3D",
+                "com.jgoodies.plaf.plastic.Plastic3DLookAndFeel");
+            UIManager.setLookAndFeel("com.jgoodies.plaf.plastic.Plastic3DLookAndFeel");
+        } catch (Throwable t) {
+        	try {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			}  catch (Exception e) {
+				e.printStackTrace();
+			}
+        }
+    }
+	
     public static void main(String[] args)
     {
-        final JFrame frame = new JpasFrame(); 
+        BasicConfigurator.configure();
+        initializeLookAndFeels();
+        
+    	final JFrame frame = new JpasFrame(); 
         
         frame.addWindowListener(new WindowAdapter()
         {
