@@ -271,13 +271,12 @@ public class TransactionDA
 		}
 	}
 
-    
 	public boolean doesTransactionExist(final Integer id)
 	{
 		final String sqlStr = "SELECT " + DBNames.CN_TRANSACTION_ID
 								+ " FROM " + DBNames.TN_TRANSACTION
 								+ " WHERE " + DBNames.CN_TRANSACTION_ID
-								+ " IS '" + id + "'";
+								+ " IS " + id;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();
