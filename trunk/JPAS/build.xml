@@ -8,6 +8,7 @@
   <property name="dist"  value="dist"/>
   <property name="lib" value="lib"/>
   <property name="log4j.jar" value="log4j-1.2.8.jar"/>
+  <propertyfile file="jpas.properties"/>
   <property name="hsqldb.jar" value="hsqldb.jar"/>
 
   <target name="init">
@@ -61,20 +62,20 @@ The most graceful way to shut this down is to use the DatabaseManager.
   		spawn="true">
 <!-- Note that multiple "arg"s must be used -->
   	<arg value="-database.0"/> 
-  	<arg value="db/jpasdb"/> 
+  	<arg value="db/${DB_NAME}"/> 
 	<arg value="-dbname.0"/> 
-	<arg value="jpasdb"/>
+	<arg value="${DB_NAME}"/>
   	</java>
   </target>
 	
   <target name="run_db_manager" description="Start the DB Manager.">
-<!-- java -cp ../lib/hsqldb.jar org.hsqldb.util.DatabaseManager -->
+<!-- java -cp lib/hsqldb.jar org.hsqldb.util.DatabaseManager -url jdbc:hsqldb:hsql://localhost/jpasdb -->
   	<java classpath="${lib}/${hsqldb.jar}" 
   		classname="org.hsqldb.util.DatabaseManager"
   		fork="true"
   		spawn="true">
   		<arg value="-url"/>
-  		<arg value="jdbc:hsqldb:hsql://localhost/jpasdb"/>
+  		<arg value="jdbc:hsqldb:hsql://localhost/${DB_NAME}"/>
   	</java>
   </target>
 
