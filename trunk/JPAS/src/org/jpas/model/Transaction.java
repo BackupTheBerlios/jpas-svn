@@ -21,13 +21,12 @@ public class Transaction
 {
 	private static Map<Integer, Transaction> transactionCache = new WeakHashMap<Integer, Transaction>();
 	
-    //private final Integer id;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
 
     private final Integer id;
     
-    private Account account;
+    private Integer accountID;
     private String payee;
     private String memo;
     private String num;
@@ -44,15 +43,15 @@ public class Transaction
     	return trans;
     }
     
-    private Transaction(final Integer id)
-    {
-    	this.id = id;
-    }
-    
     public static Transaction createTransaction(final Account account, final String payee, final String memo, final String num, final Date date)
     {
     	return getTransactionForID(
     			TransactionDA.getInstance().createTransaction( account.id, payee, memo, num, date));
+    }
+
+    private Transaction(final Integer id)
+    {
+    	this.id = id;
     }
     
     public void delete()
@@ -64,11 +63,12 @@ public class Transaction
     
     private void loadData()
     {
+    	assert(!isDeleted);
     	TransactionDA.getInstance().loadTransaction(id, new TransactionDA.TransactionHandler()
     		{
 				public void setData(final Integer accountId, final String payee, final String memo, final String num, final Date date)
 				{
-					Transaction.this.account = Account.getAccountForID(accountId);
+					Transaction.this.accountID = accountId;
 					Transaction.this.payee = payee;
 					Transaction.this.memo = memo;
 					Transaction.this.num = num;
@@ -76,6 +76,11 @@ public class Transaction
 					isLoaded = true;
 				}
     		});
+    }
+    
+    public Account getAccount()
+    {
+        return Account.getAccountForID(accountID);
     }
     
     public String getPayee()
@@ -112,5 +117,60 @@ public class Transaction
     		loadData();
     	}
     	return date;
+    }
+    
+    public void setPayee(final String payee)
+    {
+        assert (!isDeleted);
+        TransactionDA.getInstance().updateTransactionPayee(id, payee);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setMemo(final String memo)
+    {
+        assert (!isDeleted);
+        TransactionDA.getInstance().updateTransactionMemo(id, memo);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setNum(final String num)
+    {
+        assert (!isDeleted);
+        TransactionDA.getInstance().updateTransactionMemo(id, num);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+    
+    public void setDate(final Date date)
+    {
+        assert (!isDeleted);
+        TransactionDA.getInstance().updateTransactionDate(id, date);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+    
+    public long getAmount()
+    {
+    	return TransAccountMappingDA.getInstance().getTransactionAmount(id);
+    }
+    
+    public boolean isDeleted()
+    {
+        return isDeleted;
+    }
+    
+    public boolean isLoaded()
+    {
+        return isLoaded;
     }
 }
