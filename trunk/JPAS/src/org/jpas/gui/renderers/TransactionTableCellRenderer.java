@@ -215,13 +215,13 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 
 	            if(amount <= 0)
 	            {
-		            withdrawLabel.setText(String.valueOf(-amount));
+		            withdrawLabel.setText(AmountDocument.getTextForAmount(-amount));
 		            depositLabel.setText("");
 	            }
 	            else
 	            {
 		            withdrawLabel.setText("");
-		            depositLabel.setText(String.valueOf(amount));
+		            depositLabel.setText(AmountDocument.getTextForAmount(amount));
 	            }
 	            
             	categoryLabel.setText(Category.getCategoryForAccount(trans.getAccount()).getName());
