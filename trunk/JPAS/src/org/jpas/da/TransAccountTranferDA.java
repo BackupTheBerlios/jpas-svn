@@ -70,9 +70,29 @@ public class TransAccountTranferDA
             throw new RuntimeException(sqlStr, sqle);
         }
     }
+
+    public void deleteTransAccountMapping(final Integer transactionID, final Integer accountID)
+    {
+		final String sqlStr = "DELETE FROM " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
+                + " WHERE " + DBNames.CN_TAM_TRANSACTION_ID + " IS " + transactionID
+                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+        try
+        {
+            if(ConnectionManager.getInstance().update(sqlStr) < 1)
+            {
+                defaultLogger.error("TransAccountMap not found: \"" + sqlStr + "\"");
+                throw new RuntimeException("TransAccountMap not found: \"" + sqlStr + "\"");
+            }
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(sqlStr, sqle);
+            throw new RuntimeException(sqlStr, sqle);
+        }
+    }
     
     
-    public long getTotalAmount(final Integer transactionID)
+    public long getTransactionAmount(final Integer transactionID)
     {
 		final String sqlStr = "SELECT SUM(" + DBNames.CN_TAM_AMOUNT + ") FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
@@ -85,10 +105,8 @@ public class TransAccountTranferDA
 		    {
 		        return ((Long)rs.getObject(1)).longValue();
 		    }
-		    else
-		    {
-		        return 0;
-		    }
+
+		    return 0;
 		}
 		catch(final SQLException sqle)
 		{
@@ -99,6 +117,65 @@ public class TransAccountTranferDA
 		}
     }
     
+    public long getAccountBalance(final Integer accountID)
+    {
+		final String outflowsSql = "SELECT SUM(" 
+		    	+ DBNames.TN_TRANSACTION_ACCOUNT_MAP + "." + DBNames.CN_TAM_AMOUNT 
+		    	+ ") FROM " + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " JOIN " + DBNames.TN_TRANSACTION 
+		    	+ " ON " + DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ID
+		    	+ " WHERE " 
+		    	+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ACCOUNT
+		    	+ " IS" + accountID;
+		
+		final String inflowsSql = "SELECT SUM(" 
+		    	+ DBNames.TN_TRANSACTION_ACCOUNT_MAP + "." + DBNames.CN_TAM_AMOUNT
+		    	+ ") FROM " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
+		    	+ " WHERE " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+		
+		final long outflowsTotal;
+		final long inflowsTotal;
+        try
+        {
+            final ResultSet rs = ConnectionManager.getInstance().query(outflowsSql);
+            if (rs.next())
+            {
+                outflowsTotal = ((Long) rs.getObject(1)).longValue();
+            }
+            else
+            {
+                outflowsTotal = 0;
+            }
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(
+                            "SQLException while loading Trans-Account Mapping for total!",
+                            sqle);
+            throw new RuntimeException("Unable to load account id's!", sqle);
+        }
+
+        try
+        {
+            final ResultSet rs = ConnectionManager.getInstance().query(outflowsSql);
+            if (rs.next())
+            {
+                inflowsTotal = ((Long) rs.getObject(1)).longValue();
+            }
+            else
+            {
+                inflowsTotal = 0;
+            }
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(
+                            "SQLException while loading Trans-Account Mapping for total!",
+                            sqle);
+            throw new RuntimeException("Unable to load account id's!", sqle);
+        }
+
+        return outflowsTotal + inflowsTotal;
+    }
     
     public Integer[] getAllTransAccountTranfers(final Integer transactionID)
     {
@@ -125,9 +202,15 @@ public class TransAccountTranferDA
         }    
     }
     
-    
+    private static void unitTest_Create()
+    {
+        
+    }
     
     public static void main(String[] args)
     {
+		BasicConfigurator.configure();
+		
+		unitTest_Create();
     }
 }
