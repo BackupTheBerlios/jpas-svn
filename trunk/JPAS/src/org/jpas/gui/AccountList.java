@@ -52,6 +52,7 @@ public class AccountList extends JList
         super(new AccountListModel());
         setCellRenderer(new AccountListCellRenderer(true));
         setBackground(new Color(239, 239, 239));
+        setSelectedIndex(0);
     }
     
     
