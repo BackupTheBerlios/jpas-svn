@@ -25,6 +25,7 @@ package org.jpas.gui.editors;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridLayout;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
@@ -35,8 +36,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
 
-import org.jpas.gui.components.CategoryComboBox;
-import org.jpas.gui.components.PayeeComboBox;
+import org.jpas.gui.components.*;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.*;
 
@@ -50,11 +50,12 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 {
 	private final JPanel cellPanel = new JPanel();
     
-	private final JDateChooser dateChooser;
+	private final DateChooser dateChooser;
 	private final JComboBox numList;
 	private final JComboBox payeeList;
 	private final JTextField withdrawField;
 	private final JTextField depositField;
+	private final JTextField memoField;
 	private final JLabel balanceLabel;
 	private final JComboBox categoryList;
 	
@@ -68,21 +69,24 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         cellPanel.setOpaque(true);
         cellPanel.setBackground(Color.white);
 
-    	dateChooser = new JDateChooser("MM/dd/yyyy", true);
+    	dateChooser = new DateChooser();
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
+    	numList.setEditable(true);
     	payeeList = new PayeeComboBox(account);
+    	payeeList.setEditable(true);
     	withdrawField = new JTextField();
     	depositField = new JTextField();
+    	memoField = new JTextField();
     	balanceLabel = new JLabel();
     	categoryList = new CategoryComboBox();
-
+    	categoryList.setEditable(true);
         
         init();
     }
     
     private void init()
     {
-        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 105, 85, 85, 95});
+        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 125, 85, 85, 95});
         layout.setFlexColumn(2, true);
         cellPanel.setLayout(layout);
     	cellPanel.add(dateChooser);
@@ -93,12 +97,20 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	cellPanel.add(createEmptyPanel());
     	cellPanel.add(createEmptyPanel());
     	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(categoryList);
+    	cellPanel.add(createSplitPanel());
     	cellPanel.add(createEmptyPanel());
     	cellPanel.add(createEmptyPanel());
 //    	cellPanel.add(createEmptyPanel());
     	cellPanel.add(balanceLabel);
-}
+    }
+    
+    private JPanel createSplitPanel()
+    {
+    	final JPanel panel = new JPanel(new GridLayout(1, 2));
+    	panel.add(categoryList);
+    	panel.add(memoField);
+    	return panel;
+    }
     
     private JPanel createEmptyPanel()
     {
@@ -140,20 +152,18 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	}
         	balanceLabel.setText("");
         	
-        	final TransactionTransfer[] transfers = trans.getTransfers();
+        	final TransactionTransfer[] transfers = trans.getAllTransfers();
         	if(transfers.length == 0)
         	{
-        	    categoryList.setEnabled(true);
             	categoryList.setSelectedItem("");
         	}
         	else if(transfers.length == 1)
         	{
-        	    categoryList.setEnabled(true);
         	    categoryList.setSelectedItem(transfers[0].getCategory());
         	}
         	else
         	{
-        	    categoryList.setEnabled(false);
+        	    //categoryList.setEnabled(false);
         	    categoryList.setSelectedItem("[SPLIT]");
         	}
 
