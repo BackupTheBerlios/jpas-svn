@@ -264,11 +264,18 @@ public class AccountDA
 		}
 	}
 
+	private static void unitTest_Create()
+	{
+		instance.createAccount("Checking", true);
+		instance.createAccount("Savings", true);
+		instance.createAccount("Utility", false);
+		instance.createAccount("Entertainment", false);
+	}
+	
 	public static void main(final String[] args)
 	{
 		BasicConfigurator.configure();
-		final Integer id = instance.createAccount("Checking", true);
-		instance.updateAccount(id, "Share", true);
-//		instance.deleteAccount(id);
+		
+		unitTest_Create();
 	}
 }
