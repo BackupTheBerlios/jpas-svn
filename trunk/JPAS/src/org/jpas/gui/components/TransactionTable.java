@@ -24,7 +24,8 @@
 package org.jpas.gui.components;
 
 import javax.swing.JTable;
-
+import java.awt.Dimension;
+import javax.swing.table.*;
 import org.jpas.gui.editors.TransactionTableCellEditor;
 import org.jpas.gui.model.TransactionTableModel;
 import org.jpas.gui.renderers.TransactionTableCellRenderer;
@@ -37,16 +38,31 @@ import org.jpas.model.Transaction;
  */
 public class TransactionTable extends JTable
 {
+	private final Dimension dim;
+	
     /**
      * 
      */
     public TransactionTable(final Account account)
     {
+    	final TransactionTableCellRenderer transactionRenderer = new TransactionTableCellRenderer();
     	this.setModel(new TransactionTableModel(account));
-        this.setDefaultRenderer(Transaction.class, new TransactionTableCellRenderer());
+        this.setDefaultRenderer(Transaction.class, transactionRenderer);
         this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(account));
         this.setRowHeight(36);
         this.setSurrendersFocusOnKeystroke(true);
+        
+        dim = transactionRenderer.getPreferredSize();
+    }
+
+    public Dimension getPreferredSize()
+    {
+    	return new Dimension(dim.width, dim.height * getModel().getRowCount());
+    }
+    
+    public Dimension getMinimumSize()
+    {
+    	return getPreferredSize();
     }
 
     public static void main(String[] args)
