@@ -29,27 +29,44 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;
 import org.jpas.da.TransAccountMappingDA;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservable;
+import org.jpas.util.WeakValueMap;
 
-public class Account
+public class Account extends JpasObservable<Account>
 {
-    private static Map<Integer, Account> accountCache = new WeakHashMap<Integer, Account>();
+    private static WeakValueMap<Integer, Account> accountCache = new WeakValueMap<Integer, Account>();
     private static final Logger defaultLogger = Logger.getLogger(Account.class);
 
+    private static final JpasObservable<Account> observable = new JpasObservable<Account>();
+    
+    public static JpasObservable<Account> getObservable()
+    {
+    	return observable;
+    }
+    
     public static Account createAccount(final String name)
     {
-        return getAccountForID(AccountDA.getInstance()
+        final Account account = getAccountForID(AccountDA.getInstance()
                 .createAccount(name, true));
+        
+        observable.notifyObservers(new JpasDataChange.Add<Account>(account));
+        
+        return account;
     }
 
     static Account getAccountForID(final Integer id)
     {
-        Account account = accountCache.get(id);
-        if (account == null)
-        {
-            account = new Account(id);
-            accountCache.put(id, account);
-        }
-        return account;
+        synchronized(accountCache)
+		{
+	    	Account account = accountCache.get(id);
+	        if (account == null)
+	        {
+	            account = new Account(id);
+	            accountCache.put(id, account);
+	        }
+	        return account;
+		}
     }
 
     public static Account[] getAllAccounts()
@@ -76,18 +93,31 @@ public class Account
 
     public void delete()
     {
-        AccountDA.getInstance().deleteAccount(id);
-        accountCache.remove(id);
-        isDeleted = true;
+    	synchronized(this)
+		{
+	    	synchronized(accountCache)
+			{
+		        AccountDA.getInstance().deleteAccount(id);
+		        accountCache.remove(id);
+		        isDeleted = true;
+			}
+		}
+    	
+    	final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(this);
+    	observable.notifyObservers(dataChange);
+    	notifyObservers(dataChange);    	
     }
 
     public String getName()
     {
-        assert (!isDeleted);
-        if (!isLoaded)
-        {
-            loadData();
-        }
+    	synchronized(this)
+		{
+	        assert (!isDeleted);
+	        if (!isLoaded)
+	        {
+	            loadData();
+	        }
+		}
         return name;
     }
 
@@ -106,12 +136,18 @@ public class Account
 
     public void setName(final String name)
     {
-        assert (!isDeleted);
-        AccountDA.getInstance().updateAccountName(id, name);
-        if (isLoaded)
-        {
-            loadData();
-        }
+    	synchronized(this)
+		{
+	        assert (!isDeleted);
+	        AccountDA.getInstance().updateAccountName(id, name);
+	        if (isLoaded)
+	        {
+	            loadData();
+	        }
+		}
+    	final JpasDataChange<Account> dataChange = new JpasDataChange.Modify<Account>(this);
+    	observable.notifyObservers(dataChange);
+    	notifyObservers(dataChange);    	
     }
 
     public long getBalance()
