@@ -167,7 +167,8 @@ public class InitDB
 			+ DBNames.CN_TRANSACTION_NUM + " VARCHAR(8), "
 			+ DBNames.CN_TRANSACTION_MEMO + " VARCHAR(64), "
 			+ " FOREIGN KEY (" + DBNames.CN_TRANSACTION_ACCOUNT
-			  + ") REFERENCES " + DBNames.TN_ACCOUNT + "(id)"
+			  + ") REFERENCES " + DBNames.TN_ACCOUNT + "(" + DBNames.CN_ACCOUNT_ID + ") "
+			+ " ON DELETE CASCADE "
 			+ ")";
 
 		final String sqlIndexAccount = "CREATE INDEX " + DBNames.IDX_TRANSACTION_ACCOUNT + " ON " + DBNames.TN_TRANSACTION
@@ -226,10 +227,10 @@ public class InitDB
 			+ ", " + DBNames.CN_TAM_TRANSACTION_ID + "), "
 			+ " FOREIGN KEY (" + DBNames.CN_TAM_ACCOUNT_ID
 			+ ") REFERENCES " + DBNames.TN_ACCOUNT + "("
-			+ DBNames.CN_ACCOUNT_ID + "), "
+			+ DBNames.CN_ACCOUNT_ID + ") ON DELETE CASCADE , "
 			+ " FOREIGN KEY (" + DBNames.CN_TAM_TRANSACTION_ID
 			+ ") REFERENCES " + DBNames.TN_TRANSACTION + "("
-			+ DBNames.CN_TRANSACTION_ID + ") )";
+			+ DBNames.CN_TRANSACTION_ID + ") ON DELETE CASCADE )";
 
 
 		final String sqlIndexAccount = "CREATE INDEX " 
@@ -294,7 +295,7 @@ public class InitDB
 			+ DBNames.CN_REMINDER_REPEAT_VALUE + " INTEGER, "
 			+ DBNames.CN_REMINDER_MEMO + " VARCHAR(64), "
 			+ " FOREIGN KEY (" + DBNames.CN_REMINDER_ACCOUNT + ") REFERENCES "
-			+ DBNames.TN_ACCOUNT + "("+ DBNames.CN_ACCOUNT_ID +")"
+			+ DBNames.TN_ACCOUNT + " ("+ DBNames.CN_ACCOUNT_ID +") ON DELETE CASCADE "
 			+ ")";
 
 		final String sqlSequenceStr = "CREATE SEQUENCE "
@@ -338,10 +339,10 @@ public class InitDB
 			+ ", " + DBNames.CN_RAM_REMINDER_ID + "), "
 			+ " FOREIGN KEY (" + DBNames.CN_RAM_ACCOUNT_ID
 			+ ") REFERENCES " + DBNames.TN_ACCOUNT + "("
-			+ DBNames.CN_ACCOUNT_ID + "), "
+			+ DBNames.CN_ACCOUNT_ID + ") ON DELETE CASCADE , "
 			+ " FOREIGN KEY (" + DBNames.CN_RAM_REMINDER_ID
 			+ ") REFERENCES " + DBNames.TN_REMINDER + "("
-			+ DBNames.CN_REMINDER_ID + ") )";
+			+ DBNames.CN_REMINDER_ID + ") ON DELETE CASCADE )";
 
 
 		final String sqlIndexAccount = "CREATE INDEX " 
