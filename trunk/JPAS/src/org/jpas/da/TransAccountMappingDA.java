@@ -298,8 +298,8 @@ public class TransAccountMappingDA
     {
         BasicConfigurator.configure();
 
-        unitTest_Create();
+        //unitTest_Create();
         //unitTest_GetBalance();
-        //unitTest_GetAmount();
+        unitTest_GetAmount();
     }
 }
