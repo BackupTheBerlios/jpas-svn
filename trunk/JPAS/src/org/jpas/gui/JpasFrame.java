@@ -27,6 +27,7 @@ import java.awt.*;
 import javax.swing.*;
 import com.toedter.calendar.*;
 import org.jpas.gui.util.*;
+import org.jpas.model.*;
 /**
  * @author Owner
  *
@@ -84,9 +85,9 @@ public class JpasFrame extends JFrame
     {
         final JPanel panel = new JPanel(new BorderLayout());
 
+        panel.add(new JScrollPane( new TransactionTable(Account.getAllAccounts()[0])));
         return panel;
     }
-    
     
     
     public static void main(String[] args)
