@@ -50,7 +50,7 @@ public class JpasFrame extends JFrame
         this.getContentPane().add(createMainPanel());
         setJMenuBar(ActionFactory.getInstance().createJMenuBar());
         initListeners();
-        pack();
+        setSize(800, 550);
     }
     
     private void initListeners()
