@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.Transaction;
 import org.jpas.model.*;
@@ -184,15 +185,14 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 	            final long amount = trans.getAmount();
 	            if(amount >= 0)
 	            {
-		            withdrawLabel.setText(String.valueOf(amount));
+		            withdrawLabel.setText(AmountDocument.getTextForAmount(amount));
 		            depositLabel.setText("");
 	            }
 	            else
 	            {
 		            withdrawLabel.setText("");
-		            depositLabel.setText(String.valueOf(amount));
+		            depositLabel.setText(AmountDocument.getTextForAmount(-amount));
 	            }
-	            
 	            
 	            final TransactionTransfer[] transfers = trans.getAllTransfers();
 	            if(transfers.length == 0)

@@ -35,6 +35,7 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 
 import org.jpas.gui.components.*;
+import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.*;
 
@@ -52,7 +53,9 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final JComboBox numList;
 	private final PayeeComboBox payeeList;
 	private final JTextField withdrawField;
+	private final AmountDocument withdrawDoc = new AmountDocument(); 
 	private final JTextField depositField;
+	private final AmountDocument depositDoc = new AmountDocument();
 	private final JTextField memoField;
 	private final JLabel balanceLabel;
 	private final JComboBox categoryList;
@@ -78,12 +81,12 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         this.rowHeights = rowHeights;
         cellPanel.setOpaque(false);
         cellPanel.addMouseListener(new MouseAdapter()
-		        {
-		    		public void mouseClicked(final MouseEvent me)
-		    		{
-		    		    me.consume();
-		    		}
-		        });
+        {
+    		public void mouseClicked(final MouseEvent me)
+    		{
+    		    me.consume();
+    		}
+        });
     	dateChooser = new JDateChooser("MM/dd/yyyy", false);
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
@@ -95,7 +98,6 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	balanceLabel = new JLabel();
     	categoryList = new CategoryComboBox();
     	
-
         init();
     }
     
@@ -116,6 +118,9 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	cellPanel.add(btnEnter);
     	cellPanel.add(btnSplit);
     	cellPanel.add(btnDelete);
+    	
+    	withdrawField.setDocument(withdrawDoc);
+    	depositField.setDocument(depositDoc);
     }
     
     public void setAccount(final Account account)
@@ -177,13 +182,13 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	final long amount = trans.getAmount();
         	if(amount >= 0)
         	{
-	        	withdrawField.setText(String.valueOf(trans.getAmount()));
 	        	depositField.setText("");
+	        	withdrawDoc.setAmount(trans.getAmount());
         	}
         	else
         	{
 	        	withdrawField.setText("");
-	        	depositField.setText(String.valueOf(-trans.getAmount()));
+	        	depositDoc.setAmount(-trans.getAmount());
         	}
         	balanceLabel.setText("");
         	
