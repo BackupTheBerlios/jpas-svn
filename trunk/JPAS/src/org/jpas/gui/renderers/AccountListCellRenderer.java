@@ -23,18 +23,12 @@
  */
 package org.jpas.gui.renderers;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JEditorPane;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 
+import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.Account;
 
 /**
@@ -66,8 +60,12 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
         this.includeAmount = includeAmount;
         setLayout(new GridLayout(1, 1));
         
-        final JPanel inner = new JPanel(new GridLayout(1, 2));
+        final JPanel inner = new JPanel();
+        final FlexGridLayout fgl = new FlexGridLayout(new int[]{40}, new int[]{100, 75});
+        fgl.setFlexColumn(0, true);
+        inner.setLayout(fgl);
 
+        
         //accountName.setBorder(BorderFactory.createRaisedBevelBorder());
         inner.add(accountName);
 /*        
@@ -76,6 +74,7 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
         rightPanel.setBorder(BorderFactory.createLineBorder(Color.blue.darker()));
 */      
         accountAmount.setOpaque(true);
+
         inner.add(accountAmount);
         
         add(inner);
@@ -86,18 +85,26 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     public Component getListCellRendererComponent(final JList list, final Object value,
             final int index, final boolean isSelected, final boolean cellHasFocus)
     {
-        final Account a = (Account)value;
-        accountName.setText(a.getName());
-        accountAmount.setText(includeAmount ?  createAmountText(a.getBalance()) : "");
-        if(isSelected)
+        if(!(value instanceof Account))
         {
-            setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-            accountAmount.setBackground(highlightColor);
+	        accountName.setText(value.toString());
+	        accountAmount.setText("0000.00");
         }
         else
         {
-            setBorder(BorderFactory.createEmptyBorder());
-            accountAmount.setBackground(backgroundColor);
+	        final Account a = (Account)value;
+	        accountName.setText(a.getName());
+	        accountAmount.setText(includeAmount ?  createAmountText(a.getBalance()) : "");
+	        if(isSelected)
+	        {
+	            setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+	            accountAmount.setBackground(highlightColor);
+	        }
+	        else
+	        {
+	            setBorder(BorderFactory.createEmptyBorder());
+	            accountAmount.setBackground(backgroundColor);
+	        }
         }
         return this;
     }
