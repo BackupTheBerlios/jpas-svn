@@ -27,13 +27,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 
-import javax.swing.AbstractCellEditor;
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 
 import org.jpas.gui.components.*;
@@ -58,17 +52,24 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final JTextField memoField;
 	private final JLabel balanceLabel;
 	private final JComboBox categoryList;
+	private final JButton btnEnter = new JButton("Enter");
+	private final JButton btnSplit = new JButton("Split");
+	private final JButton btnDelete = new JButton("Delete");
+	
+	
+	private final int[] columnWidths;
+	private final int[] rowHeights;
 	
 	//final JLabel label = new JLabel(" ");
 
     /**
      * 
      */
-    public TransactionTableCellEditor(final Account account)
+    public TransactionTableCellEditor(final Account account, final int[] columnWidths, final int[] rowHeights)
     {
-        cellPanel.setOpaque(true);
-        cellPanel.setBackground(Color.white);
-
+        this.columnWidths = columnWidths;
+        this.rowHeights = rowHeights;
+        cellPanel.setOpaque(false);
     	dateChooser = new DateChooser();
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
@@ -79,13 +80,13 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	memoField = new JTextField();
     	balanceLabel = new JLabel();
     	categoryList = new CategoryComboBox();
-        
+
         init();
     }
     
     private void init()
     {
-        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 125, 85, 85, 95});
+        final FlexGridLayout layout = new FlexGridLayout(rowHeights, columnWidths);
         layout.setFlexColumn(2, true);
         cellPanel.setLayout(layout);
     	cellPanel.add(dateChooser);
@@ -93,14 +94,13 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	cellPanel.add(payeeList);
     	cellPanel.add(withdrawField);
     	cellPanel.add(depositField);
-    	cellPanel.add(createEmptyPanel());
+    	cellPanel.add(balanceLabel);
     	cellPanel.add(createEmptyPanel());
     	cellPanel.add(createEmptyPanel());
     	cellPanel.add(createSplitPanel());
-    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(createEmptyPanel());
-//    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(balanceLabel);
+    	cellPanel.add(btnEnter);
+    	cellPanel.add(btnSplit);
+    	cellPanel.add(btnDelete);
     }
     
     private JPanel createSplitPanel()
@@ -167,7 +167,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	}
 
         }
-       return cellPanel;
+        return cellPanel;
     }
     
     public Object getCellEditorValue()
