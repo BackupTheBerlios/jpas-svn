@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.jpas.da.*;
-import org.jpas.da.ReminderDA.AmountMethod;
-import org.jpas.da.ReminderDA.RepeatMethod;
 
 /**
  * @author jsmith
@@ -161,6 +159,116 @@ public class Reminder
     	return memo;
     }
 
+    public Date getDate()
+    {
+    	if(!isLoaded)
+    	{
+    		loadData();
+    	}
+    	return date;
+    }
+    
+    public AmountMethod getAmountMethod()
+    {
+    	if(!isLoaded)
+    	{
+    		loadData();
+    	}
+    	return amountMethod;
+    }
+
+    public RepeatMethod getRepeatMethod()
+    {
+    	if(!isLoaded)
+    	{
+    		loadData();
+    	}
+    	return repeatMethod;
+    }
+
+    public int getRepeatValue()
+    {
+    	if(!isLoaded)
+    	{
+    		loadData();
+    	}
+    	return repeatValue;
+    }
+
+    public void setPayee(final String payee)
+    {
+        assert(!isDeleted);
+        TransactionDA.getInstance().updateTransactionPayee(id, payee);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setMemo(final String memo)
+    {
+        assert (!isDeleted);
+        TransactionDA.getInstance().updateTransactionMemo(id, memo);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setDate(final Date date)
+    {
+        assert (!isDeleted);
+        TransactionDA.getInstance().updateTransactionDate(id, date);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+    
+    public void setAccount(final Integer accountID)
+    {
+        assert (!isDeleted);
+        ReminderDA.getInstance().updateReminderAccount(id, accountID);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setAmountMethod(final AmountMethod amountMethod)
+    {
+        assert (!isDeleted);
+        ReminderDA.getInstance().updateReminderAmountMethod(id, amountMethod.daAmountMethod);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setRepeatMethod(final RepeatMethod repeatMethod)
+    {
+        assert (!isDeleted);
+        ReminderDA.getInstance().updateReminderRepeatMethod(id, repeatMethod.daRepeatMethod);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+
+    public void setRepeatValue(final int repeatValue)
+    {
+        assert (!isDeleted);
+        ReminderDA.getInstance().updateReminderRepeatValue(id, repeatValue);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+    
+    public long getAmount()
+    {
+    	return ReminderAccountMappingDA.getInstance().getReminderAmount(id);
+    }
     
     public static void main(String[] args)
     {
