@@ -26,6 +26,9 @@ package org.jpas.gui.components;
 import java.awt.*;
 import java.net.URL;
 import javax.swing.*;
+
+import org.jpas.gui.layouts.FlexGridLayout;
+
 import com.toedter.calendar.JDateChooser;
 import java.util.Date;
 import java.awt.event.*;
@@ -42,11 +45,12 @@ public class DateChooser extends JPanel
      */
     public DateChooser()
     {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new FlexGridLayout(new int[]{18}, new int[]{85, 20}));
         final JButton calendarButton = new JButton(createCalendarAction());   
         
         add(new JTextField());
         add(calendarButton);
+        calendarButton.setText("");
     }
 
     private Action createCalendarAction()
