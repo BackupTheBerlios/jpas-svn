@@ -26,7 +26,10 @@ package org.jpas.model;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.jpas.da.*;
+
+import org.jpas.da.ReminderAccountMappingDA;
+import org.jpas.da.ReminderDA;
+import org.jpas.da.TransactionDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;

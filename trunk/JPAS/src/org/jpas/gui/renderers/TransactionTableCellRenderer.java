@@ -23,13 +23,20 @@
  */
 package org.jpas.gui.renderers;
 
-import javax.swing.table.*;
-import javax.swing.*;
-import java.awt.*;
-import org.jpas.gui.layouts.FlexGridLayout;
-import org.jpas.model.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridLayout;
 
-import com.toedter.calendar.*;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
+
+import org.jpas.gui.layouts.FlexGridLayout;
+import org.jpas.model.Transaction;
+import org.jpas.model.TransactionTransfer;
 
 /**
  * @author Justin W Smith
@@ -126,7 +133,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         else
         {
         	final Transaction trans = (Transaction)value;
-            dateLabel.setText(trans.getDate().toLocaleString());
+            dateLabel.setText(trans.getDate().toString());
         	numLabel.setText(trans.getNum());
             payeeLabel.setText(trans.getPayee());
             final long amount = trans.getAmount();

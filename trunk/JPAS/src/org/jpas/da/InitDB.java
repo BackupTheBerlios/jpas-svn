@@ -1,7 +1,9 @@
 package org.jpas.da;
 
-import java.sql.*;
-import org.apache.log4j.*;
+import java.sql.SQLException;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
 /**
  * Title: JPAS

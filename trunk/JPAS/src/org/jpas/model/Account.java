@@ -24,10 +24,12 @@ package org.jpas.model;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.*;
-import org.jpas.util.JpasDataChange;
+import org.jpas.da.AccountDA;
+import org.jpas.da.TransAccountMappingDA;
+import org.jpas.da.TransactionDA;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
+import org.jpas.util.JpasDataChange;
 
 public class Account extends JpasObservable<Account>
 {
@@ -191,6 +193,11 @@ public class Account extends JpasObservable<Account>
         return isLoaded;
     }
 
+    public String[] getAllPayees()
+    {
+    	return AccountDA.getInstance().getAllPayeesForAccount(id);
+    }
+    
     public static void unitTest_delete()
     {
         final Account[] accounts = getAllAccounts();

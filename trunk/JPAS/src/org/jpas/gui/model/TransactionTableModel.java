@@ -23,12 +23,18 @@
  */
 package org.jpas.gui.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.SwingUtilities;
-import javax.swing.event.*;
-import javax.swing.table.*;
-import org.jpas.util.*;
-import org.jpas.model.*;
-import java.util.*;
+import javax.swing.table.AbstractTableModel;
+
+import org.jpas.model.Account;
+import org.jpas.model.Transaction;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservable;
+import org.jpas.util.JpasObserver;
 
 /**
  * @author Justin W Smith
@@ -64,14 +70,8 @@ public class TransactionTableModel extends AbstractTableModel
     {
         final Transaction[] transArray = Transaction.getAllTransactionsAffecting(account);
         Arrays.sort(transArray, Transaction.getDateComparator());
-        SwingUtilities.invokeLater(new Runnable()
-                {
-            		public void run()
-            		{
-            		    transactionList.addAll(Arrays.asList(transArray));
-          		        fireTableStructureChanged();
-            		}
-                });
+	    transactionList.addAll(Arrays.asList(transArray));
+        fireTableStructureChanged();
     }
     
     /* (non-Javadoc)
@@ -79,7 +79,7 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public int getRowCount()
     {
-        return Math.max(transactionList.size(), 10);
+        return Math.max(transactionList.size(), 15);
     }
 
     /* (non-Javadoc)

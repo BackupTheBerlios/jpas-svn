@@ -1,8 +1,13 @@
 package org.jpas.util;
 
-import java.util.*;
-import java.io.*;
-import org.apache.log4j.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Observable;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 /**
  * <p>Title: JPAS</p>

@@ -23,8 +23,10 @@
  */
 package org.jpas.model;
 
-import org.apache.log4j.*;
-import org.jpas.da.*;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.jpas.da.AccountDA;
+import org.jpas.da.TransAccountMappingDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
@@ -273,7 +275,7 @@ public class Category extends JpasObservable<Category>
         }
     }
     
-    private static void unitTest_List()
+    public static void unitTest_List()
     {
         final Category[] cats = Category.getAllCategories();
         for (int i = 0; i < cats.length; i++)

@@ -23,11 +23,19 @@
  */
 package org.jpas.gui.renderers;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridLayout;
-import org.jpas.model.*;
-import javax.swing.*;
-import javax.swing.border.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
+import javax.swing.border.BevelBorder;
+
+import org.jpas.model.Account;
 
 /**
  * @author Justin W Smith
@@ -46,8 +54,7 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     
     private final JButton accountName = new JButton();
     private final JEditorPane accountAmount = new JEditorPane("text/html", "");
-    private final Border border = accountName.getBorder();
-    
+        
     private final Color highlightColor = new Color(255, 255, 196);
     private final Color backgroundColor = new Color(239, 239, 239);
     

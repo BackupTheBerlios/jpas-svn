@@ -1,8 +1,13 @@
 package org.jpas.da;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.apache.log4j.Logger;
 import org.jpas.util.PropertyManager;
-import org.apache.log4j.*;
-import java.sql.*;
 
 
 /**

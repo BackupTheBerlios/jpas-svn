@@ -25,7 +25,9 @@ package org.jpas.model;
 
 import java.sql.Date;
 import java.util.Comparator;
-import org.jpas.da.*;
+
+import org.jpas.da.TransAccountMappingDA;
+import org.jpas.da.TransactionDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;

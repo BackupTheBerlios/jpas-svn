@@ -23,7 +23,6 @@
  */
 package org.jpas.model;
 
-import org.jpas.da.AccountDA;
 import org.jpas.da.TransAccountMappingDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;

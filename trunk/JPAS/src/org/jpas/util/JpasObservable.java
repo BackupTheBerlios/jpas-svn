@@ -24,7 +24,8 @@
 package org.jpas.util;
 
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author jsmith

@@ -31,7 +31,7 @@ public class JpasDataChange<V>
 {
 	private V value;
 	
-	private JpasDataChange(final V value)
+	JpasDataChange(final V value)
 	{
 		this.value = value;
 	}

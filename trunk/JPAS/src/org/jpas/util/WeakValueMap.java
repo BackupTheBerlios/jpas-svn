@@ -23,8 +23,10 @@
  */
 package org.jpas.util;
 
-import java.util.*;
-import java.lang.ref.*;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author jsmith
