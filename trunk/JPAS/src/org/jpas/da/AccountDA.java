@@ -4,10 +4,10 @@ import java.sql.*;
 import org.apache.log4j.*;
 import java.util.*;
 /**
- * <p>Title: JPAS</p>
- * <p>Description: Java based Personal Accounting System</p>
- * <p>Copyright: Copyright (c) 2004</p>
- * <p>License: Distributed under the terms of the GPL v2</p>
+ * Title: JPAS
+ * Description: Java based Personal Accounting System
+ * Copyright: Copyright (c) 2004
+ * License: Distributed under the terms of the GPL v2
  * @author Justin Smith
  * @version 1.0
  */
