@@ -23,7 +23,7 @@ public class Transaction
     private boolean isDeleted = false;
     private boolean isLoaded = false;
 
-    private final Integer id;
+    final Integer id;
     
     private Integer accountID;
     private String payee;
@@ -79,6 +79,10 @@ public class Transaction
     
     public Account getAccount()
     {
+    	if(!isLoaded)
+    	{
+    		loadData();
+    	}
         return Account.getAccountForID(accountID);
     }
     
@@ -130,9 +134,16 @@ public class Transaction
         return ttArray;
     }
     
+    public TransactionTransfer addTransfer(final Category category, final long amount)
+    {
+        assert(!isDeleted);
+        TransAccountMappingDA.getInstance().createTransAccountMapping(id, category.id, amount);
+        return TransactionTransfer.getTransactionTransferforIDs(id, category.id);
+    }
+    
     public void setPayee(final String payee)
     {
-        assert (!isDeleted);
+        assert(!isDeleted);
         TransactionDA.getInstance().updateTransactionPayee(id, payee);
         if (isLoaded)
         {
