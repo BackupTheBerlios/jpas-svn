@@ -282,6 +282,25 @@ public class TransAccountMappingDA
         }
     }
 
+    public boolean doesTransAccountTransferExist(final Integer transId, final Integer accountId)
+    {
+		final String sqlStr = "SELECT " + DBNames.CN_TAM_TRANSACTION_ID
+								+ " FROM " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
+								+ " WHERE " + DBNames.CN_TAM_TRANSACTION_ID
+								+ " IS " + transId 
+								+ " AND " + DBNames.CN_TAM_ACCOUNT_ID
+								+ " IS " + accountId;
+		try
+		{
+			return ConnectionManager.getInstance().query(sqlStr).next();
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
+		}	
+    }
+    
     public static void unitTest_Create()
     {
         getInstance().createTransAccountMapping(new Integer(0), new Integer(2),
