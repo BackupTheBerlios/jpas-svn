@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.log4j.Logger;
+import org.hsqldb.Server;
 import org.jpas.util.PropertyManager;
 
 
@@ -171,5 +172,10 @@ public class ConnectionManager
 		{
 			st.close();
 		}
+	}
+	
+	public static void main(final String[] args)
+	{
+	    System.out.println(new Server().getProductVersion());
 	}
 }
