@@ -30,9 +30,7 @@ import java.util.Map;
 import org.jpas.da.*;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
-import org.jpas.util.JpasObserver;
 import org.jpas.util.WeakValueMap;
-import org.jpas.util.JpasDataChange.Delete;
 
 /**
  * @author jsmith
@@ -95,7 +93,21 @@ public class Reminder extends JpasObservable<Reminder>
 		return observable;
 	}
 	
-    static Reminder getReminderForID(final Integer id)
+    public static Reminder[] getAllReminders()
+    {
+    	synchronized(reminderCache)
+		{
+    	    final Integer[] ids = ReminderDA.getInstance().getAllReminderIDs();
+    	    final Reminder[] reminders = new Reminder[ids.length];
+    	    for(int i = 0; i < ids.length; i++)
+    	    {
+    	        reminders[i] = getReminderForID(ids[i]);
+    	    }
+    	    return reminders;
+		}
+    }
+	
+	static Reminder getReminderForID(final Integer id)
     {
     	synchronized(reminderCache)
 		{
@@ -153,20 +165,28 @@ public class Reminder extends JpasObservable<Reminder>
     }
 
     public void delete()
+	{
+	    delete(true);
+	}
+	
+	void delete(final boolean callDA)
     {
     	synchronized(this)
 		{
     		synchronized(reminderCache)
 			{
-		        ReminderDA.getInstance().deleteReminder(id);
+	    	    if(callDA)
+	    	    {
+	    	        ReminderDA.getInstance().deleteReminder(id);
+	    	    }
 		        reminderCache.remove(id);
-		        isDeleted = true;
 			}
+	        isDeleted = true;
 		}
-    	announceModify();
+    	announceDelete();
     }
     
-    private void announceDelete()
+    void announceDelete()
     {
     	final JpasDataChange<Reminder> change = new JpasDataChange.Delete<Reminder>(this);
     	observable.notifyObservers(change);
@@ -174,11 +194,16 @@ public class Reminder extends JpasObservable<Reminder>
     	deleteObservers();
     }
 
-    private void announceModify()
+    void announceModify()
     {
     	final JpasDataChange<Reminder> change = new JpasDataChange.Modify<Reminder>(this);
     	observable.notifyObservers(change);
     	notifyObservers(change);
+    }
+    
+    void amountChanged()
+    {
+        announceModify();
     }
     
     public synchronized Account getAccount()
@@ -244,7 +269,7 @@ public class Reminder extends JpasObservable<Reminder>
     	return repeatValue;
     }
 
-    public ReminderTransfer[] getTransfers()
+    public synchronized ReminderTransfer[] getTransfers()
     {
         final Integer[] accountIDs = ReminderAccountMappingDA.getInstance().getAllReminderAccountTranfers(id);
         final ReminderTransfer[] ttArray = new ReminderTransfer[accountIDs.length];
@@ -362,12 +387,4 @@ public class Reminder extends JpasObservable<Reminder>
     public static void main(String[] args)
     {
     }
-
-	/** (non-Javadoc)
-	 * @see org.jpas.util.JpasObserver#update(org.jpas.util.JpasObservable, org.jpas.util.JpasDataChange)
-	 */
-	public void update(JpasObservable<ReminderTransfer> observable, JpasDataChange<ReminderTransfer> change) 
-	{
-		
-	}
 }
