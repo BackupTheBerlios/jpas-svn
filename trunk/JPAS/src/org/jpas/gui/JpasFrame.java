@@ -108,12 +108,70 @@ public class JpasFrame extends JFrame
     
     private JComponent createRightPanel()
     {
-        final FlexGridLayout fgl = new FlexGridLayout(new int[]{300, 30}, new int[]{table.getPreferredSize().width});
+        final FlexGridLayout fgl = new FlexGridLayout(new int[]{0, 30}, new int[]{table.getPreferredSize().width});
         fgl.setFlexColumn(0, true);
         fgl.setFlexRow(0, true);
         final JPanel panel = new JPanel(fgl);
         
-        final JScrollPane tableScroll = new JScrollPane(table);
+        final JViewport vp = new JViewport()
+        {
+            protected LayoutManager createLayoutManager()
+            {
+                return new ViewportLayout()
+                {
+                    public void layoutContainer(final Container parent)
+                    {
+                    	JViewport vp = (JViewport)parent;
+                    	Component view = vp.getView();
+
+                    	Dimension vpSize = vp.getSize();
+                    	Dimension extentSize = vp.toViewCoordinates(vpSize);
+                    	Dimension viewSize = new Dimension(view.getPreferredSize());
+
+           	            viewSize.width = vpSize.width;
+            	        
+            	        if(vpSize.height > viewSize.height)
+            	        {
+            	            viewSize.height = vpSize.height;
+            	        }
+            	        
+            	        Point viewPosition = vp.getViewPosition();
+
+                    	if (vp.getParent().getComponentOrientation().isLeftToRight()) 
+                    	{
+                    	    if ((viewPosition.x + extentSize.width) > viewSize.width) 
+                    	    {
+                    	        viewPosition.x = Math.max(0, viewSize.width - extentSize.width);
+                    	    }
+                    	} 
+                    	else 
+                    	{
+                    	    if (extentSize.width > viewSize.width) 
+                    	    {
+                    	        viewPosition.x = viewSize.width - extentSize.width;
+                    	    } 
+                    	    else 
+                    	    {
+                    	        viewPosition.x = Math.max(0, Math.min(viewSize.width - extentSize.width, viewPosition.x));
+                    	    }
+                    	}
+
+                    	if ((viewPosition.y + extentSize.height) > viewSize.height) 
+                    	{
+                    	    viewPosition.y = Math.max(0, viewSize.height - extentSize.height);
+                    	}
+
+                    	vp.setViewPosition(viewPosition);
+                    	vp.setViewSize(viewSize);
+                    }
+                };
+                
+            }
+        };
+        vp.setView(table);
+
+        final JScrollPane tableScroll = new JScrollPane();
+        tableScroll.setViewport(vp);
         tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         panel.add(tableScroll);
