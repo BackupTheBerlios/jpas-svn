@@ -39,7 +39,7 @@ import org.jpas.util.JpasObserver;
  */
 public abstract class JpasListModel <T> extends AbstractListModel implements ComboBoxModel 
 {
-	private T selected = null;
+	private Object selected = null;
 	
 	private List<T> data = new ArrayList<T>();
 
@@ -74,7 +74,7 @@ public abstract class JpasListModel <T> extends AbstractListModel implements Com
 		{
 			data.add(value);
 		}
-		fireContentsChanged(this, 0, data.size());
+		fireContentsChanged(this, 0, Integer.MAX_VALUE);
 	}
 	
 	/* (non-Javadoc)
@@ -82,7 +82,8 @@ public abstract class JpasListModel <T> extends AbstractListModel implements Com
 	 */
 	public void setSelectedItem(final Object anItem) 
 	{
-		this.selected = (T)anItem;
+		this.selected = anItem;
+		fireContentsChanged(this, 0, Integer.MAX_VALUE);
 	}
 
 	/* (non-Javadoc)
