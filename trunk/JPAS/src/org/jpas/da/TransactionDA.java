@@ -273,7 +273,47 @@ public class TransactionDA
 	}
 
     
-    
+	public boolean doesTransactionExist(final Integer id)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_TRANSACTION_ID
+								+ " FROM " + DBNames.TN_TRANSACTION
+								+ " WHERE " + DBNames.CN_TRANSACTION_ID
+								+ " IS '" + id + "'";
+		try
+		{
+			return ConnectionManager.getInstance().query(sqlStr).next();
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load account id's!", sqle);
+		}	
+	}
+	
+	public Integer[] getAllTransactionIDs(final Integer accountId)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_TRANSACTION_ID
+							+ " FROM " + DBNames.TN_TRANSACTION
+							+ " WHERE " + DBNames.CN_TRANSACTION_ACCOUNT
+							+ " IS '" +  accountId
+							+ "' ORDER BY " + DBNames.CN_TRANSACTION_DATE;
+		try
+		{
+			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final List idList = new ArrayList();
+			while(rs.next())
+			{
+				idList.add(rs.getObject(DBNames.CN_TRANSACTION_ID));
+			}
+			return (Integer[])idList.toArray(new Integer[idList.size()]);
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load account id's!", sqle);
+		}
+	}
+
     
     
     
