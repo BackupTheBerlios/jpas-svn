@@ -35,7 +35,6 @@ public class PayeeListModel extends JpasListModel<String>
 	
 	public PayeeListModel(final Account account)
 	{
-    	System.out.println("PayeeListModel account:" + account);
 		this.account = account;
 	}
 	
