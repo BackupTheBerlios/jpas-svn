@@ -2,6 +2,7 @@ package org.jpas.model;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;
 
@@ -99,7 +100,8 @@ public class Account
         }
     }
 
-    public static void main(final String[] args)
+    
+    private static void unitTest_rename()
     {
         final Account[] accounts = getAllAccounts();
         for (int i = 0; i < accounts.length; i++)
@@ -107,6 +109,22 @@ public class Account
             System.out.println("name: " + accounts[i].getName());
             accounts[i].setName("account " + i);
         }
+    }
+
+    private static void unitTest_List()
+    {
+        final Account[] accs = Account.getAllAccounts();
+        for(int i = 0; i < accs.length; i++)
+        {
+            System.out.println(accs[i].getName());
+        }
+    }
+
+    
+    public static void main(final String[] args)
+    {
+		BasicConfigurator.configure();
+        unitTest_List();
     }
 
 }

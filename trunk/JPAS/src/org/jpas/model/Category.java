@@ -8,7 +8,6 @@
  * @author Justin Smith
  * @version 1.0
  * 
- * TODO synchronize?
  */
 package org.jpas.model;
 
@@ -83,7 +82,7 @@ public class Category
         {
             loadData();
         }
-        return isBankAccount ? "TRANSFER to \"" + name + "\"" : name;
+        return isBankAccount ? "TRANSFER to [" + name + "]" : name;
     }
 
     private void loadData()
@@ -102,7 +101,7 @@ public class Category
     public void setName(final String name)
     {
         assert (!isDeleted);
-        AccountDA.getInstance().updateAccountName(id, name);
+        AccountDA.getInstance().updateAccountName(id, validateName(name));
         if (isLoaded)
         {
             loadData();
@@ -114,7 +113,18 @@ public class Category
         return isBankAccount;
     }
     
+    private static void unitTest_List()
+    {
+        final Category[] cats = Category.getAllCategories();
+        for(int i = 0; i < cats.length; i++)
+        {
+            System.out.println(cats[i].getName());
+        }
+    }
+    
     public static void main(String[] args) 
 	{
+		BasicConfigurator.configure();
+        unitTest_List();
 	}
 }
