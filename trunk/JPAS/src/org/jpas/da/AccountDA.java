@@ -215,7 +215,8 @@ public class AccountDA
 		{
 			defaultLogger.error("SQLException while loading account name!", sqle);
 			throw new RuntimeException("Unable to load account id's!", sqle);
-		}	}
+		}	
+	}
 	
 	public Integer[] getAllAccountIDs(final boolean isBankAccount)
 	{
