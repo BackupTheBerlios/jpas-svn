@@ -84,7 +84,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         return Category.getCategoryForID(accountID);
     }
     
-    public synchronized Transaction getTransaction()
+    public Transaction getTransaction()
     {
         return Transaction.getTransactionForID(transactionID);
     }
@@ -128,18 +128,23 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
 
     
     public void setAmount(final long amount)
-    {       
-        synchronized(this)
+    {
+        final Transaction trans = Transaction.getTransactionForID(transactionID);
+        synchronized(trans)
         {
-	        assert(!isDeleted);
-	        TransAccountMappingDA.getInstance().updateTransAccountMapping(transactionID, accountID, amount);
-	        if(isLoaded)
+	        synchronized(this)
 	        {
-	            loadData();
+		        assert(!isDeleted);
+		        TransAccountMappingDA.getInstance().updateTransAccountMapping(transactionID, accountID, amount);
+		        if(isLoaded)
+		        {
+		            loadData();
+		        }
 	        }
+	        trans.amountChanged();
         }
+        
         announceModify();
-        Transaction.getTransactionForID(transactionID).amountChanged();
         Category.getCategoryForID(accountID).amountChanged();
         Account.getAccountForID(accountID).amountChanged();
     }
