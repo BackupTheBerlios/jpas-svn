@@ -22,11 +22,6 @@ public class Category
 	
 	private static Map<Integer, Category> categoryCache = new WeakHashMap<Integer, Category>();
 
-    private static String validateName(final String name)
-    {
-        return name;
-    }
-	
     public static Category[] getAllCategories()
     {
         final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
@@ -56,7 +51,8 @@ public class Category
         return account;
     }
     
-    private final Integer id;
+   
+    final Integer id;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
 
@@ -102,7 +98,7 @@ public class Category
     public void setName(final String name)
     {
         assert (!isDeleted);
-        AccountDA.getInstance().updateAccountName(id, validateName(name));
+        AccountDA.getInstance().updateAccountName(id, name);
         if (isLoaded)
         {
             loadData();
