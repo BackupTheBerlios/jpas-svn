@@ -58,19 +58,20 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 	private final JLabel categoryLabel = new JLabel();
 	private final JLabel memoLabel = new JLabel();
     
-	private static int[] columnWidths = new int[]{105, 85, 125, 85, 85, 95};
-	private static int[] rowHeights = new int[]{18, 18};
+	private final int[] columnWidths;
+	private final int[] rowHeights;
 	
 	private final Dimension dim;
     
     /**
      * 
      */
-    public TransactionTableCellRenderer(final Account account)
+    public TransactionTableCellRenderer(final Account account, final int[] colunmWidths, final int[] rowHeights)
     {
     	this.account = account;
-        setOpaque(true);
-        setBackground(Color.white);
+        setOpaque(false);
+        this.columnWidths = colunmWidths;
+        this.rowHeights = rowHeights;
         
         dim = new Dimension(total(columnWidths), total(rowHeights));
         
@@ -97,14 +98,13 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
     	add(payeeLabel);
     	add(withdrawLabel);
     	add(depositLabel);
-    	add(createEmptyPanel());
+    	add(balanceLabel);
     	add(createEmptyPanel());
     	add(createEmptyPanel());
     	add(createSplitPanel(categoryLabel, memoLabel));
     	add(createEmptyPanel());
     	add(createEmptyPanel());
-//    	add(createEmptyPanel());
-    	add(balanceLabel);
+    	add(createEmptyPanel());
     	
         dateLabel.setBorder(BorderFactory.createLineBorder(borderColor));
     	numLabel.setBorder(BorderFactory.createLineBorder(borderColor));
@@ -114,6 +114,14 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         balanceLabel.setBorder(BorderFactory.createLineBorder(borderColor));
         categoryLabel.setBorder(BorderFactory.createLineBorder(borderColor));
         memoLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+
+        withdrawLabel.setOpaque(true);
+        depositLabel.setOpaque(true);
+        balanceLabel.setOpaque(true);
+        
+        withdrawLabel.setBackground(Color.white);
+        depositLabel.setBackground(Color.white);
+        balanceLabel.setBackground(Color.white);
     }
     
     private JPanel createEmptyPanel()
