@@ -26,90 +26,57 @@ package org.jpas.gui.renderers;
 import javax.swing.table.*;
 import javax.swing.*;
 import java.awt.*;
+import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.*;
 
-import com.sun.org.apache.bcel.internal.generic.BALOAD;
 import com.toedter.calendar.*;
 
 /**
  * @author Justin W Smith
  *
  */
-public class TransactionTableCellRenderer extends JPanel implements TableCellRenderer
+public class TransactionTableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor
 {
+    final JPanel cellPanel = new JPanel();
+    
     final JDateChooser dateChooser = new JDateChooser();
 	final JComboBox numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     final JComboBox payeeList = new JComboBox(new String[]{"Payee1", "Payee2"});
-    final JTextField withdrawField = new JTextField();
-    final JTextField depositField = new JTextField();
-    final JLabel balanceLabel = new JLabel();
+    final JTextField withdrawField = new JTextField("0000.00", 8);
+    final JTextField depositField = new JTextField("0000.00", 8);
+    final JLabel balanceLabel = new JLabel("0000.00");
     final JComboBox categoryList = new JComboBox(new String[]{"cat1", "cat2"});
 	
 	final JLabel label = new JLabel(" ");
-    
+
     /**
      * 
      */
     public TransactionTableCellRenderer()
     {
-        this.setOpaque(true);
-        this.setBackground(Color.white);
-        setLayout(new GridBagLayout());
+        cellPanel.setOpaque(true);
+        cellPanel.setBackground(Color.white);
         init();
     }
     
     private void init()
     {
-    	final GridBagConstraints gbc = new GridBagConstraints();
-    	gbc.fill = GridBagConstraints.BOTH;
-    	gbc.gridx = 0;
-    	gbc.gridy = 0;
-    	
-    	add(dateChooser, gbc);
-    	gbc.gridx++;
-    	
-    	add(numList, gbc);
-    	gbc.gridx++;
-    	gbc.gridwidth = 2;
-    	gbc.weightx = 1;
-    	
-    	add(payeeList, gbc);
-    	gbc.gridx++;
-    	gbc.gridwidth = 1;
-    	gbc.weightx = 0;
-    	
-    	add(withdrawField, gbc);
-    	gbc.gridx++;
-    	
-    	add(depositField, gbc);
-    	gbc.gridx++;
-    	
-    	add(createEmptyPanel(), gbc);
-    	gbc.gridx = 0;
-    	gbc.gridy++;
-    	
-    	add(createEmptyPanel(), gbc);
-    	gbc.gridx++;
-    	
-    	add(createEmptyPanel(), gbc);
-    	gbc.gridx++;
-
-    	add(categoryList, gbc);
-    	gbc.gridx++;
-    	gbc.weightx = 1;
-    	
-    	add(createEmptyPanel(), gbc);
-    	gbc.gridx++;
-    	gbc.weightx = 0;
-
-    	add(createEmptyPanel(), gbc);
-    	gbc.gridx++;
-
-    	add(createEmptyPanel(), gbc);
-    	gbc.gridx++;
-
-    	add(balanceLabel, gbc);
-    	gbc.gridx++;
+        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{85, 85, 105, 85, 85, 95});
+        layout.setFlexColumn(2, true);
+        cellPanel.setLayout(layout);
+    	cellPanel.add(dateChooser);
+    	cellPanel.add(numList);
+    	cellPanel.add(payeeList);
+    	cellPanel.add(withdrawField);
+    	cellPanel.add(depositField);
+    	cellPanel.add(createEmptyPanel());
+    	cellPanel.add(createEmptyPanel());
+    	cellPanel.add(createEmptyPanel());
+    	cellPanel.add(categoryList);
+    	cellPanel.add(createEmptyPanel());
+    	cellPanel.add(createEmptyPanel());
+//    	cellPanel.add(createEmptyPanel());
+    	cellPanel.add(balanceLabel);
 }
     
     private JPanel createEmptyPanel()
@@ -135,7 +102,21 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         {
             //label.setText(((Transaction)value).getPayee());
         }
-        return this;
+        return cellPanel;
+    }
+    
+    public Component getTableCellEditorComponent(JTable table,
+            Object value,
+            boolean isSelected,
+            int row,
+            int column)
+    {
+        return cellPanel;
+    }
+    
+    public Object getCellEditorValue()
+    {
+        return null;
     }
     
     public static void main(String[] args)
