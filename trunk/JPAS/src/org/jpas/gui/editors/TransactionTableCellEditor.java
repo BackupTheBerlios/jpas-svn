@@ -38,7 +38,7 @@ import javax.swing.table.TableCellEditor;
 import org.jpas.gui.components.CategoryComboBox;
 import org.jpas.gui.components.PayeeComboBox;
 import org.jpas.gui.layouts.FlexGridLayout;
-import org.jpas.model.Account;
+import org.jpas.model.*;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -68,12 +68,12 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         cellPanel.setOpaque(true);
         cellPanel.setBackground(Color.white);
 
-    	dateChooser = new JDateChooser();
+    	dateChooser = new JDateChooser("MM/dd/yyyy", true);
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	payeeList = new PayeeComboBox(account);
-    	withdrawField = new JTextField("0000.00");
-    	depositField = new JTextField("0000.00");
-    	balanceLabel = new JLabel("0000.00");
+    	withdrawField = new JTextField();
+    	depositField = new JTextField();
+    	balanceLabel = new JLabel();
     	categoryList = new CategoryComboBox();
 
         
@@ -82,7 +82,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
     private void init()
     {
-        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{85, 85, 105, 85, 85, 95});
+        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 105, 85, 85, 95});
         layout.setFlexColumn(2, true);
         cellPanel.setLayout(layout);
     	cellPanel.add(dateChooser);
@@ -107,13 +107,58 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	return panel;
     }
     
-    public Component getTableCellEditorComponent(JTable table,
-            Object value,
-            boolean isSelected,
-            int row,
-            int column)
+    public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column)
     {
-        return cellPanel;
+        if(value == null)
+        {
+        	dateChooser.setDate(null);
+        	numList.setSelectedItem("");
+        	payeeList.setSelectedItem("");
+        	withdrawField.setText("");
+        	depositField.setText("");
+        	balanceLabel.setText("");
+        	categoryList.setSelectedItem("");
+        }
+        else
+        {
+	        final Transaction trans = (Transaction)value;
+	        
+	        dateChooser.setDate(trans.getDate());
+        	numList.setSelectedItem(trans.getNum());
+        	payeeList.setSelectedItem(trans.getPayee());
+        	
+        	final long amount = trans.getAmount();
+        	if(amount >= 0)
+        	{
+	        	withdrawField.setText(String.valueOf(trans.getAmount()));
+	        	depositField.setText("");
+        	}
+        	else
+        	{
+	        	withdrawField.setText("");
+	        	depositField.setText(String.valueOf(-trans.getAmount()));
+        	}
+        	balanceLabel.setText("");
+        	
+        	final TransactionTransfer[] transfers = trans.getTransfers();
+        	if(transfers.length == 0)
+        	{
+        	    categoryList.setEnabled(true);
+            	categoryList.setSelectedItem("");
+        	}
+        	else if(transfers.length == 1)
+        	{
+        	    categoryList.setEnabled(true);
+        	    categoryList.setSelectedItem(transfers[0].getCategory());
+        	}
+        	else
+        	{
+        	    categoryList.setEnabled(false);
+        	    categoryList.setSelectedItem("[SPLIT]");
+        	}
+
+        }
+       return cellPanel;
     }
     
     public Object getCellEditorValue()
