@@ -25,6 +25,7 @@ package org.jpas.model;
 
 import org.apache.log4j.*;
 import org.jpas.da.*;
+import org.jpas.util.WeakValueMap;
 
 import java.util.*;
 
@@ -32,7 +33,7 @@ public class Category
 {
 	private static final Logger defaultLogger = Logger.getLogger(Category.class);
 	
-	private static Map<Integer, Category> categoryCache = new WeakHashMap<Integer, Category>();
+	private static WeakValueMap<Integer, Category> categoryCache = new WeakValueMap<Integer, Category>();
 
     public static Category[] getAllCategories()
     {

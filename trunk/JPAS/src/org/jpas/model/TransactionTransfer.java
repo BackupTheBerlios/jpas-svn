@@ -27,13 +27,14 @@ package org.jpas.model;
 import java.util.*;
 
 import org.jpas.da.TransAccountMappingDA;
+import org.jpas.util.WeakValueMap;
 /**
  * @author jsmith
  *  
  */
 public class TransactionTransfer
 {
-    private static Map<Integer, Map<Integer, TransactionTransfer>> transTransferCache = new HashMap<Integer, Map<Integer, TransactionTransfer>>();
+    private static WeakValueMap<Integer, WeakValueMap<Integer, TransactionTransfer>> transTransferCache = new WeakValueMap<Integer, WeakValueMap<Integer, TransactionTransfer>>();
     
     private boolean isDeleted = false;
     private boolean isLoaded = false;
@@ -45,10 +46,10 @@ public class TransactionTransfer
     
     static TransactionTransfer getTransactionTransferforIDs(final Integer transactionID, final Integer accountID)
     {
-        Map<Integer, TransactionTransfer> map = transTransferCache.get(transactionID);
+    	WeakValueMap<Integer, TransactionTransfer> map = transTransferCache.get(transactionID);
         if(map == null)
         {
-            map = new WeakHashMap<Integer, TransactionTransfer>();
+            map = new WeakValueMap<Integer, TransactionTransfer>();
             transTransferCache.put(transactionID, map);
         }
         
@@ -124,7 +125,7 @@ public class TransactionTransfer
     public void delete()
     {
     	TransAccountMappingDA.getInstance().deleteTransAccountMapping(transactionID, accountID);
-    	final Map<Integer,  TransactionTransfer> map = transTransferCache.get(transactionID);
+    	final WeakValueMap<Integer, TransactionTransfer> map = transTransferCache.get(transactionID);
     	map.remove(accountID);
     	if(map.size() == 0)
     	{

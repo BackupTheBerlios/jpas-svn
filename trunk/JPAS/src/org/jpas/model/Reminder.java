@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.jpas.da.*;
+import org.jpas.util.WeakValueMap;
 
 /**
  * @author jsmith
@@ -82,7 +83,7 @@ public class Reminder
         public static final RepeatMethod YEARLY = new RepeatMethod(ReminderDA.RepeatMethod.YEARLY);
     }
 
-	private static Map<Integer, Reminder> reminderCache = new WeakHashMap<Integer, Reminder>();
+	private static WeakValueMap<Integer, Reminder> reminderCache = new WeakValueMap<Integer, Reminder>();
 	
     static Reminder getReminderForID(final Integer id)
     {

@@ -27,10 +27,11 @@ import java.sql.Date;
 import java.util.*;
 
 import org.jpas.da.*;
+import org.jpas.util.WeakValueMap;
 
 public class Transaction 
 {
-	private static Map<Integer, Transaction> transactionCache = new WeakHashMap<Integer, Transaction>();
+	private static WeakValueMap<Integer, Transaction> transactionCache = new WeakValueMap<Integer, Transaction>();
 	
     private boolean isDeleted = false;
     private boolean isLoaded = false;

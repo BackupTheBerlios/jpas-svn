@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.jpas.da.ReminderAccountMappingDA;
+import org.jpas.util.WeakValueMap;
 
 /**
  * @author Justin W Smith
@@ -34,7 +35,7 @@ import org.jpas.da.ReminderAccountMappingDA;
  */
 public class ReminderTransfer
 {
-    private static Map<Integer, Map<Integer, ReminderTransfer>> remTransferCache = new HashMap<Integer, Map<Integer, ReminderTransfer>>();
+    private static WeakValueMap<Integer, WeakValueMap<Integer, ReminderTransfer>> remTransferCache = new WeakValueMap<Integer, WeakValueMap<Integer, ReminderTransfer>>();
     
     private boolean isDeleted = false;
     private boolean isLoaded = false;
@@ -46,21 +47,21 @@ public class ReminderTransfer
     
     static ReminderTransfer getReminderTransferforIDs(final Integer reminderID, final Integer accountID)
     {
-        Map<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
+    	WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
         if(map == null)
         {
-            map = new WeakHashMap<Integer, ReminderTransfer>();
+            map = new WeakValueMap<Integer, ReminderTransfer>();
             remTransferCache.put(reminderID, map);
         }
         
-        ReminderTransfer tt = map.get(accountID);
-        if(tt == null)
+        ReminderTransfer rt = map.get(accountID);
+        if(rt == null)
         {
-            tt = new ReminderTransfer(reminderID, accountID);
-            map.put(accountID, tt);
+            rt = new ReminderTransfer(reminderID, accountID);
+            map.put(accountID, rt);
         }
         
-        return tt;
+        return rt;
     }
     
     private ReminderTransfer(final Integer reminderID, final Integer accountID)
@@ -125,7 +126,7 @@ public class ReminderTransfer
     public void delete()
     {
     	ReminderAccountMappingDA.getInstance().deleteReminderAccountMapping(reminderID, accountID);
-    	final Map<Integer,  ReminderTransfer> map = remTransferCache.get(reminderID);
+    	final WeakValueMap<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
     	map.remove(accountID);
     	if(map.size() == 0)
     	{
