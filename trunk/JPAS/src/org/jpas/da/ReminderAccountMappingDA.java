@@ -105,6 +105,33 @@ public class ReminderAccountMappingDA
         }
     }
     
+    public void updateReminderAccountMapping(final Integer reminderID,
+            final Integer accountID, final long amount)
+    {
+        final String sqlStr = "UPDATE " + DBNames.TN_REMINDER_ACCOUNT_MAP
+                + " SET " + DBNames.CN_RAM_AMOUNT + " = " + amount + " WHERE "
+                + DBNames.CN_RAM_REMINDER_ID + " IS " + reminderID
+                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " IS " + accountID;
+
+        try
+        {
+            final int result = ConnectionManager.getInstance().update(sqlStr);
+            if (result < 1)
+            {
+                defaultLogger.error("Reminder/Account id's not found: \""
+                        + sqlStr + "\"");
+                throw new RuntimeException(
+                        "Reminder/Account id's not found: \"" + sqlStr
+                                + "\"");
+            }
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(sqlStr, sqle);
+            throw new RuntimeException(sqlStr, sqle);
+        }
+    }
+
     
     public long getReminderAmount(final Integer reminderID)
     {
