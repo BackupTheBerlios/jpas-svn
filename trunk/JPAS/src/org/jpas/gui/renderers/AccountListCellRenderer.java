@@ -46,7 +46,7 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     
     private final StringBuffer buff = new StringBuffer();
     
-    private final JButton accountName = new JButton();
+    private final JEditorPane accountName = new JEditorPane("text/html", "");
     private final JEditorPane accountAmount = new JEditorPane("text/html", "");
         
     private final Color highlightColor = new Color(255, 255, 196);
@@ -61,20 +61,22 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
         setLayout(new GridLayout(1, 1));
         
         final JPanel inner = new JPanel();
-        final FlexGridLayout fgl = new FlexGridLayout(new int[]{40}, new int[]{100, 75});
+        final FlexGridLayout fgl = new FlexGridLayout(new int[]{40}, new int[]{75, 75});
         fgl.setFlexColumn(0, true);
         inner.setLayout(fgl);
 
         
-        //accountName.setBorder(BorderFactory.createRaisedBevelBorder());
+        accountName.setBorder(BorderFactory.createRaisedBevelBorder());
+        accountName.setOpaque(true);
         inner.add(accountName);
+
 /*        
         final JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.add(accountAmount, BorderLayout.EAST);
         rightPanel.setBorder(BorderFactory.createLineBorder(Color.blue.darker()));
 */      
         accountAmount.setOpaque(true);
-
+        accountAmount.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         inner.add(accountAmount);
         
         add(inner);
@@ -87,13 +89,13 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     {
         if(!(value instanceof Account))
         {
-	        accountName.setText(value.toString());
+	        accountName.setText(createAccountText(value.toString()));
 	        accountAmount.setText("0000.00");
         }
         else
         {
 	        final Account a = (Account)value;
-	        accountName.setText(a.getName());
+	        accountName.setText(createAccountText(a.getName()));
 	        accountAmount.setText(includeAmount ?  createAmountText(a.getBalance()) : "");
 	        if(isSelected)
 	        {
@@ -109,6 +111,16 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
         return this;
     }
 
+    public String createAccountText(final String name)
+    {
+        buff.setLength(0);
+        buff.append("<html><body><p align=\"left\"><b>");
+        buff.append(name);
+        buff.append("</b></p></body></html>");
+        return buff.toString();        
+
+    }
+    
     public String createAmountText(long value)
     {
         buff.setLength(0);
