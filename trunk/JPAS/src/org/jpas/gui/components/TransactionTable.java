@@ -98,7 +98,7 @@ public class TransactionTable extends JTable
     
     public Dimension getPreferredSize()
     {
-    	return new Dimension(dim.width, dim.height * getModel().getRowCount());
+    	return new Dimension(dim.width, getRowHeight() * getModel().getRowCount());
     }
     
     public Dimension getMinimumSize()
@@ -137,7 +137,10 @@ public class TransactionTable extends JTable
 		    	    sg.drawLine(fromLeft-1, 0, fromLeft-1, rect.height);
 	    	    }
 	    	    
-	    	    int fromRight = 0;
+	    	    
+	    	    int fromRight = rect.width < dim.width 
+	    	    				? rect.width - dim.width
+	    	    				: 0;
 	    	    for(int i = columnWidths.length -1; i >= 3; i--)
 	    	    {
     	            fromRight += columnWidths[i];
@@ -145,6 +148,7 @@ public class TransactionTable extends JTable
 		    	    sg.drawLine(x, 0, x, rect.height);
 		    	    sg.drawLine(x-1, 0, x-1, rect.height);
 	    	    }
+	    	    
             }
             finally
             {
