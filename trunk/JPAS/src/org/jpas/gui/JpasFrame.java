@@ -30,6 +30,7 @@ import javax.swing.event.*;
 import com.toedter.calendar.*;
 import org.jpas.gui.util.*;
 import org.jpas.model.*;
+import org.jpas.gui.layouts.*;
 import org.jpas.util.*;
 import org.jpas.gui.components.*;
 /**
@@ -39,8 +40,8 @@ import org.jpas.gui.components.*;
 public class JpasFrame extends JFrame
 {
     private final JButton btnReminder = new JButton("Reminders");
-    private final CardLayout tableLayout = new CardLayout();
-    private final JPanel tablePanel = new JPanel(tableLayout); 
+    private final TransactionTable table = new TransactionTable();
+    private final AccountTotalPanel totalPanel = new AccountTotalPanel();
     private final AccountList accountList = new AccountList();
     
     public JpasFrame()
@@ -48,7 +49,6 @@ public class JpasFrame extends JFrame
         super("JPAS - Java Personal Accounting Software");
         this.getContentPane().add(createMainPanel());
         setJMenuBar(ActionFactory.getInstance().createJMenuBar());
-        initTablePanel();
         initListeners();
         pack();
     }
@@ -62,29 +62,20 @@ public class JpasFrame extends JFrame
 				final Account selected = (Account)accountList.getSelectedValue();
 				System.out.println("name: " + selected.getName());
 				
-				tableLayout.show(tablePanel, selected.getName());
-				tablePanel.invalidate();
+				table.setAccount(selected);
+				totalPanel.setAccount(selected);
 			}
 		});
-    	
-    	Account.getObservable().addObserver(new JpasObserver<Account>()
-    			{
-    				public void update(final JpasObservable<Account> observable, final JpasDataChange<Account> change ) 
-    				{
-    					if(change instanceof JpasDataChange.Add || change instanceof JpasDataChange.Delete)
-    					{
-    						initTablePanel();
-    					}
-    				}
-    			});
+    	accountList.setSelectedIndex(0);
+    	//accountList.getSelectionModel().setSelectionInterval(0, 0);
     }
     
     public JComponent createMainPanel()
     {
-        final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-        splitPane.setLeftComponent(createLeftPanel());
-        splitPane.setRightComponent(new JScrollPane(tablePanel));
-        return splitPane;
+        final JPanel panel = new JPanel(new BorderLayout());
+        panel.add(createLeftPanel(), BorderLayout.WEST);
+        panel.add(createRightPanel(), BorderLayout.CENTER);
+        return panel;
     }
     
     public JPanel createLeftPanel()
@@ -115,28 +106,24 @@ public class JpasFrame extends JFrame
     }
     
     
-    public void initTablePanel()
+    private JComponent createRightPanel()
     {
-        tablePanel.removeAll();
+        final FlexGridLayout fgl = new FlexGridLayout(new int[]{300, 30}, new int[]{table.getPreferredSize().width});
+        fgl.setFlexColumn(0, true);
+        fgl.setFlexRow(0, true);
+        final JPanel panel = new JPanel(fgl);
         
-    	final Account[] accounts = Account.getAllAccounts();
+        final JScrollPane tableScroll = new JScrollPane(table);
+        tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		for(int i = 0; i < accounts.length; i++)
-		{
-			System.out.println("adding: " + accounts[i].getName());
-			tablePanel.add(new TransactionTable(accounts[i]), accounts[i].getName());
-		}
-		if(accounts.length > 0)
-		{
-			tableLayout.show( tablePanel, accounts[0].getName());
-		}
-		else
-		{
-			tablePanel.add(new JLabel("No accounts exist!"));
-		}
-		
+        panel.add(tableScroll);
+        panel.add(totalPanel);
+
+        final JScrollPane panelScroll = new JScrollPane(panel);
+        panelScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        return panelScroll;
     }
-    
     
     public static void main(String[] args)
     {
