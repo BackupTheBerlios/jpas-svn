@@ -23,14 +23,117 @@
  */
 package org.jpas.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+import org.jpas.da.ReminderAccountMappingDA;
+
 /**
  * @author Justin W Smith
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
  */
 public class ReminderTransfer
 {
+    private static Map<Integer, Map<Integer, ReminderTransfer>> remTransferCache = new HashMap<Integer, Map<Integer, ReminderTransfer>>();
+    
+    private boolean isDeleted = false;
+    private boolean isLoaded = false;
+
+    final Integer reminderID;
+    final Integer accountID;
+
+    private long amount;
+    
+    static ReminderTransfer getReminderTransferforIDs(final Integer reminderID, final Integer accountID)
+    {
+        Map<Integer, ReminderTransfer> map = remTransferCache.get(reminderID);
+        if(map == null)
+        {
+            map = new WeakHashMap<Integer, ReminderTransfer>();
+            remTransferCache.put(reminderID, map);
+        }
+        
+        ReminderTransfer tt = map.get(accountID);
+        if(tt == null)
+        {
+            tt = new ReminderTransfer(reminderID, accountID);
+            map.put(accountID, tt);
+        }
+        
+        return tt;
+    }
+    
+    private ReminderTransfer(final Integer reminderID, final Integer accountID)
+    {
+        this.reminderID = reminderID;
+        this.accountID = accountID;
+    }
+    
+    public Account getAccount()
+    {
+        return Account.getAccountForID(accountID);
+    }
+    
+    public Reminder getTransaction()
+    {
+        return Reminder.getReminderForID(reminderID);
+    }
+    
+    private void loadData()
+    {
+        assert(!isDeleted);
+        ReminderAccountMappingDA.getInstance().loadReminderAccountMapping(reminderID, accountID, 
+            new ReminderAccountMappingDA.ReminderAccountTranferHandler()
+            {
+        		public void setData(final long amount)
+        		{
+        		    ReminderTransfer.this.amount = amount;
+        		    isLoaded = true;
+        		}
+            });
+    }
+    
+    public long getAmount()
+    {
+        if(!isLoaded)
+        {
+            loadData();
+        }
+        return amount;
+    }
+    
+    public void setAmount(final long amount)
+    {
+        assert(!isDeleted);
+        ReminderAccountMappingDA.getInstance().updateReminderAccountMapping(reminderID, accountID, amount);
+        if(isLoaded)
+        {
+            loadData();
+        }
+    }
+    
+    public boolean isDeleted()
+    {
+        return isDeleted;
+    }
+    
+    public boolean isLoaded()
+    {
+        return isLoaded;
+    }
+    
+    public void delete()
+    {
+    	ReminderAccountMappingDA.getInstance().deleteReminderAccountMapping(reminderID, accountID);
+    	final Map<Integer,  ReminderTransfer> map = remTransferCache.get(reminderID);
+    	map.remove(accountID);
+    	if(map.size() == 0)
+    	{
+    	    remTransferCache.remove(reminderID);
+    	}
+    	isDeleted = true;
+    }
+    
     public static void main(String[] args)
     {
     }
