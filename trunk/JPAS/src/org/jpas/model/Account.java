@@ -1,113 +1,111 @@
 package org.jpas.model;
 
-import org.apache.log4j.*;
-import org.jpas.da.*;
-import java.util.*;
+import java.util.Map;
+import java.util.WeakHashMap;
+import org.apache.log4j.Logger;
+import org.jpas.da.AccountDA;
+
 /**
- * <p>Title: JPAS</p>
- * <p>Description: Java based Personal Accounting System</p>
- * <p>Copyright: Copyright (c) 2004</p>
- * <p>License: Distributed under the terms of the GPL v2</p>
+ * Title: JPAS Description: Java based Personal Accounting System Copyright:
+ * Copyright (c) 2004 License: Distributed under the terms of the GPL v2
+ * 
  * @author Justin Smith
  * @version 1.0
  */
-
 public class Account
 {
-	private static final Logger defaultLogger = Logger.getLogger(Account.class);
-	private static Map accountCache = new WeakHashMap();
+    private static Map accountCache = new WeakHashMap();
+    private static final Logger defaultLogger = Logger.getLogger(Account.class);
 
-	public static Account[] getAllAccounts()
-	{
-		final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(true);
-		final Account[] accounts = new Account[ids.length];
-		for(int i = 0; i < ids.length; i++)
-		{
-			accounts[i] = new Account(ids[i]);
-		}
+    private static String validateName(final String name)
+    {
+        return name;
+    }
+    
+    public static Account createAccount(final String name)
+    {
+        return getAccountForID(AccountDA.getInstance()
+                .createAccount(name, true));
+    }
 
-		return accounts;
-	}
+    static Account getAccountForID(final Integer id)
+    {
+        Account account = (Account) accountCache.get(id);
+        if (account == null)
+        {
+            account = new Account(id);
+            accountCache.put(id, account);
+        }
+        return account;
+    }
 
-	public static Account createAccount(final String name, final boolean isBankAccount)
-	{
-		return new Account(AccountDA.getInstance().createAccount(name, isBankAccount));
-	}
+    public static Account[] getAllAccounts()
+    {
+        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(true);
+        final Account[] accounts = new Account[ids.length];
+        for (int i = 0; i < ids.length; i++)
+        {
+            accounts[i] = getAccountForID(ids[i]);
+        }
+        return accounts;
+    }
 
-	private final Integer id;
-	private boolean isLoaded = false;
-	private boolean isDeleted = false;
+    public static void main(final String[] args)
+    {
+        final Account[] accounts = getAllAccounts();
+        for (int i = 0; i < accounts.length; i++)
+        {
+            System.out.println("name: " + accounts[i].getName());
+            accounts[i].setName("account " + i);
+        }
+    }
 
-	private String name;
-	private boolean bankAccount;
+    private final Integer id;
+    private boolean isDeleted = false;
+    private boolean isLoaded = false;
+    private String name;
 
-	private Account(final Integer id)
-	{
-		this.id = id;
-		accountCache.put(id, this);
-	}
+    private Account(final Integer id)
+    {
+        this.id = id;
+    }
 
-	Account getAccountForID(final Integer id)
-	{
-		Account temp = (Account)accountCache.get(id);
-		if(temp == null)
-		{
-			
-		}
-		return null;
-	}
-	
-	private void loadData()
-	{
-		AccountDA.getInstance().loadAccount(
-			 id,
-			 new AccountDA.AccountHandler()
-				{
-					public void setData(final String name, final boolean isBankAccount)
-					{
-						Account.this.name = name;
-						Account.this.bankAccount = isBankAccount;
-						isLoaded = true;
-					}
-				});
-	}
+    public void delete()
+    {
+        AccountDA.getInstance().deleteAccount(id);
+        accountCache.remove(id);
+        isDeleted = true;
+    }
 
-	public String getName()
-	{
-		assert(!isDeleted);
+    public String getName()
+    {
+        assert (!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
+        return name;
+    }
 
-		if(!isLoaded)
-		{
-			loadData();
-		}
-		return name;
-	}
+    private void loadData()
+    {
+        AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
+        {
+            public void setData(final String name, final boolean isBankAccount)
+            {
+                Account.this.name = name;
+                isLoaded = true;
+            }
+        });
+    }
 
-	public void setName(final String name)
-	{
-		assert(!isDeleted);
-
-		AccountDA.getInstance().updateAccountName(id, name);
-		if(isLoaded)
-		{
-			loadData();
-		}
-	}
-
-	public void delete()
-	{
-		AccountDA.getInstance().deleteAccount(id);
-		accountCache.remove(id);
-		isDeleted = true;
-	}
-
-	public static void main(final String[] args)
-	{
-		final Account[] accounts = getAllAccounts();
-		for(int i = 0; i < accounts.length; i++)
-		{
-			System.out.println("name: " + accounts[i].getName());
-			accounts[i].setName("account " + i);
-		}
-	}
+    public void setName(final String name)
+    {
+        assert (!isDeleted);
+        AccountDA.getInstance().updateAccountName(id, name);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
 }
