@@ -19,7 +19,7 @@ public class Account
 
 	public static Account[] getAllAccounts()
 	{
-		final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
+		final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(true);
 		final Account[] accounts = new Account[ids.length];
 		for(int i = 0; i < ids.length; i++)
 		{
@@ -34,7 +34,6 @@ public class Account
 		return new Account(AccountDA.getInstance().createAccount(name, isBankAccount));
 	}
 
-
 	private final Integer id;
 	private boolean isLoaded = false;
 	private boolean isDeleted = false;
@@ -45,8 +44,19 @@ public class Account
 	private Account(final Integer id)
 	{
 		this.id = id;
+		accountCache.put(id, this);
 	}
 
+	Account getAccountForID(final Integer id)
+	{
+		Account temp = (Account)accountCache.get(id);
+		if(temp == null)
+		{
+			
+		}
+		return null;
+	}
+	
 	private void loadData()
 	{
 		AccountDA.getInstance().loadAccount(
@@ -64,7 +74,7 @@ public class Account
 
 	public String getName()
 	{
-		//assert(!isDeleted);
+		assert(!isDeleted);
 
 		if(!isLoaded)
 		{
@@ -73,18 +83,9 @@ public class Account
 		return name;
 	}
 
-	public boolean isBankAccount()
-	{
-		if(!isLoaded)
-		{
-			loadData();
-		}
-		return bankAccount;
-	}
-	
 	public void setName(final String name)
 	{
-		//assert(!isDeleted);
+		assert(!isDeleted);
 
 		AccountDA.getInstance().updateAccountName(id, name);
 		if(isLoaded)
@@ -96,6 +97,7 @@ public class Account
 	public void delete()
 	{
 		AccountDA.getInstance().deleteAccount(id);
+		accountCache.remove(id);
 		isDeleted = true;
 	}
 

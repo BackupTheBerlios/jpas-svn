@@ -163,7 +163,7 @@ public class AccountDA
 			final int result = ConnectionManager.getInstance().update(
 											  "DELETE FROM " + DBNames.TN_ACCOUNT
 											 + " WHERE " + DBNames.CN_ACCOUNT_ID
-												 + " IS '" + id + "'");
+											 + " IS '" + id + "'");
 			if(result < 1)
 			{
 				defaultLogger.error("Account id not found: "+ id +"!");
@@ -177,6 +177,46 @@ public class AccountDA
 		}
 	}
 
+	public boolean doesAccountExist(final Integer id)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
+								+ " FROM " + DBNames.TN_ACCOUNT
+								+ " WHERE " + DBNames.CN_ACCOUNT_ID
+								+ " IS '" + id + "'";
+		try
+		{
+			return ConnectionManager.getInstance().query(sqlStr).next();
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load account id's!", sqle);
+		}	}
+	
+	public Integer[] getAllAccountIDs(final boolean isBankAccount)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
+							+ " FROM " + DBNames.TN_ACCOUNT
+							+ " WHERE " + DBNames.CN_ACCOUNT_IS_BANK
+							+ " IS '" +  isBankAccount
+							+ "' ORDER BY " + DBNames.CN_ACCOUNT_NAME;
+		try
+		{
+			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final List idList = new ArrayList();
+			while(rs.next())
+			{
+				idList.add(rs.getObject(DBNames.CN_ACCOUNT_ID));
+			}
+			return (Integer[])idList.toArray(new Integer[idList.size()]);
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load account id's!", sqle);
+		}
+	}
+	
 	public Integer[] getAllAccountIDs()
 	{
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
