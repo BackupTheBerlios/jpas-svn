@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Dimension;
+import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -49,6 +50,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 	
 	private Account account;
 	
+	private final SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 	private final JLabel dateLabel = new JLabel();
 	private final JLabel numLabel = new JLabel();
 	private final JLabel payeeLabel = new JLabel();
@@ -171,7 +173,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         {
         	final Transaction trans = (Transaction)value;
 
-        	dateLabel.setText(trans.getDate().toString());
+        	dateLabel.setText(format.format(trans.getDate()));
         	numLabel.setText(trans.getNum());
             balanceLabel.setText("");
             memoLabel.setText(trans.getMemo());
