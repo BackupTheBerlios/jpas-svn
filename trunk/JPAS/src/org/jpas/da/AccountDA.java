@@ -58,7 +58,17 @@ public class AccountDA
 	    public static final AccountType UNKNOWN_CATEGORY = new AccountType(3); 
 	}
 	
-	private AccountDA(){}
+	private AccountDA()
+	{
+	    if(!doesAccountExist(AccountType.DELETED_BANK))
+	    {
+	        createAccount("DELETED", AccountType.DELETED_BANK);
+	    }
+	    if(!doesAccountExist(AccountType.UNKNOWN_CATEGORY))
+	    {
+	        createAccount("UNKNOWN", AccountType.UNKNOWN_CATEGORY);
+	    }
+	}
 
 	public static interface AccountHandler
 	{
@@ -241,7 +251,7 @@ public class AccountDA
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 								+ " FROM " + DBNames.TN_ACCOUNT
 								+ " WHERE " + DBNames.CN_ACCOUNT_ID
-								+ " IS '" + id + "'";
+								+ " IS " + id;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();
@@ -252,14 +262,57 @@ public class AccountDA
 			throw new RuntimeException("Unable to load account id's!", sqle);
 		}	
 	}
+
+	public boolean doesAccountExist(final AccountType type)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
+								+ " FROM " + DBNames.TN_ACCOUNT
+								+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
+								+ " IS " + type.dbValue;
+		try
+		{
+			return ConnectionManager.getInstance().query(sqlStr).next();
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load account id's!", sqle);
+		}	
+	}
+
 	
-	public Integer[] getAllAccountIDs(final boolean isBankAccount)
+	public Integer[] getAllAccountIDsExcept(final AccountType type)
 	{
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 							+ " FROM " + DBNames.TN_ACCOUNT
 							+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
-							+ " IS '" +  isBankAccount
-							+ "' ORDER BY " + DBNames.CN_ACCOUNT_NAME;
+							+ " IS NOT " +  type.dbValue
+							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
+		try
+		{
+			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final List<Integer> idList = new ArrayList<Integer>();
+			while(rs.next())
+			{
+				idList.add((Integer)rs.getObject(DBNames.CN_ACCOUNT_ID));
+			}
+			return idList.toArray(new Integer[idList.size()]);
+		}
+		catch(final SQLException sqle)
+		{
+			defaultLogger.error("SQLException while loading account name!", sqle);
+			throw new RuntimeException("Unable to load account id's!", sqle);
+		}
+	}
+
+	
+	public Integer[] getAllAccountIDs(final AccountType type)
+	{
+		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
+							+ " FROM " + DBNames.TN_ACCOUNT
+							+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
+							+ " IS " +  type.dbValue
+							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
 		{
 			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);

@@ -71,7 +71,7 @@ public class Account extends JpasObservable<Account>
     {
         synchronized(accountCache)
 		{
-	        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(true);
+	        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(AccountDA.AccountType.BANK);
 	        final Account[] accounts = new Account[ids.length];
 	        for (int i = 0; i < ids.length; i++)
 	        {
