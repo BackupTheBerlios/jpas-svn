@@ -168,7 +168,7 @@ public class Category extends JpasObservable<Category>
         {
             loadData();
         }
-        return (type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK) ? "TRANSFER to ["
+        return (type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK) ? "TXFR["
                 + name + "]"
                 : name;
     }
