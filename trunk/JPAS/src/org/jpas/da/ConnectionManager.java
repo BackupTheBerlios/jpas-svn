@@ -49,6 +49,7 @@ public class ConnectionManager
 				tempConn = DriverManager.getConnection(dbName,
 													   "sa",
 													   "");
+				defaultLogger.info("Connection to external database established");
 				Runtime.getRuntime().addShutdownHook(new Thread()
 						{
 							public void run()
@@ -82,6 +83,8 @@ public class ConnectionManager
 					   .getConnection(dbName,
 									   "sa",
 									   "");
+				defaultLogger.info("Connection to internal database established");
+				
 				Runtime.getRuntime().addShutdownHook(new Thread()
 					{
 						public void run()
