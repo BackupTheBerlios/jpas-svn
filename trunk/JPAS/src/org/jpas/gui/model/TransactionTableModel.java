@@ -42,36 +42,45 @@ import org.jpas.util.JpasObserver;
  */
 public class TransactionTableModel extends AbstractTableModel
 {
-    private final Account account;
+    private Account account = null;
     
     
     private List<Transaction> transactionList = new ArrayList<Transaction>();
     /**
      * 
      */
-    public TransactionTableModel(final Account account)
+    public TransactionTableModel()
     {
-        this.account = account;
-        
         Transaction.getObservable().addObserver(new JpasObserver<Transaction>()
                 {
             		public void update(final JpasObservable<Transaction> observable, final JpasDataChange<Transaction> change)
             		{
-            		    if(change.getValue().affects(account))
+            		    if(account != null && change.getValue().affects(account))
             		    {
             		        loadData();
             		    }
             		}
                 });
-        loadData();
     }
 
     private void loadData()
     {
+        transactionList.clear();
         final Transaction[] transArray = Transaction.getAllTransactionsAffecting(account);
         Arrays.sort(transArray, Transaction.getDateComparator());
 	    transactionList.addAll(Arrays.asList(transArray));
         fireTableStructureChanged();
+    }
+    
+    public void setAccount(final Account account)
+    {
+        this.account = account;
+        loadData();
+    }
+    
+    public Account getAccount()
+    {
+        return account;
     }
     
     /* (non-Javadoc)

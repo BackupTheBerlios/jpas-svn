@@ -31,11 +31,16 @@ import org.jpas.util.JpasObserver;
  */
 public class PayeeListModel extends JpasListModel<String>
 {
-	private final Account account;
+	private Account account = null;
 	
-	public PayeeListModel(final Account account)
+	public PayeeListModel()
 	{
-		this.account = account;
+	}
+	
+	public void setAccount(final Account account)
+	{
+	    this.account = account;
+	    populateData();
 	}
 	
 	/* (non-Javadoc)
@@ -50,6 +55,10 @@ public class PayeeListModel extends JpasListModel<String>
 	 */
 	protected String[] loadData() 
 	{
+	    if(account == null)
+	    {
+	        return new String[0];
+	    }
 		return account.getAllPayees();
 	}
 

@@ -34,12 +34,15 @@ import org.jpas.model.Account;
  */
 public class PayeeComboBox extends JComboBox 
 {
-	final PayeeListModel model;
+	private final PayeeListModel model = new PayeeListModel();
 	
-	public PayeeComboBox(final Account account)
+	public PayeeComboBox()
 	{
-		this.model = new PayeeListModel(account);
 		setModel(model);
-		model.reload();
+	}
+	
+	public void setAccount(final Account account)
+	{
+	    model.setAccount(account);
 	}
 }

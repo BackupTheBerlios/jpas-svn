@@ -46,7 +46,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
 	private final DateChooser dateChooser;
 	private final JComboBox numList;
-	private final JComboBox payeeList;
+	private final PayeeComboBox payeeList;
 	private final JTextField withdrawField;
 	private final JTextField depositField;
 	private final JTextField memoField;
@@ -60,12 +60,12 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final int[] columnWidths;
 	private final int[] rowHeights;
 	
-	//final JLabel label = new JLabel(" ");
+	private Account account;
 
     /**
      * 
      */
-    public TransactionTableCellEditor(final Account account, final int[] columnWidths, final int[] rowHeights)
+    public TransactionTableCellEditor(final int[] columnWidths, final int[] rowHeights)
     {
         this.columnWidths = columnWidths;
         this.rowHeights = rowHeights;
@@ -73,7 +73,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	dateChooser = new DateChooser();
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
-    	payeeList = new PayeeComboBox(account);
+    	payeeList = new PayeeComboBox();
     	payeeList.setEditable(true);
     	withdrawField = new JTextField();
     	depositField = new JTextField();
@@ -102,6 +102,18 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	cellPanel.add(btnSplit);
     	cellPanel.add(btnDelete);
     }
+    
+    public void setAccount(final Account account)
+    {
+        this.account = account;
+        payeeList.setAccount(account);
+    }
+    
+    public Account getAccount()
+    {
+        return account;
+    }
+
     
     private JPanel createSplitPanel()
     {

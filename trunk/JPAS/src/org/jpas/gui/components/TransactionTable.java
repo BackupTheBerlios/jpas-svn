@@ -42,7 +42,9 @@ import org.jpas.model.Transaction;
 public class TransactionTable extends JTable
 {
 	private final Dimension dim;
+	private final TransactionTableModel model = new TransactionTableModel();
 	private final TransactionTableCellRenderer transactionRenderer;
+	private final TransactionTableCellEditor transactionEditor;
 	private final Color topColor = new Color(231, 255, 231);
 	private final Color bottomColor = new Color(229, 227, 208);
 	
@@ -52,14 +54,15 @@ public class TransactionTable extends JTable
     /**
      * 
      */
-    public TransactionTable(final Account account)
+    public TransactionTable()
     {
         this.columnWidths = createColumnWidths();
         this.rowHeights = createRowHeights();
-    	transactionRenderer = new TransactionTableCellRenderer(account, columnWidths, rowHeights);
-    	this.setModel(new TransactionTableModel(account));
+    	transactionRenderer = new TransactionTableCellRenderer(columnWidths, rowHeights);
+    	transactionEditor = new TransactionTableCellEditor(columnWidths, rowHeights);
+    	this.setModel(model);
         this.setDefaultRenderer(Transaction.class, transactionRenderer);
-        this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(account, columnWidths, rowHeights));
+        this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(columnWidths, rowHeights));
         this.setRowHeight(total(rowHeights) + 1);
         this.setSurrendersFocusOnKeystroke(true);
         this.setBackground(bottomColor);
@@ -84,6 +87,13 @@ public class TransactionTable extends JTable
             total += values[i];
         }
         return total;
+    }
+    
+    public void setAccount(final Account account)
+    {
+        model.setAccount(account);
+        transactionRenderer.setAccount(account);
+        transactionEditor.setAccount(account);
     }
     
     public Dimension getPreferredSize()

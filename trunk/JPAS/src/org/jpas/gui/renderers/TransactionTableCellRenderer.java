@@ -47,7 +47,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 {
 	private static final Color borderColor = Color.gray;
 	
-	private final Account account;
+	private Account account;
 	
 	private final JLabel dateLabel = new JLabel();
 	private final JLabel numLabel = new JLabel();
@@ -66,9 +66,8 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
     /**
      * 
      */
-    public TransactionTableCellRenderer(final Account account, final int[] colunmWidths, final int[] rowHeights)
+    public TransactionTableCellRenderer(final int[] colunmWidths, final int[] rowHeights)
     {
-    	this.account = account;
         setOpaque(false);
         this.columnWidths = colunmWidths;
         this.rowHeights = rowHeights;
@@ -76,6 +75,16 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         dim = new Dimension(total(columnWidths), total(rowHeights));
         
         init();
+    }
+    
+    public void setAccount(final Account account)
+    {
+        this.account = account;
+    }
+    
+    public Account getAccount()
+    {
+        return account;
     }
     
     private int total(int[] values)
