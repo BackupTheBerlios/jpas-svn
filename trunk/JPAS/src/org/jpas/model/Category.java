@@ -177,6 +177,36 @@ public class Category extends JpasObservable<Category>
                 || type == AccountDA.AccountType.DELETED_BANK;
     }
 
+    public boolean isIncome()
+    {
+        assert (!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
+        return type == AccountDA.AccountType.INCOME_CATEGORY;
+    }
+
+    public boolean isExpense()
+    {
+        assert (!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
+        return type == AccountDA.AccountType.EXPENSE_CATEGORY;
+    }
+    
+    public boolean isUnknown()
+    {
+        assert (!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
+        return type == AccountDA.AccountType.UNKNOWN_CATEGORY;
+    }
+    
     private void loadData()
     {
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
