@@ -47,4 +47,35 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
+	
+  <target name="run_db_server" description="Start the DB Server. This will only be used during development.">
+<!-- java -cp lib/hsqldb.jar org.hsqldb.Server -database.0 db/jpasdb -dbname.0 jpasdb -->
+<!-- 
+Note that if this command fails, there will be no warnings. 
+And when it succeeds, it will continue running until you shut it down.
+The most graceful way to shut this down is to use the DatabaseManager.
+-->
+  	<java classpath="${lib}/${hsqldb.jar}" 
+  		classname="org.hsqldb.Server" 
+  		fork="true"
+  		spawn="true">
+<!-- Note that multiple "arg"s must be used -->
+  	<arg value="-database.0"/> 
+  	<arg value="db/jpasdb"/> 
+	<arg value="-dbname.0"/> 
+	<arg value="jpasdb"/>
+  	</java>
+  </target>
+	
+  <target name="run_db_manager" description="Start the DB Manager.">
+<!-- java -cp ../lib/hsqldb.jar org.hsqldb.util.DatabaseManager -->
+  	<java classpath="${lib}/${hsqldb.jar}" 
+  		classname="org.hsqldb.util.DatabaseManager"
+  		fork="true"
+  		spawn="true">
+  		<arg value="-url"/>
+  		<arg value="jdbc:hsqldb:hsql://localhost/jpasdb"/>
+  	</java>
+  </target>
+
 </project>
