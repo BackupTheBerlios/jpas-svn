@@ -26,6 +26,10 @@ package org.jpas.gui.editors;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
+import java.sql.Date;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -44,7 +48,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 {
 	private final JPanel cellPanel = new JPanel();
     
-	private final DateChooser dateChooser;
+	private final JDateChooser dateChooser;
 	private final JComboBox numList;
 	private final PayeeComboBox payeeList;
 	private final JTextField withdrawField;
@@ -73,7 +77,14 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         this.columnWidths = columnWidths;
         this.rowHeights = rowHeights;
         cellPanel.setOpaque(false);
-    	dateChooser = new DateChooser();
+        cellPanel.addMouseListener(new MouseAdapter()
+		        {
+		    		public void mouseClicked(final MouseEvent me)
+		    		{
+		    		    me.consume();
+		    		}
+		        });
+    	dateChooser = new JDateChooser("MM/dd/yyyy", false);
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
     	payeeList = new PayeeComboBox();
@@ -146,7 +157,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     {
         if(value == null)
         {
-        	dateChooser.setDate(null);
+        	dateChooser.setDate(new java.util.Date());
         	numList.setSelectedItem("");
         	payeeList.setSelectedItem("");
         	withdrawField.setText("");
