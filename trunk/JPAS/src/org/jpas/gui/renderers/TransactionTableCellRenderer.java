@@ -35,27 +35,26 @@ import com.toedter.calendar.*;
  * @author Justin W Smith
  *
  */
-public class TransactionTableCellRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor
+public class TransactionTableCellRenderer extends JPanel implements TableCellRenderer
 {
-    final JPanel cellPanel = new JPanel();
-    
-    final JDateChooser dateChooser = new JDateChooser();
-	final JComboBox numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
-    final JComboBox payeeList = new JComboBox(new String[]{"Payee1", "Payee2"});
-    final JTextField withdrawField = new JTextField("0000.00", 8);
-    final JTextField depositField = new JTextField("0000.00", 8);
-    final JLabel balanceLabel = new JLabel("0000.00");
-    final JComboBox categoryList = new JComboBox(new String[]{"cat1", "cat2"});
+	private static final Color borderColor = Color.gray;
 	
-	final JLabel label = new JLabel(" ");
-
+    final JLabel dateLabel = new JLabel();
+	final JLabel numLabel = new JLabel();
+    final JLabel payeeLabel = new JLabel();
+    final JLabel withdrawLabel = new JLabel();
+    final JLabel depositLabel = new JLabel();
+    final JLabel balanceLabel = new JLabel();
+    final JLabel categoryLabel = new JLabel();
+    final JLabel memoLabel = new JLabel();
+    
     /**
      * 
      */
     public TransactionTableCellRenderer()
     {
-        cellPanel.setOpaque(true);
-        cellPanel.setBackground(Color.white);
+        setOpaque(true);
+        setBackground(Color.white);
         init();
     }
     
@@ -63,20 +62,31 @@ public class TransactionTableCellRenderer extends AbstractCellEditor implements 
     {
         final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{85, 85, 105, 85, 85, 95});
         layout.setFlexColumn(2, true);
-        cellPanel.setLayout(layout);
-    	cellPanel.add(dateChooser);
-    	cellPanel.add(numList);
-    	cellPanel.add(payeeList);
-    	cellPanel.add(withdrawField);
-    	cellPanel.add(depositField);
-    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(categoryList);
-    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(createEmptyPanel());
-//    	cellPanel.add(createEmptyPanel());
-    	cellPanel.add(balanceLabel);
+        setLayout(layout);
+    	add(dateLabel);
+    	add(numLabel);
+    	add(payeeLabel);
+    	add(withdrawLabel);
+    	add(depositLabel);
+    	add(createEmptyPanel());
+    	add(createEmptyPanel());
+    	add(createEmptyPanel());
+    	add(createSplitPanel(categoryLabel, memoLabel));
+    	add(createEmptyPanel());
+    	add(createEmptyPanel());
+//    	add(createEmptyPanel());
+    	add(balanceLabel);
+    	
+    	
+        dateLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+    	numLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+        payeeLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+        withdrawLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+        depositLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+        balanceLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+        categoryLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+        memoLabel.setBorder(BorderFactory.createLineBorder(borderColor));
+
 }
     
     private JPanel createEmptyPanel()
@@ -86,6 +96,14 @@ public class TransactionTableCellRenderer extends AbstractCellEditor implements 
     	return panel;
     }
     
+    private JPanel createSplitPanel(final JComponent comp1, final JComponent comp2)
+    {
+    	final JPanel panel = new JPanel(new GridLayout(1, 2));
+    	panel.add(comp1);
+    	panel.add(comp2);
+    	
+    	return panel;
+    }
 
     public Component getTableCellRendererComponent(JTable table,
             Object value,
@@ -96,27 +114,49 @@ public class TransactionTableCellRenderer extends AbstractCellEditor implements 
     {
         if(value == null)
         {
-//            label.setText(" ");
+            dateLabel.setText("");
+        	numLabel.setText("");
+            payeeLabel.setText("");
+            withdrawLabel.setText("");
+            depositLabel.setText("");
+            balanceLabel.setText("");
+            categoryLabel.setText("");
+            memoLabel.setText("");
         }
         else
         {
-            //label.setText(((Transaction)value).getPayee());
+        	final Transaction trans = (Transaction)value;
+            dateLabel.setText(trans.getDate().toLocaleString());
+        	numLabel.setText(trans.getNum());
+            payeeLabel.setText(trans.getPayee());
+            final long amount = trans.getAmount();
+            if(amount >= 0)
+            {
+	            withdrawLabel.setText(String.valueOf(amount));
+	            depositLabel.setText("");
+            }
+            else
+            {
+	            withdrawLabel.setText("");
+	            depositLabel.setText(String.valueOf(amount));
+            }
+            balanceLabel.setText("");
+            final TransactionTransfer[] transfers = trans.getTransfers();
+            if(transfers.length == 0)
+            {
+            	categoryLabel.setText("[NONE]");
+            }
+            else if(transfers.length == 1)
+            {
+            	categoryLabel.setText(transfers[0].getCategory().getName());
+            }
+            else
+            {
+            	categoryLabel.setText("[SPLIT]");
+            }
+            memoLabel.setText(trans.getMemo());
         }
-        return cellPanel;
-    }
-    
-    public Component getTableCellEditorComponent(JTable table,
-            Object value,
-            boolean isSelected,
-            int row,
-            int column)
-    {
-        return cellPanel;
-    }
-    
-    public Object getCellEditorValue()
-    {
-        return null;
+        return this;
     }
     
     public static void main(String[] args)
