@@ -25,13 +25,22 @@ package org.jpas.model;
 
 import org.apache.log4j.*;
 import org.jpas.da.*;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
 
-public class Category 
+public class Category extends JpasObservable<Category>
 {
 	private static final Logger defaultLogger = Logger.getLogger(Category.class);
 	
 	private static WeakValueMap<Integer, Category> categoryCache = new WeakValueMap<Integer, Category>();
+	
+	private static JpasObservable<Category> observable = new JpasObservable<Category>();
+	
+	public static  JpasObservable<Category> getObservable()
+	{
+		return observable;
+	}
 
     public static Category[] getAllCategories()
     {
@@ -53,13 +62,16 @@ public class Category
 
     static Category getCategoryForID(final Integer id)
     {
-        Category account = categoryCache.get(id);
-        if (account == null)
-        {
-            account = new Category(id);
-            categoryCache.put(id, account);
-        }
-        return account;
+    	synchronized(categoryCache)
+		{
+	        Category category = categoryCache.get(id);
+	        if (category == null)
+	        {
+	            category = new Category(id);
+	            categoryCache.put(id, category);
+	        }
+	        return category;
+		}
     }
     
    
@@ -78,12 +90,22 @@ public class Category
     
     public void delete()
     {
-        AccountDA.getInstance().deleteAccount(id);
-        categoryCache.remove(id);
-        isDeleted = true;
+    	synchronized(this)
+		{
+    		synchronized(categoryCache)
+			{
+		        AccountDA.getInstance().deleteAccount(id);
+		        categoryCache.remove(id);
+		        isDeleted = true;
+			}
+		}
+    	final JpasDataChange<Category> change = new JpasDataChange.Delete<Category>(this);
+    	observable.notifyObservers(change);
+		notifyObservers(change);
+		deleteObservers();
     }
 
-    public String getName()
+    public synchronized String getName()
     {
         assert (!isDeleted);
         if (!isLoaded)
@@ -108,12 +130,18 @@ public class Category
 
     public void setName(final String name)
     {
-        assert (!isDeleted);
-        AccountDA.getInstance().updateAccountName(id, name);
-        if (isLoaded)
-        {
-            loadData();
-        }
+    	synchronized(this)
+		{
+	        assert (!isDeleted);
+	        AccountDA.getInstance().updateAccountName(id, name);
+	        if (isLoaded)
+	        {
+	            loadData();
+	        }
+		}
+    	final JpasDataChange<Category> change = new JpasDataChange.Modify<Category>(this);
+    	observable.notifyObservers(change);
+		notifyObservers(change);
     }
     
     public long getTotal()
@@ -121,8 +149,13 @@ public class Category
     	return TransAccountMappingDA.getInstance().getAccountBalance(id);
     }
     
-    public boolean isTranfer()
+    public synchronized boolean isTranfer()
     {
+    	assert(!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
         return isBankAccount;
     }
     

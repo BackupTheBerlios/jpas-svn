@@ -103,25 +103,22 @@ public class Account extends JpasObservable<Account>
     	
     	final JpasDataChange<Account> dataChange = new JpasDataChange.Delete<Account>(this);
     	observable.notifyObservers(dataChange);
-    	notifyObservers(dataChange);    	
+    	notifyObservers(dataChange);
+    	deleteObservers();
     }
 
-    public String getName()
+    public synchronized String getName()
     {
-    	synchronized(this)
-		{
-	        assert (!isDeleted);
-	        if (!isLoaded)
-	        {
-	            loadData();
-	        }
-		}
+        assert (!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
         return name;
     }
 
     private void loadData()
     {
-    	assert(!isDeleted);
         AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
         {
             public void setData(final String name, final boolean isBankAccount)
