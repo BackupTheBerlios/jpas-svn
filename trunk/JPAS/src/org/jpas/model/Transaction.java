@@ -25,32 +25,44 @@ package org.jpas.model;
 
 import java.sql.Date;
 import org.jpas.da.*;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservable;
 import org.jpas.util.WeakValueMap;
 
-public class Transaction 
+public class Transaction extends JpasObservable<Transaction>
 {
 	private static WeakValueMap<Integer, Transaction> transactionCache = new WeakValueMap<Integer, Transaction>();
+	
+	private static JpasObservable<Transaction> observable = new JpasObservable<Transaction>();
+	
+	public static JpasObservable<Transaction> getObservable()
+	{
+	    return observable;
+	}
 	
     private boolean isDeleted = false;
     private boolean isLoaded = false;
 
     final Integer id;
     
-    private Integer accountID;
-    private String payee;
-    private String memo;
-    private String num;
-    private Date date;
+    Integer accountID;
+    String payee;
+    String memo;
+    String num;
+    Date date;
 
     static Transaction getTransactionForID(final Integer id)
     {
-    	Transaction trans = transactionCache.get(id);
-    	if(trans == null)
-    	{
-    		trans = new Transaction(id);
-    		transactionCache.put(id, trans);
-    	}
-    	return trans;
+        synchronized(transactionCache)
+        {
+	    	Transaction trans = transactionCache.get(id);
+	    	if(trans == null)
+	    	{
+	    		trans = new Transaction(id);
+	    		transactionCache.put(id, trans);
+	    	}
+	    	return trans;
+        }
     }
     
     public static Transaction createTransaction(final Account account, final String payee, final String memo, final String num, final Date date)
@@ -65,10 +77,46 @@ public class Transaction
     }
     
     public void delete()
+	{
+	    delete(true);
+	}
+	
+	void delete(final boolean callDA)
     {
-    	TransactionDA.getInstance().deleteTransaction(id);
-    	transactionCache.remove(id);
-    	isDeleted = true;
+        synchronized(this)
+        {
+            synchronized(transactionCache)
+            {
+	    	    if(callDA)
+	    	    {
+	    	        TransactionDA.getInstance().deleteTransaction(id);
+	    	    }
+            	transactionCache.remove(id);
+            }
+        	isDeleted = true;
+        }
+        announceDelete();
+    }
+    
+    void announceDelete()
+    {
+        final JpasDataChange<Transaction> change = new JpasDataChange.Delete<Transaction>(this);
+        observable.notifyObservers(change);
+        notifyObservers(change);
+    }
+    
+    void announceModify()
+    {
+        final JpasDataChange<Transaction> change = new JpasDataChange.Modify<Transaction>(this);
+        observable.notifyObservers(change);
+        notifyObservers(change);
+    }
+    
+    void amountChanged()
+    {
+        announceModify();
+        Category.getCategoryForID(accountID).amountChanged();
+        Account.getAccountForID(accountID).amountChanged();
     }
     
     private void loadData()
@@ -88,7 +136,7 @@ public class Transaction
     		});
     }
     
-    public Account getAccount()
+    public synchronized Account getAccount()
     {
     	if(!isLoaded)
     	{
@@ -97,7 +145,7 @@ public class Transaction
         return Account.getAccountForID(accountID);
     }
     
-    public String getPayee()
+    public synchronized String getPayee()
     {
     	if(!isLoaded)
     	{
@@ -106,7 +154,7 @@ public class Transaction
     	return payee;
     }
     
-    public String getMemo()
+    public synchronized String getMemo()
     {
     	if(!isLoaded)
     	{
@@ -115,7 +163,7 @@ public class Transaction
     	return memo;
     }
 
-    public String getNum()
+    public synchronized String getNum()
     {
     	if(!isLoaded)
     	{
@@ -124,7 +172,7 @@ public class Transaction
     	return num;
     }
 
-    public Date getDate()
+    public synchronized Date getDate()
     {
     	if(!isLoaded)
     	{
@@ -133,7 +181,7 @@ public class Transaction
     	return date;
     }
     
-    public TransactionTransfer[] getAllTransfers()
+    public synchronized TransactionTransfer[] getTransfers()
     {
         final Integer[] accountIDs = TransAccountMappingDA.getInstance().getAllTransAccountTranfers(id);
         final TransactionTransfer[] ttArray = new TransactionTransfer[accountIDs.length];
@@ -145,64 +193,86 @@ public class Transaction
         return ttArray;
     }
     
-    public TransactionTransfer addTransfer(final Category category, final long amount)
+    public synchronized TransactionTransfer addTransfer(final Category category, final long amount)
     {
-        assert(!isDeleted);
-        TransAccountMappingDA.getInstance().createTransAccountMapping(id, category.id, amount);
-        return TransactionTransfer.getTransactionTransferforIDs(id, category.id);
+        synchronized(this)
+        {
+	        assert(!isDeleted);
+	        if(TransAccountMappingDA.getInstance().doesTransAccountTransferExist(id, category.id))
+	        {
+	            TransAccountMappingDA.getInstance().updateTransAccountMapping(id, category.id, amount);
+	        }
+	        else
+	        {
+	            TransAccountMappingDA.getInstance().createTransAccountMapping(id, category.id, amount);
+	        }
+	        return TransactionTransfer.getTransactionTransferforIDs(id, category.id);
+        }
     }
     
     public void setPayee(final String payee)
     {
-        assert(!isDeleted);
-        TransactionDA.getInstance().updateTransactionPayee(id, payee);
-        if (isLoaded)
+        synchronized(this)
         {
-            loadData();
+	        assert(!isDeleted);
+	        TransactionDA.getInstance().updateTransactionPayee(id, payee);
+	        if (isLoaded)
+	        {
+	            loadData();
+	        }
         }
     }
 
     public void setMemo(final String memo)
     {
-        assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionMemo(id, memo);
-        if (isLoaded)
+        synchronized(this)
         {
-            loadData();
+	        assert (!isDeleted);
+	        TransactionDA.getInstance().updateTransactionMemo(id, memo);
+	        if (isLoaded)
+	        {
+	            loadData();
+	        }
         }
     }
 
     public void setNum(final String num)
     {
-        assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionMemo(id, num);
-        if (isLoaded)
+        synchronized(this)
         {
-            loadData();
+	        assert (!isDeleted);
+	        TransactionDA.getInstance().updateTransactionMemo(id, num);
+	        if (isLoaded)
+	        {
+	            loadData();
+	        }
         }
     }
     
     public void setDate(final Date date)
     {
-        assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionDate(id, date);
-        if (isLoaded)
+        synchronized(this)
         {
-            loadData();
+	        assert (!isDeleted);
+	        TransactionDA.getInstance().updateTransactionDate(id, date);
+	        if (isLoaded)
+	        {
+	            loadData();
+	        }
         }
     }
     
-    public long getAmount()
+    public synchronized long getAmount()
     {
-    	return TransAccountMappingDA.getInstance().getTransactionAmount(id);
+        return TransAccountMappingDA.getInstance().getTransactionAmount(id);
     }
     
-    public boolean isDeleted()
+    public synchronized boolean isDeleted()
     {
         return isDeleted;
     }
     
-    public boolean isLoaded()
+    public synchronized boolean isLoaded()
     {
         return isLoaded;
     }
