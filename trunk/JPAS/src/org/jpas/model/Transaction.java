@@ -12,8 +12,7 @@
 package org.jpas.model;
 
 import java.sql.Date;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import org.jpas.da.*;
 
@@ -117,6 +116,18 @@ public class Transaction
     		loadData();
     	}
     	return date;
+    }
+    
+    public TransactionTransfer[] getAllTransfers()
+    {
+        final Integer[] accountIDs = TransAccountMappingDA.getInstance().getAllTransAccountTranfers(id);
+        final TransactionTransfer[] ttArray = new TransactionTransfer[accountIDs.length];
+        for(int i = 0; i < accountIDs.length; i++)
+        {
+            ttArray[i] = TransactionTransfer.getTransactionTransferforIDs(id, accountIDs[i]);
+        }
+        
+        return ttArray;
     }
     
     public void setPayee(final String payee)
