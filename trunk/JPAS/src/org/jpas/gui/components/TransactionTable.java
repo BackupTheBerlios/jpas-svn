@@ -23,9 +23,12 @@
  */
 package org.jpas.gui.components;
 
-import javax.swing.JTable;
-import java.awt.Dimension;
+import javax.swing.*;
+
+import java.awt.*;
+
 import javax.swing.table.*;
+
 import org.jpas.gui.editors.TransactionTableCellEditor;
 import org.jpas.gui.model.TransactionTableModel;
 import org.jpas.gui.renderers.TransactionTableCellRenderer;
@@ -39,13 +42,15 @@ import org.jpas.model.Transaction;
 public class TransactionTable extends JTable
 {
 	private final Dimension dim;
+	private final TransactionTableCellRenderer transactionRenderer;
+	private final Color topColor = new Color(213, 255, 213);
 	
     /**
      * 
      */
     public TransactionTable(final Account account)
     {
-    	final TransactionTableCellRenderer transactionRenderer = new TransactionTableCellRenderer(account);
+    	transactionRenderer = new TransactionTableCellRenderer(account);
     	this.setModel(new TransactionTableModel(account));
         this.setDefaultRenderer(Transaction.class, transactionRenderer);
         this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(account));
@@ -65,6 +70,67 @@ public class TransactionTable extends JTable
     	return getPreferredSize();
     }
 
+    public void paintComponent(final Graphics g)
+    {
+        if(isOpaque())
+        {
+	    	final Graphics sg = g.create();
+	    	
+	    	final Rectangle rect = getBounds();
+	    	sg.setColor(getBackground());
+	    	sg.fillRect(0, 0, rect.width, rect.height);
+	    	
+	    	final int rowHeight = getRowHeight();
+	    	final int halfHeight = rowHeight/2;
+	    	//sg.setColor(topColor);
+	    	
+	    	//final JPanel panel = (JPanel)transactionRenderer.getTableCellRendererComponent(this, null, false, false, 0, 0);
+    	    //panel.setDebugGraphicsOptions(DebugGraphics.LOG_OPTION);
+    	    
+    	    //paintCells(g);
+
+    	    for(int y = 0; y < rect.height; y += rowHeight)
+	    	{
+    	        final Graphics cg = sg.create(0, y, rect.width, rowHeight);
+	    	    cg.setClip(0, 0, rect.width, rowHeight);
+	    	    cg.setColor(topColor);
+	    	    //panel.setBounds(0, y, rect.width, rowHeight);
+	    	    //panel.getUI().update(g, panel);
+	    	    cg.fillRect(0, 0, rect.width, halfHeight);
+	    	}
+        }
+
+    	if (ui != null) {
+            Graphics scratchGraphics = (g == null) ? null : g.create();
+            try {
+                ui.paint(scratchGraphics, this);
+            }
+            finally {
+                scratchGraphics.dispose();
+            }
+        }
+
+    }
+
+    private void paintCells(final Graphics g)
+    {
+        //final Rectangle bounds = getBounds();
+        Rectangle cellRect = getCellRect(0, 0, false);
+        CellRendererPane rendererPane = (CellRendererPane)getComponent(0);
+        for(int row = 0; row < 15/*cellRect.y <= bounds.y*/; row++) 
+	    {
+	        cellRect = getCellRect(row, 0, false);
+	        final Graphics sg = g.create(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
+	        
+            Component component = prepareRenderer(transactionRenderer, row, 0);
+            
+            //rendererPane.paintComponent( sg, component, this, 0, 0, cellRect.width, cellRect.height, true);
+            
+            //component.paint(sg);
+	    }
+    }
+
+    
     public static void main(String[] args)
     {
     }
