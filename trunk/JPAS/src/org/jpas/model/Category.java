@@ -1,23 +1,120 @@
 /*
  * Created on Sep 7, 2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
+ * Title: JPAS
+ * Description: Java based Personal Accounting System
+ * Copyright: Copyright (c) 2004
+ * License: Distributed under the terms of the GPL v2
+ * @author Justin Smith
+ * @version 1.0
+ * 
+ * TODO synchronize?
  */
 package org.jpas.model;
 
-/**
- * @author jsmith
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
+import org.apache.log4j.*;
+import org.jpas.da.*;
+
+import java.util.*;
+
 public class Category 
 {
+	private static final Logger defaultLogger = Logger.getLogger(Category.class);
 	
-	
+	private static Map categoryCache = new WeakHashMap();
 
-	public static void main(String[] args) 
+    private static String validateName(final String name)
+    {
+        return name;
+    }
+	
+    public static Category[] getAllCategories()
+    {
+        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
+        final Category[] categories = new Category[ids.length];
+        for (int i = 0; i < ids.length; i++)
+        {
+            categories[i] = getCategoryForID(ids[i]);
+        }
+
+        return categories;
+    }
+
+    public static Category createCategory(final String name)
+    {
+        return getCategoryForID(
+                AccountDA.getInstance().createAccount(name, true));
+    }
+
+    static Category getCategoryForID(final Integer id)
+    {
+        Category account = (Category) categoryCache.get(id);
+        if (account == null)
+        {
+            account = new Category(id);
+            categoryCache.put(id, account);
+        }
+        return account;
+    }
+    
+    private final Integer id;
+    private boolean isDeleted = false;
+    private boolean isLoaded = false;
+
+    private String name;
+    private boolean isBankAccount;
+    
+    private Category(final Integer id)
+    {
+        this.id = id;
+    }
+    
+    public void delete()
+    {
+        AccountDA.getInstance().deleteAccount(id);
+        categoryCache.remove(id);
+        isDeleted = true;
+    }
+
+    public String getName()
+    {
+        assert (!isDeleted);
+        if (!isLoaded)
+        {
+            loadData();
+        }
+        return isBankAccount ? "TRANSFER to \"" + name + "\"" : name;
+    }
+
+    private void loadData()
+    {
+        AccountDA.getInstance().loadAccount(id, new AccountDA.AccountHandler()
+        {
+            public void setData(final String name, final boolean isBankAccount)
+            {
+                Category.this.name = name;
+                Category.this.isBankAccount = isBankAccount;
+                isLoaded = true;
+            }
+        });
+    }
+
+    public void setName(final String name)
+    {
+        assert (!isDeleted);
+        AccountDA.getInstance().updateAccountName(id, name);
+        if (isLoaded)
+        {
+            loadData();
+        }
+    }
+    
+    public boolean isTranfer()
+    {
+        return isBankAccount;
+    }
+    
+    public static void main(String[] args) 
 	{
 	}
 }
