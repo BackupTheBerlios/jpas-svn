@@ -92,6 +92,10 @@ public class Category extends JpasObservable<Category>
     private String name;
     private AccountDA.AccountType type;
 
+    private boolean totalLoaded = false;
+    private long total;
+
+    
     private Category(final Integer id)
     {
         defaultLogger.debug("Constructing Category: " + id);
@@ -105,13 +109,16 @@ public class Category extends JpasObservable<Category>
 
     void delete(final boolean internalCall)
     {
-        /*
-         * TODO: This should probably not immediately delete this category. All
-         * refering transfers must be altered.
-         */
         if (!internalCall)
         {
             AccountDA.getInstance().deleteAccount(id);
+            
+            final Category cat = getUnknownCategory();
+            final Integer[] transferIDs = TransAccountMappingDA.getInstance().getAllTranfersForAccount(id);
+            for(int i = 0; i < transferIDs.length; i++)
+            {
+                TransactionTransfer.getTransactionTransferforIDs(transferIDs[i], id).setCategory(cat);
+            }
         }
         categoryCache.remove(id);
         isDeleted = true;
@@ -190,7 +197,12 @@ public class Category extends JpasObservable<Category>
 
     public long getTotal()
     {
-        return TransAccountMappingDA.getInstance().getAccountBalance(id);
+        if(!totalLoaded)
+        {
+            total = TransAccountMappingDA.getInstance().getAccountBalance(id);
+            totalLoaded = true;
+        }
+        return total;
     }
 
     public boolean isDeleted()
