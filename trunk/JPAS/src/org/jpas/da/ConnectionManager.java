@@ -1,5 +1,6 @@
 package org.jpas.da;
 
+import org.hsqldb.jdbcDriver;
 import org.jpas.util.PropertyManager;
 import org.apache.log4j.*;
 import java.sql.*;
@@ -31,22 +32,42 @@ public class ConnectionManager
 		final String dbMode = PropertyManager.instance.getProperty(
 									   PropertyManager.DB_MODE,
 										"SERVER");
-
+		final String dbDriver = "org.hsqldb.jdbcDriver";
+		String dbName = "jdbc:hsqldb:";
 
 		Connection tempConn = null;
+
 		try
 		{
-			Class.forName("org.hsqldb.jdbcDriver");
-
+			
+			Class.forName(dbDriver).newInstance();
+			
 			if(dbMode.equalsIgnoreCase("SERVER"))
 			{
-				final String dbName = PropertyManager.instance.getProperty(
-												PropertyManager.DB_NAME,
-												 "jpac_db");
-
-				tempConn = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost/" + dbName,
+				dbName += "hsql://localhost/" + PropertyManager.instance.getProperty(
+													PropertyManager.DB_NAME,
+				 									"jpasdb");
+				tempConn = DriverManager.getConnection(dbName,
 													   "sa",
 													   "");
+				Runtime.getRuntime().addShutdownHook(new Thread()
+						{
+							public void run()
+							{
+								try
+								{
+									defaultLogger.info("Closing database connection!");
+									if(!conn.isClosed())
+									{
+										conn.close();
+									}
+								}
+								catch(final SQLException sqle)
+								{
+									defaultLogger.error("Unable to close the database connection!", sqle);
+								}
+							}
+						});
 			}
 			else
 			{
@@ -55,10 +76,11 @@ public class ConnectionManager
 												 "db/");
 				final String dbFilePrefix = PropertyManager.instance.getProperty(
 												PropertyManager.DB_FILE_PREFIX,
-												 "jpac_db");
+												 "jpasdb");
 
+				dbName += "file:" + dbFileDir + dbFilePrefix;
 				tempConn = DriverManager
-					   .getConnection("jdbc:hsqldb:file:" + dbFileDir + dbFilePrefix,
+					   .getConnection(dbName,
 									   "sa",
 									   "");
 				Runtime.getRuntime().addShutdownHook(new Thread()
@@ -67,7 +89,13 @@ public class ConnectionManager
 						{
 							try
 							{
+								defaultLogger.info("Shutting down database!");
 								update("SHUTDOWN");
+								
+								if(!conn.isClosed())
+								{
+									conn.close();
+								}
 							}
 							catch(final SQLException sqle)
 							{
@@ -85,25 +113,16 @@ public class ConnectionManager
 		}
 		catch(final SQLException sqle)
 		{
-			defaultLogger.error("Unable to open database connection!", sqle);
+			defaultLogger.error("Unable to open database connection: \"" + dbName + "\"", sqle);
+			System.exit(1);
+		}
+		catch(final Exception e)
+		{
+			defaultLogger.error("Problem creating DatabaseManager!", e);
 			System.exit(1);
 		}
 		conn = tempConn;
 
-		Runtime.getRuntime().addShutdownHook(new Thread()
-			{
-				public void run()
-				{
-					try
-					{
-						conn.close();
-					}
-					catch(final SQLException sqle)
-					{
-						defaultLogger.error("Unable to close the database connection!", sqle);
-					}
-				}
-			});
 	}
 
 	public ResultSet query(final String sql) throws SQLException
