@@ -50,16 +50,6 @@ public class Account
         return accounts;
     }
 
-    public static void main(final String[] args)
-    {
-        final Account[] accounts = getAllAccounts();
-        for (int i = 0; i < accounts.length; i++)
-        {
-            System.out.println("name: " + accounts[i].getName());
-            accounts[i].setName("account " + i);
-        }
-    }
-
     private final Integer id;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
@@ -108,4 +98,15 @@ public class Account
             loadData();
         }
     }
+
+    public static void main(final String[] args)
+    {
+        final Account[] accounts = getAllAccounts();
+        for (int i = 0; i < accounts.length; i++)
+        {
+            System.out.println("name: " + accounts[i].getName());
+            accounts[i].setName("account " + i);
+        }
+    }
+
 }
