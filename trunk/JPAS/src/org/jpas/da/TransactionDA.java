@@ -37,7 +37,7 @@ public class TransactionDA
 	}
     
     
-	public void loadAccount(final Integer id, final TransactionHandler handler)
+	public void loadTransaction(final Integer id, final TransactionHandler handler)
 	{
 		final String sqlStr = "SELECT * FROM " + DBNames.TN_TRANSACTION
 										 + " WHERE " + DBNames.CN_TRANSACTION_ID
