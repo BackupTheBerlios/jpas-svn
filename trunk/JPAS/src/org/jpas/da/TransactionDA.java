@@ -29,8 +29,16 @@ public class TransactionDA
 {
     private static final Logger defaultLogger = Logger.getLogger(TransactionDA.class);
 
+    private static final TransactionDA instance = new TransactionDA();
     
-    
+    public static TransactionDA getInstance()
+    {
+        return instance;
+    }
+
+    private TransactionDA()
+    {
+    }
     
 	public static interface TransactionHandler
 	{
@@ -195,7 +203,7 @@ public class TransactionDA
 		}
 	}
 
-	public Integer createAccount(final Integer accountId, final String payee, final String memo, final String num, final Date date)
+	public Integer createTransaction(final Integer accountId, final String payee, final String memo, final String num, final Date date)
 	{
 		final String sqlSequenceStr = "CALL NEXT VALUE FOR " + DBNames.SEQ_TRANSACTION_ID;
 
@@ -205,8 +213,8 @@ public class TransactionDA
 			final ResultSet rs = ConnectionManager.getInstance().query(sqlSequenceStr);
 			if(!rs.next())
 			{
-				defaultLogger.error("Unable to get next Account ID: \"" + sqlSequenceStr + "\"");
-				throw new RuntimeException("Unable to get next Account ID: \"" + sqlSequenceStr + "\"");
+				defaultLogger.error("Unable to get next transaction ID: \"" + sqlSequenceStr + "\"");
+				throw new RuntimeException("Unable to get next transaction ID: \"" + sqlSequenceStr + "\"");
 			}
 			id = (Integer)rs.getObject(1);
 		}
@@ -237,7 +245,7 @@ public class TransactionDA
 			final int result = ConnectionManager.getInstance().update(sqlStr);
 			if(result < 1)
 			{
-				defaultLogger.error("Unable to create account: \"" + sqlStr + "\"");
+				defaultLogger.error("Unable to create transaction: \"" + sqlStr + "\"");
 				throw new RuntimeException(sqlStr);
 			}
 		}
@@ -286,7 +294,7 @@ public class TransactionDA
 		catch(final SQLException sqle)
 		{
 			defaultLogger.error("SQLException while loading account name!", sqle);
-			throw new RuntimeException("Unable to load account id's!", sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
 		}	
 	}
 	
@@ -310,7 +318,7 @@ public class TransactionDA
 		catch(final SQLException sqle)
 		{
 			defaultLogger.error("SQLException while loading account name!", sqle);
-			throw new RuntimeException("Unable to load account id's!", sqle);
+			throw new RuntimeException("Unable to load transaction id's!", sqle);
 		}
 	}
 
