@@ -25,9 +25,12 @@ package org.jpas.gui;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.event.*;
+
 import com.toedter.calendar.*;
 import org.jpas.gui.util.*;
 import org.jpas.model.*;
+import org.jpas.util.*;
 import org.jpas.gui.components.*;
 /**
  * @author Owner
@@ -35,26 +38,57 @@ import org.jpas.gui.components.*;
  */
 public class JpasFrame extends JFrame
 {
-    private JButton btnReminder = new JButton("Reminders");
+    private final JButton btnReminder = new JButton("Reminders");
+    private final CardLayout tableLayout = new CardLayout();
+    private final JPanel tablePanel = new JPanel(tableLayout); 
+    private final AccountList accountList = new AccountList();
     
     public JpasFrame()
     {
         super("JPAS - Java Personal Accounting Software");
         this.getContentPane().add(createMainPanel());
         setJMenuBar(ActionFactory.getInstance().createJMenuBar());
+        initTablePanel();
+        initListeners();
         pack();
+    }
+    
+    private void initListeners()
+    {
+    	accountList.addListSelectionListener(new ListSelectionListener()
+		{
+			public void valueChanged(final ListSelectionEvent e)
+			{
+				final Account selected = (Account)accountList.getSelectedValue();
+				System.out.println("name: " + selected.getName());
+				
+				tableLayout.show(tablePanel, selected.getName());
+				tablePanel.invalidate();
+			}
+		});
+    	
+    	Account.getObservable().addObserver(new JpasObserver<Account>()
+    			{
+    				public void update(final JpasObservable<Account> observable, final JpasDataChange<Account> change ) 
+    				{
+    					if(change instanceof JpasDataChange.Add || change instanceof JpasDataChange.Delete)
+    					{
+    						initTablePanel();
+    					}
+    				}
+    			});
     }
     
     public JComponent createMainPanel()
     {
         final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
         splitPane.setLeftComponent(createLeftPanel());
-        splitPane.setRightComponent(createRightPanel());
+        splitPane.setRightComponent(new JScrollPane(tablePanel));
         return splitPane;
     }
     
     public JPanel createLeftPanel()
-    {
+    {	
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(createAccountListPanel(), BorderLayout.CENTER);
         panel.add(createReminderPanel(), BorderLayout.SOUTH);
@@ -65,7 +99,10 @@ public class JpasFrame extends JFrame
     public JPanel createAccountListPanel()
     {
         final JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new AccountList(), BorderLayout.CENTER);
+        
+        accountList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        panel.add(accountList, BorderLayout.CENTER);
        
         return panel;
     }
@@ -78,12 +115,26 @@ public class JpasFrame extends JFrame
     }
     
     
-    public JPanel createRightPanel()
+    public void initTablePanel()
     {
-        final JPanel panel = new JPanel(new BorderLayout());
+        tablePanel.removeAll();
+        
+    	final Account[] accounts = Account.getAllAccounts();
 
-        panel.add(new JScrollPane( new TransactionTable(Account.getAllAccounts()[0])));
-        return panel;
+		for(int i = 0; i < accounts.length; i++)
+		{
+			System.out.println("adding: " + accounts[i].getName());
+			tablePanel.add(new TransactionTable(accounts[i]), accounts[i].getName());
+		}
+		if(accounts.length > 0)
+		{
+			tableLayout.show( tablePanel, accounts[0].getName());
+		}
+		else
+		{
+			tablePanel.add(new JLabel("No accounts exist!"));
+		}
+		
     }
     
     
