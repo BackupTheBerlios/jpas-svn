@@ -45,7 +45,7 @@ public class TransactionTable extends JTable
      */
     public TransactionTable(final Account account)
     {
-    	final TransactionTableCellRenderer transactionRenderer = new TransactionTableCellRenderer();
+    	final TransactionTableCellRenderer transactionRenderer = new TransactionTableCellRenderer(account);
     	this.setModel(new TransactionTableModel(account));
         this.setDefaultRenderer(Transaction.class, transactionRenderer);
         this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(account));
