@@ -12,6 +12,7 @@ package org.jpas.da;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 public class ReminderAccountMappingDA
@@ -157,4 +158,27 @@ public class ReminderAccountMappingDA
 
 		}
     }
+
+    public static void unitTest_GetAmount()
+    {
+        System.out.println("Amount: "
+                + getInstance().getReminderAmount(new Integer(0)));
+    }
+
+    
+    public static void unitTest_Create()
+    {
+        getInstance().createReminderAccountMapping(new Integer(0), new Integer(2),
+                7735);
+        getInstance().createReminderAccountMapping(new Integer(0), new Integer(3),
+                5855);
+    }
+
+    public static void main(String[] args)
+    {
+        BasicConfigurator.configure();
+
+        unitTest_GetAmount();
+    }
+
 }
