@@ -64,6 +64,11 @@ public class Category extends JpasObservable<Category>
         return getCategoryForID(AccountDA.getInstance().getUnknownCategoryID());
     }
     
+    public static Category getCategoryForAccount(final Account account)
+    {
+    	return getCategoryForID(account.id);
+    }
+    
     public static Category createIncomeCategory(final String name)
     {
         return getCategoryForID(AccountDA.getInstance().createAccount(name,
