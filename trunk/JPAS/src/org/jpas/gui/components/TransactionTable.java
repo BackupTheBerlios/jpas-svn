@@ -43,23 +43,49 @@ public class TransactionTable extends JTable
 {
 	private final Dimension dim;
 	private final TransactionTableCellRenderer transactionRenderer;
-	private final Color topColor = new Color(213, 255, 213);
+	private final Color topColor = new Color(231, 255, 231);
+	private final Color bottomColor = new Color(229, 227, 208);
 	
+	private final int[] columnWidths;
+	private final int[] rowHeights;
+
     /**
      * 
      */
     public TransactionTable(final Account account)
     {
-    	transactionRenderer = new TransactionTableCellRenderer(account);
+        this.columnWidths = createColumnWidths();
+        this.rowHeights = createRowHeights();
+    	transactionRenderer = new TransactionTableCellRenderer(account, columnWidths, rowHeights);
     	this.setModel(new TransactionTableModel(account));
         this.setDefaultRenderer(Transaction.class, transactionRenderer);
-        this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(account));
-        this.setRowHeight(36);
+        this.setDefaultEditor(Transaction.class, new TransactionTableCellEditor(account, columnWidths, rowHeights));
+        this.setRowHeight(total(rowHeights) + 1);
         this.setSurrendersFocusOnKeystroke(true);
-        
+        this.setBackground(bottomColor);
         dim = transactionRenderer.getPreferredSize();
     }
 
+    public int[] createColumnWidths()
+    {
+        return new int[]{105, 85, 125, 85, 85, 95};
+    }
+    
+    public int[] createRowHeights()
+    {
+        return new int[]{18, 18};
+    }
+    
+    private int total(final int[] values)
+    {
+        int total = 0;
+        for(int i = 0; i < values.length; i++)
+        {
+            total += values[i];
+        }
+        return total;
+    }
+    
     public Dimension getPreferredSize()
     {
     	return new Dimension(dim.width, dim.height * getModel().getRowCount());
@@ -72,65 +98,64 @@ public class TransactionTable extends JTable
 
     public void paintComponent(final Graphics g)
     {
-        if(isOpaque())
+        if(isOpaque() && (g != null))
         {
-	    	final Graphics sg = g.create();
-	    	
-	    	final Rectangle rect = getBounds();
-	    	sg.setColor(getBackground());
-	    	sg.fillRect(0, 0, rect.width, rect.height);
-	    	
-	    	final int rowHeight = getRowHeight();
-	    	final int halfHeight = rowHeight/2;
-	    	//sg.setColor(topColor);
-	    	
-	    	//final JPanel panel = (JPanel)transactionRenderer.getTableCellRendererComponent(this, null, false, false, 0, 0);
-    	    //panel.setDebugGraphicsOptions(DebugGraphics.LOG_OPTION);
-    	    
-    	    //paintCells(g);
-
-    	    for(int y = 0; y < rect.height; y += rowHeight)
-	    	{
-    	        final Graphics cg = sg.create(0, y, rect.width, rowHeight);
-	    	    cg.setClip(0, 0, rect.width, rowHeight);
-	    	    cg.setColor(topColor);
-	    	    //panel.setBounds(0, y, rect.width, rowHeight);
-	    	    //panel.getUI().update(g, panel);
-	    	    cg.fillRect(0, 0, rect.width, halfHeight);
-	    	}
+            final Graphics sg = g.create();
+            try
+            {
+		    	final Rectangle rect = getBounds();
+		    	sg.setColor(getBackground());
+		    	sg.fillRect(0, 0, rect.width, rect.height);
+		    	
+		    	final int rowHeight = getRowHeight();
+		    	final int halfHeight = rowHeight/2;
+	
+	    	    for(int y = 0; y < rect.height; y += rowHeight)
+		    	{
+	    	        sg.setColor(topColor);
+		    	    sg.fillRect(0, y, rect.width, halfHeight);
+		    	    sg.setColor(Color.gray);
+		    	    sg.drawLine(0, y, rect.width, y);
+		    	    final int halfY = y + halfHeight;
+		    	    sg.drawLine(0, halfY, rect.width, halfY);
+		    	}
+	    	    int fromLeft = 0;
+	    	    for(int i = 0; i < 2; i++)
+	    	    {
+    	            fromLeft += columnWidths[i];
+		    	    sg.drawLine(fromLeft, 0, fromLeft, rect.height);
+		    	    sg.drawLine(fromLeft-1, 0, fromLeft-1, rect.height);
+	    	    }
+	    	    
+	    	    int fromRight = 0;
+	    	    for(int i = columnWidths.length -1; i >= 3; i--)
+	    	    {
+    	            fromRight += columnWidths[i];
+    	            final int x = rect.width - fromRight;
+		    	    sg.drawLine(x, 0, x, rect.height);
+		    	    sg.drawLine(x-1, 0, x-1, rect.height);
+	    	    }
+            }
+            finally
+            {
+                sg.dispose();
+            }
         }
 
-    	if (ui != null) {
-            Graphics scratchGraphics = (g == null) ? null : g.create();
-            try {
-                ui.paint(scratchGraphics, this);
+    	if (ui != null) 
+    	{
+            final Graphics sg = (g == null) ? null : g.create();
+            try 
+            {
+                ui.paint(sg, this);
             }
             finally {
-                scratchGraphics.dispose();
+                sg.dispose();
             }
         }
 
     }
 
-    private void paintCells(final Graphics g)
-    {
-        //final Rectangle bounds = getBounds();
-        Rectangle cellRect = getCellRect(0, 0, false);
-        CellRendererPane rendererPane = (CellRendererPane)getComponent(0);
-        for(int row = 0; row < 15/*cellRect.y <= bounds.y*/; row++) 
-	    {
-	        cellRect = getCellRect(row, 0, false);
-	        final Graphics sg = g.create(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
-	        
-            Component component = prepareRenderer(transactionRenderer, row, 0);
-            
-            //rendererPane.paintComponent( sg, component, this, 0, 0, cellRect.width, cellRect.height, true);
-            
-            //component.paint(sg);
-	    }
-    }
-
-    
     public static void main(String[] args)
     {
     }
