@@ -115,9 +115,9 @@ public class ReminderDA
 		final String sqlStr = "INSERT INTO " + DBNames.TN_REMINDER
 										 + " ( " + DBNames.CN_REMINDER_ID
 										 + " , " + DBNames.CN_REMINDER_ACCOUNT
-										 + " , '" + DBNames.CN_REMINDER_PAYEE
-										 + "' , '" + DBNames.CN_REMINDER_MEMO
-										 + "' , " + DBNames.CN_REMINDER_DATE
+										 + " , " + DBNames.CN_REMINDER_PAYEE
+										 + " , " + DBNames.CN_REMINDER_MEMO
+										 + " , " + DBNames.CN_REMINDER_DATE
 										 + " , " + DBNames.CN_REMINDER_AMOUNT_METHOD
 										 + " , " + DBNames.CN_REMINDER_REPEAT_METHOD
 										 + " , " + DBNames.CN_REMINDER_REPEAT_VALUE
@@ -125,11 +125,11 @@ public class ReminderDA
 										 + id + " , " 
 										 + accountId + " , '"
 										 + payee + "' , '" 
-										 + memo + "' , "
-										 + date + " , "
+										 + memo + "' , '"
+										 + date + "' , "
 										 + amountMethod.dbValue + " , "
 										 + repeatMethod.dbValue + " , "
-										 + repeatValue + "')";
+										 + repeatValue + ")";
 
 
 		try
@@ -408,7 +408,7 @@ public class ReminderDA
 
     public static void unitTest_Create()
     {
-        getInstance().createReminder(new Integer(0), "Joe`s bar and grill", "memo", new Date(System.currentTimeMillis()), AmountMethod.FIXED, RepeatMethod.WEEKLY, 1);
+        getInstance().createReminder(new Integer(0), "My Utilities", "memo", new Date(System.currentTimeMillis()), AmountMethod.FIXED, RepeatMethod.WEEKLY, 1);
     }
     
     
