@@ -39,6 +39,7 @@ public class CategoryComboBox extends JComboBox
 	public CategoryComboBox()
 	{
 		setModel(model);
+		setEditable(false);
 		model.reload();
 		setRenderer(new CategoryListCellRenderer());
 	}
