@@ -106,7 +106,34 @@ public class TransAccountMappingDA
         }
     }
 
-    public void updateTransAccountMapping(final Integer transactionID,
+    public void updateTAMAccount(final Integer transactionID,
+            final Integer accountID, final Integer newAccountID)
+    {
+        final String sqlStr = "UPDATE " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
+                + " SET " + DBNames.CN_TAM_ACCOUNT_ID + " = " + newAccountID + " WHERE "
+                + DBNames.CN_TAM_TRANSACTION_ID + " IS " + transactionID
+                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+
+        try
+        {
+            final int result = ConnectionManager.getInstance().update(sqlStr);
+            if (result < 1)
+            {
+                defaultLogger.error("Transaction/Account id's not found: \""
+                        + sqlStr + "\"");
+                throw new RuntimeException(
+                        "Transaction/Account id's not found: \"" + sqlStr
+                                + "\"");
+            }
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(sqlStr, sqle);
+            throw new RuntimeException(sqlStr, sqle);
+        }
+    }
+    
+    public void updateTAMAmount(final Integer transactionID,
             final Integer accountID, final long amount)
     {
         final String sqlStr = "UPDATE " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
@@ -131,7 +158,6 @@ public class TransAccountMappingDA
             defaultLogger.error(sqlStr, sqle);
             throw new RuntimeException(sqlStr, sqle);
         }
-
     }
 
     public void deleteTransAccountMapping(final Integer transactionID,
@@ -257,7 +283,33 @@ public class TransAccountMappingDA
         return inflowsTotal - outflowsTotal;
     }
 
-    public Integer[] getAllTransAccountTranfers(final Integer transactionID)
+    public Integer[] getAllTranfersForAccount(final Integer accountID)
+    {
+        final String sqlStr = "SELECT " + DBNames.CN_TAM_ACCOUNT_ID + " FROM "
+                + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
+                + DBNames.CN_TAM_ACCOUNT_ID + " IS '" + accountID + "'";
+
+        try
+        {
+            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final List<Integer> idList = new ArrayList<Integer>();
+            while (rs.next())
+            {
+                idList.add((Integer) rs.getObject(DBNames.CN_TAM_ACCOUNT_ID));
+            }
+            return idList.toArray(new Integer[idList.size()]);
+        }
+        catch (final SQLException sqle)
+        {
+            defaultLogger.error(
+                    "SQLException while loading Trans-Account Mapping!", sqle);
+            throw new RuntimeException("Unable to load Trans-Account Mapping!",
+                    sqle);
+        }
+    }
+
+    
+    public Integer[] getAllTranfersForTransaction(final Integer transactionID)
     {
         final String sqlStr = "SELECT " + DBNames.CN_TAM_ACCOUNT_ID + " FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
