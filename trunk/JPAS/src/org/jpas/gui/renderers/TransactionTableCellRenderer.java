@@ -67,7 +67,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
     
     private void init()
     {
-        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{85, 85, 105, 85, 85, 95});
+        final FlexGridLayout layout = new FlexGridLayout(new int[]{18, 18}, new int[]{105, 85, 105, 85, 85, 95});
         layout.setFlexColumn(2, true);
         setLayout(layout);
     	add(dateLabel);
