@@ -15,7 +15,7 @@ import org.jpas.da.AccountDA;
  */
 public class Account
 {
-    private static Map accountCache = new WeakHashMap();
+    private static Map<Integer, Account> accountCache = new WeakHashMap<Integer, Account>();
     private static final Logger defaultLogger = Logger.getLogger(Account.class);
 
     private static String validateName(final String name)
@@ -31,7 +31,7 @@ public class Account
 
     static Account getAccountForID(final Integer id)
     {
-        Account account = (Account) accountCache.get(id);
+        Account account = accountCache.get(id);
         if (account == null)
         {
             account = new Account(id);
@@ -58,6 +58,7 @@ public class Account
 
     private Account(final Integer id)
     {
+        defaultLogger.debug("Constructing Account: " + id);
         this.id = id;
     }
 

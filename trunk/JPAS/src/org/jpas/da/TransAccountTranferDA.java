@@ -10,13 +10,11 @@
  */
 package org.jpas.da;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.*;
-import org.jpas.model.*;
 
 /**
  * @author Owner
@@ -156,7 +154,7 @@ public class TransAccountTranferDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(outflowsSql);
+            final ResultSet rs = ConnectionManager.getInstance().query(inflowsSql);
             if (rs.next())
             {
                 inflowsTotal = ((Long) rs.getObject(1)).longValue();
@@ -187,12 +185,12 @@ public class TransAccountTranferDA
 		try
         {
             final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
-            final List idList = new ArrayList();
+            final List<Integer> idList = new ArrayList<Integer>();
             while (rs.next())
             {
-                idList.add(rs.getObject(DBNames.CN_TAM_ACCOUNT_ID));
+                idList.add((Integer)rs.getObject(DBNames.CN_TAM_ACCOUNT_ID));
             }
-            return (Integer[]) idList.toArray(new Integer[idList.size()]);
+            return idList.toArray(new Integer[idList.size()]);
         } 
 		catch (final SQLException sqle)
         {

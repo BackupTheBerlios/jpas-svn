@@ -13,7 +13,6 @@ package org.jpas.da;
 
 import java.sql.*;
 import org.apache.log4j.*;
-import org.jpas.da.AccountDA.AccountHandler;
 import java.util.*;
 import java.sql.Date;
 /*
@@ -308,12 +307,12 @@ public class TransactionDA
 		try
 		{
 			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
-			final List idList = new ArrayList();
+			final List<Integer> idList = new ArrayList<Integer>();
 			while(rs.next())
 			{
-				idList.add(rs.getObject(DBNames.CN_TRANSACTION_ID));
+				idList.add((Integer)rs.getObject(DBNames.CN_TRANSACTION_ID));
 			}
-			return (Integer[])idList.toArray(new Integer[idList.size()]);
+			return idList.toArray(new Integer[idList.size()]);
 		}
 		catch(final SQLException sqle)
 		{
@@ -324,7 +323,7 @@ public class TransactionDA
 
     private static void unitTest_Create()
     {
-        getInstance().createTransaction(new Integer(0), "Joe`s bar and grill", "memo", "23", new Date(2004, 03, 03));
+        getInstance().createTransaction(new Integer(0), "Joe`s bar and grill", "memo", "23", new Date(System.currentTimeMillis()));
     }
     
     

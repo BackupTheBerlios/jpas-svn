@@ -20,7 +20,7 @@ public class Category
 {
 	private static final Logger defaultLogger = Logger.getLogger(Category.class);
 	
-	private static Map categoryCache = new WeakHashMap();
+	private static Map<Integer, Category> categoryCache = new WeakHashMap<Integer, Category>();
 
     private static String validateName(final String name)
     {
@@ -47,7 +47,7 @@ public class Category
 
     static Category getCategoryForID(final Integer id)
     {
-        Category account = (Category) categoryCache.get(id);
+        Category account = categoryCache.get(id);
         if (account == null)
         {
             account = new Category(id);
