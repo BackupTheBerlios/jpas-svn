@@ -313,7 +313,7 @@ public class TransactionDA
 		}
 	}
 
-    private static void unitTest_Create()
+    public static void unitTest_Create()
     {
         getInstance().createTransaction(new Integer(0), "Joe`s bar and grill", "memo", "23", new Date(System.currentTimeMillis()));
     }

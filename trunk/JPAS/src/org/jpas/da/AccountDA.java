@@ -264,7 +264,7 @@ public class AccountDA
 		}
 	}
 
-	private static void unitTest_Create()
+	public static void unitTest_Create()
 	{
 		instance.createAccount("Checking", true);
 		instance.createAccount("Savings", true);
