@@ -1,13 +1,3 @@
-/*
- * Created on Sep 11, 2004 - 9:59:59 AM
- * 
- * Title: JPAS
- * Description: Java based Personal Accounting System
- * Copyright: Copyright (c) 2004
- * License: Distributed under the terms of the GPL v2
- * @author Justin Smith
- * @version 1.0
- */
 package org.jpas.da;
 
 import java.sql.ResultSet;
@@ -17,10 +7,14 @@ import java.util.List;
 import org.apache.log4j.*;
 
 /**
- * @author Owner
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * Created on Sep 11, 2004 - 9:59:59 AM
+ * 
+ * Title: JPAS
+ * Description: Java based Personal Accounting System
+ * Copyright: Copyright (c) 2004
+ * License: Distributed under the terms of the GPL v2
+ * @author Justin Smith
+ * @version 1.0
  */
 public class TransAccountMappingDA
 {
@@ -229,18 +223,18 @@ public class TransAccountMappingDA
         }    
     }
     
-    private static void unitTest_Create()
+    public static void unitTest_Create()
     {
         getInstance().createTransAccountMapping(new Integer(0), new Integer(2), 435);
         getInstance().createTransAccountMapping(new Integer(0), new Integer(3), 755);
     }
     
-    private static void unitTest_GetAmount()
+    public static void unitTest_GetAmount()
     {
         System.out.println("Amount: " + getInstance().getTransactionAmount(new Integer(0)));
     }
     
-    private static void unitTest_GetBalance()
+    public static void unitTest_GetBalance()
     {
         System.out.println("Balance: " + getInstance().getAccountBalance(new Integer(0)));
         System.out.println("Balance: " + getInstance().getAccountBalance(new Integer(1)));

@@ -15,15 +15,7 @@ import java.sql.*;
 import org.apache.log4j.*;
 import java.util.*;
 import java.sql.Date;
-/*
- * 
- * Title: JPAS
- * Description: Java based Personal Accounting System
- * Copyright: Copyright (c) 2004
- * License: Distributed under the terms of the GPL v2
- * @author Justin Smith
- * @version 1.0
- */
+
 public class TransactionDA
 {
     private static final Logger defaultLogger = Logger.getLogger(TransactionDA.class);

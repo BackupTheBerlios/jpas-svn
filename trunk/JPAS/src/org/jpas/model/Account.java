@@ -7,22 +7,20 @@ import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;
 
 /**
- * Title: JPAS Description: Java based Personal Accounting System Copyright:
- * Copyright (c) 2004 License: Distributed under the terms of the GPL v2
  * 
+ * Title: JPAS
+ * Description: Java based Personal Accounting System
+ * Copyright: Copyright (c) 2004
+ * License: Distributed under the terms of the GPL v2
  * @author Justin Smith
  * @version 1.0
+ * 
  */
 public class Account
 {
     private static Map<Integer, Account> accountCache = new WeakHashMap<Integer, Account>();
     private static final Logger defaultLogger = Logger.getLogger(Account.class);
 
-    private static String validateName(final String name)
-    {
-        return name;
-    }
-    
     public static Account createAccount(final String name)
     {
         return getAccountForID(AccountDA.getInstance()
@@ -102,7 +100,7 @@ public class Account
     }
 
     
-    private static void unitTest_rename()
+    public static void unitTest_rename()
     {
         final Account[] accounts = getAllAccounts();
         for (int i = 0; i < accounts.length; i++)
@@ -112,7 +110,7 @@ public class Account
         }
     }
 
-    private static void unitTest_List()
+    public static void unitTest_List()
     {
         final Account[] accs = Account.getAllAccounts();
         for(int i = 0; i < accs.length; i++)
