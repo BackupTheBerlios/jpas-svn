@@ -67,7 +67,7 @@ public abstract class JpasListModel <T> extends AbstractListModel implements Com
 		populateData();
 	}
 	
-	private void populateData()
+	protected void populateData()
 	{
 		data.clear();
 		for(final T value: loadData())
