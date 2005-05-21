@@ -58,7 +58,7 @@ public class TransactionDA
 	{
 		final String sqlStr = "SELECT * FROM " + DBNames.TN_TRANSACTION
 										 + " WHERE " + DBNames.CN_TRANSACTION_ID
-										 + " IS " + id;
+										 + " = " + id;
 		try
 		{
 			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);

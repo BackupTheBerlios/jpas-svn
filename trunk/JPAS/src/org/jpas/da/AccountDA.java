@@ -332,7 +332,7 @@ public class AccountDA
 		final String sqlStr = "SELECT " + DBNames.CN_ACCOUNT_ID
 							+ " FROM " + DBNames.TN_ACCOUNT
 							+ " WHERE " + DBNames.CN_ACCOUNT_TYPE
-							+ " IS NOT " +  type.dbValue
+							+ " != " +  type.dbValue
 							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
 		{

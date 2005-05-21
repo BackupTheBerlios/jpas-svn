@@ -173,7 +173,7 @@ public class ReminderDA
 			final int result = ConnectionManager.getInstance().update(
 											  "DELETE FROM " + DBNames.TN_REMINDER
 											 + " WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS '" + id + "'");
+											 + " = '" + id + "'");
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: "+ id +"!");
@@ -214,7 +214,7 @@ public class ReminderDA
 	{
 		final String sqlStr = "SELECT * FROM " + DBNames.TN_REMINDER
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-										 + " IS " + id;
+										 + " = " + id;
 		try
 		{
 			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
@@ -261,7 +261,7 @@ public class ReminderDA
 										 + " , " + DBNames.CN_REMINDER_REPEAT_VALUE
 										 + " = " + repeatValue
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -285,7 +285,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_ACCOUNT
 										 + " = " + accountID 
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-										 + " IS " + id;
+										 + " = " + id;
 
 		try
 		{
@@ -310,7 +310,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_PAYEE
 										 + " = '" + payee 
 										 + "' WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -334,7 +334,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_MEMO
 										 + " = '" + memo 
 										 + "' WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -358,7 +358,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_DATE
 										 + " = " + date 
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -382,7 +382,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_AMOUNT_METHOD
 										 + " = " + amountMethod.dbValue
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -406,7 +406,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_REPEAT_METHOD
 										 + " = " + repeatMethod.dbValue 
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -430,7 +430,7 @@ public class ReminderDA
 										 + " SET " + DBNames.CN_REMINDER_REPEAT_VALUE
 										 + " = " + repeatValue 
 										 + " WHERE " + DBNames.CN_REMINDER_ID
-											 + " IS " + id;
+											 + " = " + id;
 
 		try
 		{
@@ -453,7 +453,7 @@ public class ReminderDA
 		final String sqlStr = "SELECT " + DBNames.CN_REMINDER_ID
 								+ " FROM " + DBNames.TN_REMINDER
 								+ " WHERE " + DBNames.CN_REMINDER_ID
-								+ " IS " + id;
+								+ " = " + id;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();

@@ -84,8 +84,8 @@ public class TransAccountMappingDA
     {
         final String sqlStr = "SELECT * FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_TAM_TRANSACTION_ID + " IS " + transactionID
-                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+                + DBNames.CN_TAM_TRANSACTION_ID + " = " + transactionID
+                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
         try
         {
             final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
@@ -113,8 +113,8 @@ public class TransAccountMappingDA
     {
         final String sqlStr = "UPDATE " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
                 + " SET " + DBNames.CN_TAM_ACCOUNT_ID + " = " + newAccountID + " WHERE "
-                + DBNames.CN_TAM_TRANSACTION_ID + " IS " + transactionID
-                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+                + DBNames.CN_TAM_TRANSACTION_ID + " = " + transactionID
+                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
 
         try
         {
@@ -140,8 +140,8 @@ public class TransAccountMappingDA
     {
         final String sqlStr = "UPDATE " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
                 + " SET " + DBNames.CN_TAM_AMOUNT + " = " + amount + " WHERE "
-                + DBNames.CN_TAM_TRANSACTION_ID + " IS " + transactionID
-                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+                + DBNames.CN_TAM_TRANSACTION_ID + " = " + transactionID
+                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
 
         try
         {
@@ -167,8 +167,8 @@ public class TransAccountMappingDA
     {
         final String sqlStr = "DELETE FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_TAM_TRANSACTION_ID + " IS " + transactionID
-                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+                + DBNames.CN_TAM_TRANSACTION_ID + " = " + transactionID
+                + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
         try
         {
             if (ConnectionManager.getInstance().update(sqlStr) < 1)
@@ -190,7 +190,7 @@ public class TransAccountMappingDA
     {
         final String sqlStr = "SELECT SUM(" + DBNames.CN_TAM_AMOUNT + ") FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_TAM_TRANSACTION_ID + " IS '" + transactionID + "'";
+                + DBNames.CN_TAM_TRANSACTION_ID + " = '" + transactionID + "'";
 
         try
         {
@@ -224,13 +224,13 @@ public class TransAccountMappingDA
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + "."
                 + DBNames.CN_TAM_TRANSACTION_ID + " AND "
                 + DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ACCOUNT
-                + " IS " + accountID;
+                + " = " + accountID;
 
         final String inflowsSql = "SELECT SUM("
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + "."
                 + DBNames.CN_TAM_AMOUNT + ") FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_TAM_ACCOUNT_ID + " IS " + accountID;
+                + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
 
         final long outflowsTotal;
         final long inflowsTotal;
@@ -315,7 +315,7 @@ public class TransAccountMappingDA
     {
         final String sqlStr = "SELECT " + DBNames.CN_TAM_ACCOUNT_ID + " FROM "
                 + DBNames.TN_TRANSACTION_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_TAM_TRANSACTION_ID + " IS '" + transactionID + "'";
+                + DBNames.CN_TAM_TRANSACTION_ID + " = '" + transactionID + "'";
 
         try
         {
@@ -341,9 +341,9 @@ public class TransAccountMappingDA
 		final String sqlStr = "SELECT " + DBNames.CN_TAM_TRANSACTION_ID
 								+ " FROM " + DBNames.TN_TRANSACTION_ACCOUNT_MAP
 								+ " WHERE " + DBNames.CN_TAM_TRANSACTION_ID
-								+ " IS " + transId 
+								+ " = " + transId 
 								+ " AND " + DBNames.CN_TAM_ACCOUNT_ID
-								+ " IS " + accountId;
+								+ " = " + accountId;
 		try
 		{
 			return ConnectionManager.getInstance().query(sqlStr).next();

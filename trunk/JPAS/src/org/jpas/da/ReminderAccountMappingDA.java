@@ -80,7 +80,7 @@ public class ReminderAccountMappingDA
     {
         final String sqlStr = "SELECT " + DBNames.CN_RAM_ACCOUNT_ID + " FROM "
                 + DBNames.TN_REMINDER_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_RAM_REMINDER_ID + " IS '" + reminderID + "'";
+                + DBNames.CN_RAM_REMINDER_ID + " = '" + reminderID + "'";
 
         try
         {
@@ -105,8 +105,8 @@ public class ReminderAccountMappingDA
     public void loadReminderAccountMapping(final Integer reminderID, final Integer accountID, final ReminderAccountTranferHandler handler)
     {
 		final String sqlStr = "SELECT * FROM " + DBNames.TN_REMINDER_ACCOUNT_MAP
-                + " WHERE " + DBNames.CN_RAM_REMINDER_ID + " IS " + reminderID
-                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " IS " + accountID;
+                + " WHERE " + DBNames.CN_RAM_REMINDER_ID + " = " + reminderID
+                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " = " + accountID;
         try
         {
             final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
@@ -131,8 +131,8 @@ public class ReminderAccountMappingDA
     public void deleteReminderAccountMapping(final Integer reminderID, final Integer accountID)
     {
 		final String sqlStr = "DELETE FROM " + DBNames.TN_REMINDER_ACCOUNT_MAP
-                + " WHERE " + DBNames.CN_RAM_REMINDER_ID + " IS " + reminderID
-                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " IS " + accountID;
+                + " WHERE " + DBNames.CN_RAM_REMINDER_ID + " = " + reminderID
+                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " = " + accountID;
         try
         {
             if(ConnectionManager.getInstance().update(sqlStr) < 1)
@@ -153,8 +153,8 @@ public class ReminderAccountMappingDA
     {
         final String sqlStr = "UPDATE " + DBNames.TN_REMINDER_ACCOUNT_MAP
                 + " SET " + DBNames.CN_RAM_AMOUNT + " = " + amount + " WHERE "
-                + DBNames.CN_RAM_REMINDER_ID + " IS " + reminderID
-                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " IS " + accountID;
+                + DBNames.CN_RAM_REMINDER_ID + " = " + reminderID
+                + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " = " + accountID;
 
         try
         {
@@ -180,7 +180,7 @@ public class ReminderAccountMappingDA
     {
 		final String sqlStr = "SELECT SUM(" + DBNames.CN_RAM_AMOUNT + ") FROM "
                 + DBNames.TN_REMINDER_ACCOUNT_MAP + " WHERE "
-                + DBNames.CN_RAM_REMINDER_ID + " IS '" + reminderID + "'";
+                + DBNames.CN_RAM_REMINDER_ID + " = '" + reminderID + "'";
 
 		try
 		{
