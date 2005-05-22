@@ -61,5 +61,9 @@ public class PayeeListModel extends JpasListModel<String>
 	    }
 		return account.getAllPayees();
 	}
-
+	
+	public void setSelectedItem(final Object anItem) 
+	{
+		super.setSelectedItem((String)anItem);
+	}
 }

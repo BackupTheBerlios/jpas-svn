@@ -41,4 +41,9 @@ public class CategoryListModel extends JpasListModel<Category>
 	{
 		return Category.getAllCategories();
 	}
+	
+	public void setSelectedItem(final Object anItem) 
+	{
+		super.setSelectedItem((Category)anItem);
+	}
 }

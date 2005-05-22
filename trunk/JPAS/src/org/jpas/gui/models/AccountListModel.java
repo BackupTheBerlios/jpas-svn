@@ -40,4 +40,8 @@ public class AccountListModel extends JpasListModel<Account>
 	{
 		return Account.getAllAccounts();
 	}
+	public void setSelectedItem(final Object anItem) 
+	{
+		super.setSelectedItem((Account)anItem);
+	}
 }
