@@ -222,14 +222,14 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	if(transfers.length == 0)
         	{
         	    setCategoryPanel();
-            	categoryList.setSelectedItem("");
+            	categoryList.setSelectedItem(null);
         	}
         	else if(!currentTrans.getAccount().equals(account))
         	{
         	    //System.out.println(currentTrans.getAccount().getName());
         	    //System.out.println(account.getName());
         	    setCategoryPanel();
-        	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(currentTrans.getAccount()).getName());
+        	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(currentTrans.getAccount()));
         	}
         	else if(transfers.length == 1)
         	{
