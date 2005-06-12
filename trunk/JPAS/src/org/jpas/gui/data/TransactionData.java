@@ -24,6 +24,7 @@
 package org.jpas.gui.data;
 
 import org.jpas.model.*;
+import java.util.Date;
 
 /**
  * @author Justin W Smith
@@ -31,29 +32,37 @@ import org.jpas.model.*;
  */
 public class TransactionData
 {
+	private final Date date;
     private final String num;
     private final String payee;
-    private final String withdraw;
-    private final String deposit;
-    private final Category category; 
+    private final long withdraw;
+    private final long deposit;
+    private final Category[] categories; 
     private final String memo;
 
     
-    public TransactionData(	final String num,
+    public TransactionData(	final Date date,
+							final String num,
 						    final String payee,
-						    final String withdraw,
-						    final String deposit,
-						    final Category category, 
+						    final long withdraw,
+						    final long deposit,
+						    final Category[] categories, 
 						    final String memo)
     {
+		this.date = date;
         this.num = num;
         this.payee = payee;
         this.withdraw = withdraw;
         this.deposit = deposit;
-        this.category = category;
+        this.categories = categories;
         this.memo = memo;
     }
 
+	public Date getDate()
+	{
+		return date;
+	}
+	
     public String getNum()
     {
         return num;
@@ -62,17 +71,17 @@ public class TransactionData
     {
         return payee;
     }
-    public String getWithdraw()
+    public long getWithdraw()
     {
         return withdraw;
     }
-    public String getDeposit()
+    public long getDeposit()
     {
         return deposit;
     }
-    public Category getCategory()
+    public Category[] getCategories()
     {
-        return category;
+        return categories;
     }
     public String getMemo()
     {
@@ -81,12 +90,23 @@ public class TransactionData
     
     public String toString()
     {
-        return "TransactionData { " + num + ", "
+		final StringBuffer buffer = new StringBuffer("TransactionData { " + num + ", "
         	+ payee + ", "
         	+ withdraw + ", "
-        	+ deposit + ", "
-        	+ category + ", "
-        	+ memo + "}";
+        	+ deposit + ", " 
+        	+ "{ ");
+		
+		for(int i = 0; i < categories.length; i++)
+		{
+        	buffer.append(categories[i].getName());
+			if(i + 1 < categories.length)
+			{
+				buffer.append(", ");
+			}
+		}
+		
+		buffer.append("}, memo}");
+		return buffer.toString();
     }
     
     public static void main(String[] args)
