@@ -27,16 +27,19 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseListener;
-import java.sql.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
-import org.jpas.gui.components.*;
+import org.jpas.gui.components.CategoryComboBox;
+import org.jpas.gui.components.PayeeComboBox;
 import org.jpas.gui.data.TransactionData;
 import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
@@ -47,6 +50,7 @@ import com.toedter.calendar.JDateChooser;
 /**
  * @author jsmith
  *
+ * An object of this class can only be used on one table at a time.
  */
 public class TransactionTableCellEditor extends AbstractCellEditor implements TableCellEditor 
 {
@@ -69,11 +73,13 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	
 	private final JPanel splitPanel = new JPanel(new GridLayout(1, 2));
 	
+	private Category[] splitCategories;
 	
 	private final int[] columnWidths;
 	private final int[] rowHeights;
 	
 	private Account account;
+	private JTable table;
 	
     /**
      * 
@@ -82,6 +88,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     {
         this.columnWidths = columnWidths;
         this.rowHeights = rowHeights;
+
         cellPanel.setOpaque(false);
         cellPanel.addMouseListener(new MouseAdapter()
         {
@@ -91,6 +98,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     		}
         });
     	dateChooser = new JDateChooser("MM/dd/yyyy", false);
+		// TODO
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
     	payeeList = new PayeeComboBox();
@@ -103,6 +111,20 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	
         init();
     }
+	
+	public void initListeners()
+	{
+		btnEnter.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(final ActionEvent ae)
+			{
+				if(table != null)
+				{
+					table.editingStopped(new ChangeEvent(cellPanel));
+				}
+			}
+		});
+	}
     
     private void init()
     {
@@ -127,6 +149,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
     	createClearDocListener(withdrawDoc, depositDoc);
     	createClearDocListener(depositDoc, withdrawDoc);
+		initListeners();
     }
     
     private void createClearDocListener(final Document doc, final Document opposite)
@@ -163,18 +186,28 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 
     private void setCategoryPanel()
     {
+    	splitCategories = null;
         splitPanel.removeAll();
         splitPanel.add(categoryList);
         splitPanel.add(memoField);
         splitPanel.invalidate();
+        withdrawField.setEnabled(true);
+        depositField.setEnabled(true);
+        withdrawField.setToolTipText(null);
+        depositField.setToolTipText(null);
     }
     
-    private void setSplitPanel()
+    private void setSplitPanel(final Category[] categories)
     {
+    	splitCategories = categories;
         splitPanel.removeAll();
         splitPanel.add(categoryLabel);
         splitPanel.add(memoField);
         splitPanel.invalidate();
+        withdrawField.setEnabled(false);
+        depositField.setEnabled(false);
+        withdrawField.setToolTipText("Select \"Split\" to modify amount.");
+        depositField.setToolTipText("Select \"Split\" to modify amount.");
     }
     
     private JPanel createEmptyPanel()
@@ -187,7 +220,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column)
     {
         final Transaction currentTrans = (Transaction)value;
-        if(currentTrans == null)
+		this.table = table;
+		if(currentTrans == null)
         {
         	dateChooser.setDate(new java.util.Date());
         	numList.setSelectedItem("");
@@ -204,56 +238,83 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	        dateChooser.setDate(currentTrans.getDate());
         	numList.setSelectedItem(currentTrans.getNum());
         	payeeList.setSelectedItem(currentTrans.getPayee());
+        	//TODO set balance value appropriately
+        	balanceLabel.setText("");
+        	memoField.setText(currentTrans.getMemo());
         	
-        	final long amount = currentTrans.getAmount();
-        	if(amount >= 0)
+        	if(currentTrans.getAccount().equals(account))
         	{
-	        	depositField.setText("");
-	        	withdrawDoc.setAmount(currentTrans.getAmount());
+	        	final long amount = currentTrans.getAmount();
+	        	if(amount >= 0)
+	        	{
+		        	depositField.setText("");
+		        	withdrawDoc.setAmount(currentTrans.getAmount());
+	        	}
+	        	else
+	        	{
+		        	withdrawField.setText("");
+		        	depositDoc.setAmount(-currentTrans.getAmount());
+	        	}
+	        	
+	        	final TransactionTransfer[] transfers = currentTrans.getAllTransfers();
+	        	if(transfers.length == 0)
+	        	{
+	        	    setCategoryPanel();
+	        	    // TODO Deal with no category on save.
+	            	categoryList.setSelectedItem(null);
+	        	}
+	        	else if(transfers.length == 1)
+	        	{
+	        	    setCategoryPanel();
+	        	    categoryList.setSelectedItem(transfers[0].getCategory());
+	        	}
+	        	else
+	        	{
+	        		final List<Category> list = new LinkedList<Category>();
+	        		for(int i = 0; i < transfers.length; i++)
+	        		{
+	        			list.add(transfers[i].getCategory());
+	        		}
+	        		
+	        	    setSplitPanel(list.toArray(new Category[list.size()]));
+	        	    //categoryList.setSelectedItem("[SPLIT]");
+	        	    //categoryList.setEnabled(false);
+	        	}
         	}
         	else
         	{
-	        	withdrawField.setText("");
-	        	depositDoc.setAmount(-currentTrans.getAmount());
-        	}
-        	balanceLabel.setText("");
-        	memoField.setText(currentTrans.getMemo());
-        	final TransactionTransfer[] transfers = currentTrans.getAllTransfers();
-        	if(transfers.length == 0)
-        	{
-        	    setCategoryPanel();
-            	categoryList.setSelectedItem(null);
-        	}
-        	else if(!currentTrans.getAccount().equals(account))
-        	{
-        	    //System.out.println(currentTrans.getAccount().getName());
-        	    //System.out.println(account.getName());
+        	    final Category cat = Category.getCategoryForAccount(account);
+	            final long amount = currentTrans.getTransfer(cat).getAmount();
+
+	            if(amount <= 0)
+	            {
+		            withdrawField .setText(AmountDocument.getTextForAmount(-amount));
+		            depositField.setText("");
+	            }
+	            else
+	            {
+	            	withdrawField.setText("");
+		            depositField.setText(AmountDocument.getTextForAmount(amount));
+	            }
+
         	    setCategoryPanel();
         	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(currentTrans.getAccount()));
         	}
-        	else if(transfers.length == 1)
-        	{
-        	    setCategoryPanel();
-        	    categoryList.setSelectedItem(transfers[0].getCategory());
-        	}
-        	else
-        	{
-        	    setSplitPanel();
-        	    //categoryList.setSelectedItem("[SPLIT]");
-        	    //categoryList.setEnabled(false);
-        	}
-
         }
         return cellPanel;
     }
     
     public Object getCellEditorValue()
     {
-        return new TransactionData((String)numList.getEditor().getItem(),
+        return new TransactionData(
+        		dateChooser.getDate(),
+        		(String)numList.getEditor().getItem(),
                 (String)payeeList.getEditor().getItem(),
-                withdrawField.getText(),
-                depositField.getText(),
-                (Category)categoryList.getModel().getSelectedItem(),
+                withdrawDoc.getAmount(),
+                depositDoc.getAmount(),
+                splitCategories == null ?
+                new Category[]{(Category)categoryList.getModel().getSelectedItem()}
+        		: splitCategories,
                 memoField.getText());
         
     }
