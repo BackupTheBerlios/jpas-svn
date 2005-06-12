@@ -23,7 +23,7 @@
  */
 package org.jpas.model;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.Comparator;
 
 import org.jpas.da.TransAccountMappingDA;
@@ -98,7 +98,7 @@ public class Transaction extends JpasObservable<Transaction>
             final Date date)
     {
         return getTransactionForID(TransactionDA.getInstance()
-                .createTransaction(account.id, payee, memo, num, date));
+                .createTransaction(account.id, payee, memo, num, new java.sql.Date(date.getTime())));
     }
 
     private Transaction(final Integer id)
@@ -166,7 +166,7 @@ public class Transaction extends JpasObservable<Transaction>
                 {
                     public void setData(final Integer accountId,
                             final String payee, final String memo,
-                            final String num, final Date date)
+                            final String num, final java.sql.Date date)
                     {
                         Transaction.this.accountID = accountId;
                         Transaction.this.payee = payee;
@@ -283,7 +283,7 @@ public class Transaction extends JpasObservable<Transaction>
             loadData();
         }
     }
-
+	
     public void setNum(final String num)
     {
         assert (!isDeleted);
@@ -297,13 +297,25 @@ public class Transaction extends JpasObservable<Transaction>
     public void setDate(final Date date)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionDate(id, date);
+        TransactionDA.getInstance().updateTransactionDate(id, new java.sql.Date(date.getTime()));
         if (isLoaded)
         {
             loadData();
         }
     }
 
+	public void set(final String payee, final String memo, final String num,
+            final Date date)
+	{
+        assert (!isDeleted);
+		TransactionDA.getInstance().updateTransaction(id, payee, memo, num, new java.sql.Date(date.getTime()));
+        if (isLoaded)
+        {
+            loadData();
+        }
+
+	}
+	
     public long getAmount()
     {
         if(!amountLoaded)
