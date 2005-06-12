@@ -27,11 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
-import org.jpas.model.Account;
-import org.jpas.model.Transaction;
+import org.apache.log4j.Logger;
+import org.jpas.gui.data.TransactionData;
+import org.jpas.model.*;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.JpasObserver;
@@ -42,6 +42,8 @@ import org.jpas.util.JpasObserver;
  */
 public class TransactionTableModel extends AbstractTableModel
 {
+	private static final Logger defaultLogger = Logger.getLogger(TransactionTableModel.class);
+	
     private Account account = null;
     
     
@@ -137,7 +139,56 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public void setValueAt(Object aValue, int rowIndex, int columnIndex)
     {
-        // TODO Auto-generated method stub
+		final TransactionData transData = (TransactionData)aValue;
+		if(rowIndex >= transactionList.size())
+		{
+			if(transData.getWithdraw() > 0 || transData.getDeposit() > 0)
+			{
+				final Transaction trans = Transaction.createTransaction(getAccount(), transData.getPayee(), transData.getMemo(), transData.getNum(), transData.getDate());
+				trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+			}
+			return;
+		}
+		final Transaction trans = transactionList.get(rowIndex);
+		trans.set(transData.getPayee(), transData.getMemo(), transData.getNum(), transData.getDate());
+		
+		if(trans.getAccount().equals(account))
+		{
+			final Category[] categories = transData.getCategories();
+			
+			// Ignore the amount on a split transaction
+			if(categories.length == 1)
+			{
+				defaultLogger.debug("Clearing all transfers");
+				final TransactionTransfer[] transfers = trans.getAllTransfers();
+				for(int i = 0; i < transfers.length; i++)
+				{
+					transfers[i].delete();
+				}
+				defaultLogger.debug("Adding new transfer");
+				trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+				return;
+			}
+			defaultLogger.debug("Ignoring the amount b/c it is a split transaction?");
+		}
+		else
+		{
+			// Should only affect the tranfer to this account
+			final TransactionTransfer[] transfers = trans.getAllTransfers();
+			for(int i = 0; i < transfers.length; i++)
+			{
+				//System.out.println("To account:" + transfers[i].getCategory().getName());
+				if(transfers[i].getCategory().equals(Category.getCategoryForAccount(account)))
+				{
+					defaultLogger.debug("Setting amount:");
+					transfers[i].setAmount(transData.getDeposit() - transData.getWithdraw());
+					return;
+				}
+			}
+			// TODO: Should this even happen?
+			defaultLogger.debug("Should this even be possible?");
+			trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+		}
     }
 
     public static void main(String[] args)
