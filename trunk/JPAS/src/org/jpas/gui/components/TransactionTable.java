@@ -23,11 +23,9 @@
  */
 package org.jpas.gui.components;
 
-import javax.swing.*;
-
 import java.awt.*;
 
-import javax.swing.table.*;
+import javax.swing.JTable;
 
 import org.jpas.gui.editors.TransactionTableCellEditor;
 import org.jpas.gui.models.TransactionTableModel;
