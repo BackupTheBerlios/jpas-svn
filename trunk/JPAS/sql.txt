@@ -1,7 +1,0 @@
-select * from trans_account_map_tbl
-
-select * from transaction_tbl
-
-select * from account_tbl
-
-SELECT SUM(trans_account_map_tbl.amount) FROM trans_account_map_tbl JOIN transaction_tbl ON transaction_tbl.id WHERE transaction_tbl.account IS 0
