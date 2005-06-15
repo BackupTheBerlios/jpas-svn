@@ -374,6 +374,8 @@ public class TransactionDA
 	{
 		final String sqlStr = "SELECT " 
 		    	+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ID 
+		    	+ " , "
+		    	+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_DATE
 		    	+ " FROM "
                 + DBNames.TN_TRANSACTION + " , " 
                 + DBNames.TN_ACCOUNT + " , "
@@ -389,9 +391,15 @@ public class TransactionDA
                 + " = " + accountId
                 + " UNION "
                 + " SELECT " + DBNames.CN_TRANSACTION_ID
+                + " , "
+                + DBNames.CN_TRANSACTION_DATE
 				+ " FROM " + DBNames.TN_TRANSACTION
 				+ " WHERE " + DBNames.CN_TRANSACTION_ACCOUNT
-				+ " = " +  accountId;
+				+ " = " +  accountId
+				+ " ORDER BY "
+				+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_DATE 
+		    	+ " , "
+		    	+ DBNames.TN_TRANSACTION + "." + DBNames.CN_TRANSACTION_ID;
 
         try
         {
