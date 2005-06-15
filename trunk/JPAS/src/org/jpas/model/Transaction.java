@@ -271,6 +271,7 @@ public class Transaction extends JpasObservable<Transaction>
         if (isLoaded)
         {
             loadData();
+            announceModify();
         }
     }
 
@@ -281,6 +282,7 @@ public class Transaction extends JpasObservable<Transaction>
         if (isLoaded)
         {
             loadData();
+            announceModify();
         }
     }
 	
@@ -291,6 +293,7 @@ public class Transaction extends JpasObservable<Transaction>
         if (isLoaded)
         {
             loadData();
+            announceModify();
         }
     }
 
@@ -301,6 +304,7 @@ public class Transaction extends JpasObservable<Transaction>
         if (isLoaded)
         {
             loadData();
+            announceModify();
         }
     }
 
@@ -312,8 +316,8 @@ public class Transaction extends JpasObservable<Transaction>
         if (isLoaded)
         {
             loadData();
+            announceModify();
         }
-
 	}
 	
     public long getAmount()
