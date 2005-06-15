@@ -33,21 +33,50 @@ import java.util.Set;
  */
 public class JpasObservable<V>
 {
-	private final Set<WeakReference<JpasObserver<V>>> observerSet = new HashSet<WeakReference<JpasObserver<V>>>();
+	//TODO Test this class
+	
+	private final Set<JpasObserver<V>> observerSet = new HashSet<JpasObserver<V>>();
+	private final Set<WeakReference<JpasObserver<V>>> observerWeakSet = new HashSet<WeakReference<JpasObserver<V>>>();
 	
 	public void addObserver(final JpasObserver<V> o)
 	{
 		synchronized(observerSet)
 		{
-			observerSet.add(new WeakReference<JpasObserver<V>>(o));
+			observerSet.add(o);
 		}
 	}
 	
-	public void deleteObserver(final JpasObserver<V> o)
+	public void addObserverWeak(JpasObserver<V> ob)
 	{
 		synchronized(observerSet)
 		{
-			observerSet.remove(o);
+			observerWeakSet.add(new WeakReference<JpasObserver<V>>(ob));
+		}
+	}
+	
+	public boolean deleteObserver(final JpasObserver<V> o)
+	{
+		synchronized(observerSet)
+		{
+			if(!observerSet.remove(o))
+			{
+				for(WeakReference<JpasObserver<V>> wr : observerWeakSet)
+				{
+					final JpasObserver<V> ob = wr.get();
+					
+					if(ob == null)
+					{
+						observerWeakSet.remove(wr);
+						continue;
+					}
+					if(ob.equals(o))
+					{
+						return observerWeakSet.remove(wr);
+					}
+				}
+				return false;
+			}
+			return true;
 		}
 	}
 	
@@ -55,15 +84,19 @@ public class JpasObservable<V>
 	{
 		synchronized(observerSet)
 		{
-			for(WeakReference<JpasObserver<V>> wr : observerSet)
+			for(JpasObserver<V> ob : observerSet)
+			{
+				ob.update(this, arg);
+			}
+			for(WeakReference<JpasObserver<V>> wr : observerWeakSet)
 			{
 				final JpasObserver<V> ob = wr.get();
+				
 				if(ob == null)
 				{
-					observerSet.remove(wr);
+					observerWeakSet.remove(wr);
 					continue;
 				}
-				
 				ob.update(this, arg);
 			}
 		}
