@@ -62,7 +62,7 @@ public class Transaction extends JpasObservable<Transaction>
         {
             public int compare(final Transaction a, final Transaction b)
             {
-                final int dateComp = a.date.compareTo(b.date);
+                final int dateComp = a.getDate().compareTo(b.getDate());
                 return dateComp != 0 ? dateComp : a.id.intValue()
                         - b.id.intValue();
             }
