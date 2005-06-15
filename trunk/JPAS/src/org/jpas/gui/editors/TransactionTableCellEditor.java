@@ -79,7 +79,6 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final int[] rowHeights;
 	
 	private Account account;
-	private JTable table;
 	
     /**
      * 
@@ -90,15 +89,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         this.rowHeights = rowHeights;
 
         cellPanel.setOpaque(false);
-        cellPanel.addMouseListener(new MouseAdapter()
-        {
-    		public void mouseClicked(final MouseEvent me)
-    		{
-    		    me.consume();
-    		}
-        });
     	dateChooser = new JDateChooser("MM/dd/yyyy", false);
-		// TODO
+		// TODO create a "real" combo box for the "num" field
     	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
     	payeeList = new PayeeComboBox();
@@ -118,10 +110,14 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 		{
 			public void actionPerformed(final ActionEvent ae)
 			{
-				if(table != null)
+				SwingUtilities.invokeLater(new Runnable()
 				{
-					table.editingStopped(new ChangeEvent(cellPanel));
-				}
+
+					public void run() 
+					{
+						stopCellEditing();
+					}
+				});
 			}
 		});
 	}
@@ -217,10 +213,29 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	return panel;
     }
     
+    private void setPanelEnabled(final boolean enable)
+    {
+    	dateChooser.setEnabled(enable);
+    	numList.setEnabled(enable);
+    	payeeList.setEnabled(enable);
+    	withdrawField.setEnabled(enable);
+    	depositField.setEnabled(enable);
+    	memoField.setEnabled(enable);
+    	balanceLabel.setEnabled(enable);
+    	categoryList.setEnabled(enable);
+    	categoryLabel.setEnabled(enable);
+    	btnEnter.setEnabled(enable);
+    	btnSplit.setEnabled(enable);
+    	btnDelete.setEnabled(enable);
+    }
+    
+    
     public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column)
     {
+   	
         final Transaction currentTrans = (Transaction)value;
-		this.table = table;
+
+        setPanelEnabled(false);
 		if(currentTrans == null)
         {
         	dateChooser.setDate(new java.util.Date());
@@ -238,6 +253,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	        dateChooser.setDate(currentTrans.getDate());
         	numList.setSelectedItem(currentTrans.getNum());
         	payeeList.setSelectedItem(currentTrans.getPayee());
+        	
         	//TODO set balance value appropriately
         	balanceLabel.setText("");
         	memoField.setText(currentTrans.getMemo());
@@ -301,6 +317,14 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(currentTrans.getAccount()));
         	}
         }
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				setPanelEnabled(true);
+			}
+		});
+		
         return cellPanel;
     }
     
