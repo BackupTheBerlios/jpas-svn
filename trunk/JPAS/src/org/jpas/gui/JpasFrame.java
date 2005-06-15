@@ -24,21 +24,27 @@
 package org.jpas.gui;
 
 import java.awt.*;
-import javax.swing.*;
-import javax.swing.event.*;
 
-import com.toedter.calendar.*;
-import org.jpas.gui.util.*;
-import org.jpas.model.*;
-import org.jpas.gui.layouts.*;
-import org.jpas.util.*;
-import org.jpas.gui.components.*;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import org.apache.log4j.Logger;
+import org.jpas.gui.components.AccountList;
+import org.jpas.gui.components.AccountTotalPanel;
+import org.jpas.gui.components.TransactionTable;
+import org.jpas.gui.layouts.FlexGridLayout;
+import org.jpas.gui.util.ActionFactory;
+import org.jpas.model.Account;
+
 /**
  * @author Owner
  *
  */
 public class JpasFrame extends JFrame
 {
+	private static final Logger defaultLogger = Logger.getLogger(JpasFrame.class);
+	
     private final JButton btnReminder = new JButton("Reminders");
     private final TransactionTable table = new TransactionTable();
     private final AccountTotalPanel totalPanel = new AccountTotalPanel();
@@ -60,7 +66,7 @@ public class JpasFrame extends JFrame
 			public void valueChanged(final ListSelectionEvent e)
 			{
 				final Account selected = (Account)accountList.getSelectedValue();
-				System.out.println("name: " + selected.getName());
+				defaultLogger.debug("Account changed: " + selected.getName());
 				
 				table.setAccount(selected);
 				totalPanel.setAccount(selected);
