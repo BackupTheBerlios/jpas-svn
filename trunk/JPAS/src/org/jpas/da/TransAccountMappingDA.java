@@ -361,6 +361,7 @@ public class TransAccountMappingDA
                 435);
         getInstance().createTransAccountMapping(new Integer(0), new Integer(4),
                 755);
+        getInstance().createTransAccountMapping(new Integer(1), new Integer(5),78945);
     }
 
     public static void unitTest_GetAmount()

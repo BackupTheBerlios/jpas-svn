@@ -414,6 +414,7 @@ public class TransactionDA
     public static void unitTest_Create()
     {
         getInstance().createTransaction(new Integer(2), "Joe`s bar and grill", "memo", "23", new Date(System.currentTimeMillis()));
+        getInstance().createTransaction(new Integer(2), "Kat`s Home Cooking", "memos", "21", new Date(System.currentTimeMillis()));
     }
     
     
