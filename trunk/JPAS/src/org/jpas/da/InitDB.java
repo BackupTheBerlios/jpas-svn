@@ -174,8 +174,8 @@ public class InitDB
 			+ ")";
 
 		final String sqlIndexAccount = "CREATE INDEX " + DBNames.IDX_TRANSACTION_ACCOUNT + " ON " + DBNames.TN_TRANSACTION
-				+ "(" + DBNames.CN_TRANSACTION_ACCOUNT + ", "
-				+ DBNames.CN_TRANSACTION_DATE + ")";
+				+ "(" + DBNames.CN_TRANSACTION_ACCOUNT + " , "
+				+ DBNames.CN_TRANSACTION_DATE + " , " + DBNames.CN_TRANSACTION_ID + ")";
 
 		final String sqlSequenceStr = "CREATE SEQUENCE "
 									 + DBNames.SEQ_TRANSACTION_ID
