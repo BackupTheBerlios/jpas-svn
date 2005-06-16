@@ -186,10 +186,15 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         
         final WeakValueMap<Integer, TransactionTransfer> map = transTransferCache
                 .get(transactionID);
-        map.remove(accountID);
-        if (map.size() == 0)
+        
+        if(map != null)
         {
-            transTransferCache.remove(transactionID);
+		    map.remove(accountID);
+		    
+		    if (map.size() == 0)
+		    {
+		        transTransferCache.remove(transactionID);
+		    }
         }
         
         isDeleted = true;
