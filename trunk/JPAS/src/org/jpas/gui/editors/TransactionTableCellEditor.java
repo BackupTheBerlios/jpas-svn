@@ -187,8 +187,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         splitPanel.add(categoryList);
         splitPanel.add(memoField);
         splitPanel.invalidate();
-        withdrawField.setEnabled(true);
-        depositField.setEnabled(true);
+        withdrawField.setEditable(true);
+        depositField.setEditable(true);
         withdrawField.setToolTipText(null);
         depositField.setToolTipText(null);
     }
@@ -200,8 +200,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         splitPanel.add(categoryLabel);
         splitPanel.add(memoField);
         splitPanel.invalidate();
-        withdrawField.setEnabled(false);
-        depositField.setEnabled(false);
+        withdrawField.setEditable(false);
+        depositField.setEditable(false);
         withdrawField.setToolTipText("Select \"Split\" to modify amount.");
         depositField.setToolTipText("Select \"Split\" to modify amount.");
     }
