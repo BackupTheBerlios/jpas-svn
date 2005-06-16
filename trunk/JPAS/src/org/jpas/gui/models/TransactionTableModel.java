@@ -146,6 +146,7 @@ public class TransactionTableModel extends AbstractTableModel
 			{
 				final Transaction trans = Transaction.createTransaction(getAccount(), transData.getPayee(), transData.getMemo(), transData.getNum(), transData.getDate());
 				trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+				trans.amountChanged();
 			}
 			return;
 		}
@@ -167,6 +168,7 @@ public class TransactionTableModel extends AbstractTableModel
 				}
 				defaultLogger.debug("Adding new transfer");
 				trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+				trans.amountChanged();
 				return;
 			}
 			defaultLogger.debug("Ignoring the amount b/c it is a split transaction?");
@@ -182,12 +184,14 @@ public class TransactionTableModel extends AbstractTableModel
 				{
 					defaultLogger.debug("Setting amount:");
 					transfers[i].setAmount(transData.getDeposit() - transData.getWithdraw());
+					trans.amountChanged();
 					return;
 				}
 			}
 			// TODO: Should this even happen?
 			defaultLogger.debug("Should this even be possible?");
 			trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+			trans.amountChanged();
 		}
     }
 
