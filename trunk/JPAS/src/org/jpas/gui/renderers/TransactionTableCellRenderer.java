@@ -176,7 +176,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 
         	dateLabel.setText(format.format(trans.getDate()));
         	numLabel.setText(trans.getNum());
-            balanceLabel.setText("");
+            balanceLabel.setText(String.valueOf(trans.getBalance()));
             memoLabel.setText(trans.getMemo());
             payeeLabel.setText(trans.getPayee());
             
