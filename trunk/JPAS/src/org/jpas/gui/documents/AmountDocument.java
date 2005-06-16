@@ -158,13 +158,29 @@ public class AmountDocument extends PlainDocument
         {
         	final String text = getText(0, getLength());
         	long value = 0;
+        	boolean pastDecimal = false;
+        	int digitsPastDecimal = 0;
         	for(int i = 0; i < text.length(); i++)
         	{
+        		if(pastDecimal)
+        		{
+        			digitsPastDecimal++;
+        		}
+       		
         	    final char ch = text.charAt(i);
         	    if(Character.isDigit(ch))
         	    {
         	        value = 10*value + (ch - '0');
         	    }
+        	    else if(ch == '.')
+        	    {
+        	    	pastDecimal = true;
+        	    }
+        	}
+        	
+        	for(int i = 2; i > digitsPastDecimal; i--)
+        	{
+        		value *= 10;
         	}
         	return value;
 	    }
