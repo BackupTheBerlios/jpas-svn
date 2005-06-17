@@ -41,8 +41,7 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
         public int compare(final Transaction a, final Transaction b)
         {
             final int dateComp = a.getDate().compareTo(b.getDate());
-            return dateComp != 0 ? dateComp : a.id.intValue()
-                            - b.id.intValue();
+            return dateComp != 0 ? dateComp : a.id.intValue() - b.id.intValue();
         }
     };
 
@@ -155,16 +154,25 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
         return amount;
     }
 
-	public void update(JpasObservable<TransactionTransfer> ob, JpasDataChange<TransactionTransfer> ch) 
+    private void announceAmountChange()
+    {
+        final JpasDataChange<Transaction> myChange = new JpasDataChange.AmountModify<Transaction>(this);
+        amountLoaded = false;
+        if(true)
+        {
+            observable.notifyObservers(myChange);
+        }
+        notifyObservers(myChange);
+    }
+    
+	public void update(JpasObservable<TransactionTransfer> ob, JpasDataChange<TransactionTransfer> change) 
 	{
     	assert(!isDeleted);
-    	final JpasDataChange<Transaction> myChange = new JpasDataChange.Modify<Transaction>(this);
-    	amountLoaded = false;
-    	if(true)
-		{
-			observable.notifyObservers(myChange);
-		}
-        notifyObservers(myChange);
+        if(change instanceof JpasDataChange.Delete)
+        {
+            ob.deleteObserver(this);
+        }
+        announceAmountChange();
 	}
     
     public void commit(final boolean broadcastForAll)
@@ -174,6 +182,14 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
     		final JpasDataChange<Transaction> change;
 			if(isDeleted)
 			{
+                final TransactionTransfer[] transfers = TransactionTransfer.getTransfersForTransaction(this);
+                for(int i = 0; i < transfers.length; i++)
+                {
+                    transfers[i].deleteObserver(this);
+                    transfers[i].delete();
+                    transfers[i].commit(false);
+                }
+                
 				change = new JpasDataChange.Delete<Transaction>(this);
 		        TransactionDA.getInstance().deleteTransaction(id);
 			}

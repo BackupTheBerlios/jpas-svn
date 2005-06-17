@@ -27,11 +27,9 @@ import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;
 import org.jpas.da.TransAccountMappingDA;
 import org.jpas.da.TransactionDA;
-import org.jpas.util.JpasObservable;
-import org.jpas.util.WeakValueMap;
-import org.jpas.util.JpasDataChange;
+import org.jpas.util.*;
 
-public class Account extends JpasObservable<Account>
+public class Account extends JpasObservable<Account> implements JpasObserver<Transaction>
 {
     private static WeakValueMap<Integer, Account> accountCache = new WeakValueMap<Integer, Account>();
     private static final Logger defaultLogger = Logger.getLogger(Account.class);
@@ -234,5 +232,11 @@ public class Account extends JpasObservable<Account>
         BasicConfigurator.configure();
         //unitTest_List();
         unitTest_delete();
+    }
+
+    public void update(JpasObservable<Transaction> observable, JpasDataChange<Transaction> change)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

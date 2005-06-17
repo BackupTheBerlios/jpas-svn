@@ -27,11 +27,10 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.jpas.da.AccountDA;
 import org.jpas.da.TransAccountMappingDA;
-import org.jpas.util.JpasDataChange;
-import org.jpas.util.JpasObservable;
-import org.jpas.util.WeakValueMap;
+import org.jpas.da.TransactionDA;
+import org.jpas.util.*;
 
-public class Category extends JpasObservable<Category>
+public class Category extends JpasObservable<Category> implements JpasObserver<TransactionTransfer>
 {
     private static final Logger defaultLogger = Logger
             .getLogger(Category.class);
@@ -96,8 +95,10 @@ public class Category extends JpasObservable<Category>
     }
 
     final Integer id;
+    private boolean isModified = false;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
+    
     private String name;
     private AccountDA.AccountType type;
 
@@ -113,26 +114,50 @@ public class Category extends JpasObservable<Category>
 
     public void delete()
     {
-        delete(false);
+        if(!isDeleted)
+        {
+            isDeleted = true;
+            isModified = true;
+        }
     }
 
-    void delete(final boolean internalCall)
+    public void commit()
     {
-        if (!internalCall)
+        if(isModified)
         {
-            if(!canBeDeleted())
+            if(isDeleted)
             {
-                throw new RuntimeException("This category cannot be deleted!");
+                if(!canBeDeleted())
+                {
+                    throw new RuntimeException("This category cannot be deleted!");
+                }
+                
+                final Category cat = getUnknownCategory();
+                final Integer[] transferIDs = TransAccountMappingDA.getInstance().getAllTranfersForAccount(id);
+                for(int i = 0; i < transferIDs.length; i++)
+                {
+                    final TransactionTransfer transfer = TransactionTransfer.getTransactionTransferforIDs(transferIDs[i], id);
+                    transfer.deleteObserver(this);
+                    TransactionTransfer.createTransfer(Transaction.getTransactionForID(transferIDs[i]), cat, transfer.getAmount());
+                    transfer.delete();
+                    transfer.commit(true);
+                }
+
+                final Account twin = Account.getAccountForID(id);
+                final Account account = Account.getDeletedBankAccount();
+                final Integer[] transactionsIDs = TransactionDA.getInstance().getAllTransactionIDs(id);
+                for(int i = 0; i < transactionsIDs.length; i++)
+                {
+                    final Transaction trans = Transaction.getTransactionForID(transactionsIDs[i]);
+                    trans.deleteObserver(twin);
+                    trans.delete();
+                    trans.commit(true);
+                }
+                
+                
+                
+                AccountDA.getInstance().deleteAccount(id);
             }
-            
-            final Category cat = getUnknownCategory();
-            final Integer[] transferIDs = TransAccountMappingDA.getInstance().getAllTranfersForAccount(id);
-            for(int i = 0; i < transferIDs.length; i++)
-            {
-                TransactionTransfer.getTransactionTransferforIDs(transferIDs[i], id).setCategory(cat);
-            }
-            
-            AccountDA.getInstance().deleteAccount(id);
         }
         categoryCache.remove(id);
         isDeleted = true;
@@ -294,5 +319,11 @@ public class Category extends JpasObservable<Category>
         BasicConfigurator.configure();
         //unitTest_List();
         unitTest_Delete();
+    }
+
+    public void update(JpasObservable<TransactionTransfer> observable, JpasDataChange<TransactionTransfer> change)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }
