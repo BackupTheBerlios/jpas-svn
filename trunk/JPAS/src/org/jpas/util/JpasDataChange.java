@@ -41,6 +41,15 @@ public class JpasDataChange<V>
 		return value;
 	}
 
+	public static class AmountModify<V> extends JpasDataChange<V>
+	{
+		public AmountModify(final V value)
+		{
+			super(value);
+		}
+	}
+
+	
 	public static class Modify<V> extends JpasDataChange<V>
 	{
 		public Modify(final V value)

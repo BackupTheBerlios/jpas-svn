@@ -24,9 +24,9 @@
 package org.jpas.model;
 
 import org.jpas.da.TransAccountMappingDA;
-import org.jpas.util.JpasDataChange;
-import org.jpas.util.JpasObservable;
-import org.jpas.util.WeakValueMap;
+import org.jpas.util.*;
+
+import java.util.*;
 
 /**
  * @author Justin W Smith
@@ -34,7 +34,30 @@ import org.jpas.util.WeakValueMap;
  */
 public class TransactionTransfer extends JpasObservable<TransactionTransfer>
 {
-    private static WeakValueMap<Integer, WeakValueMap<Integer, TransactionTransfer>> transTransferCache = new WeakValueMap<Integer, WeakValueMap<Integer, TransactionTransfer>>();
+	static class TransTransferKey 
+	{
+		final Integer transactionID;
+		final Integer categoryID;
+		TransTransferKey(final Integer transactionID, final Integer categoryID)
+		{
+			this.transactionID = transactionID;
+			this.categoryID = categoryID;
+		}
+		
+		public boolean equals(final Object o)
+		{
+			return o instanceof TransTransferKey 
+				&& ((TransTransferKey)o).transactionID.equals(transactionID)
+				&& ((TransTransferKey)o).categoryID.equals(categoryID);
+		}
+		
+		public int hashCode()
+		{
+			return transactionID.intValue() * categoryID.intValue();
+		}
+	}
+	
+    private static WeakValueMap<TransTransferKey, TransactionTransfer> transTransferCache = new WeakValueMap<TransTransferKey, TransactionTransfer>();
     private static JpasObservable<TransactionTransfer> observable = new JpasObservable<TransactionTransfer>();
 
     public static JpasObservable<TransactionTransfer> getObservable()
@@ -42,36 +65,40 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         return observable;
     }
 
-    private boolean isDeleted = false;
     private boolean isLoaded = false;
+    private boolean isDeleted = false;
+    private boolean isAmountModified = false;
+    private boolean isCategoryModified = false;
+    
     final Integer transactionID;
     Integer accountID;
     private long amount;
 
-    static TransactionTransfer getTransactionTransferforIDs(
-            final Integer transactionID, final Integer accountID)
+    static TransactionTransfer getTransactionTransferforIDs(final Integer transactionID, final Integer categoryID)
     {
-        WeakValueMap<Integer, TransactionTransfer> map = transTransferCache
-                .get(transactionID);
-        if (map == null)
-        {
-            map = new WeakValueMap<Integer, TransactionTransfer>();
-            transTransferCache.put(transactionID, map);
-        }
-        TransactionTransfer tt = map.get(accountID);
-        if (tt == null)
-        {
-            tt = new TransactionTransfer(transactionID, accountID);
-            map.put(accountID, tt);
-        }
-        return tt;
-    }
+    	if(TransAccountMappingDA.getInstance().doesTransAccountTransferExist(transactionID, categoryID))
+    	{
+    		final TransTransferKey key = new TransTransferKey(transactionID, categoryID);
+    		TransactionTransfer transfer = transTransferCache.get(key);
 
+    		if(transfer == null)
+		    {
+    			transfer = new TransactionTransfer(transactionID, categoryID);
+    			transTransferCache.put(key, transfer);
+		    }
+    		return transfer;
+    	}
+    	return null;
+    }
+    
     private TransactionTransfer(final Integer transactionID,
             final Integer accountID)
     {
         this.transactionID = transactionID;
         this.accountID = accountID;
+        addObserver(Transaction.getTransactionForID(transactionID));
+        addObserver(Account.getAccountForID(accountID));
+        addObserver(Category.getCategoryForID(accountID));
     }
 
     public Category getCategory()
@@ -108,58 +135,75 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         return amount;
     }
 
-    private void announceDelete()
+    private void announceChange(final JpasDataChange<TransactionTransfer> change)
     {
-        final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Delete<TransactionTransfer>(
-                this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
+    	if(true)
+    	{
+    		observable.notifyObservers(change);
+    	}
+    	notifyObservers(change);
     }
-
-    private void announceModify()
+    
+    private void commit()
     {
-        final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Modify<TransactionTransfer>(
-                this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
+    	if(isDeleted)
+    	{
+    		final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Delete<TransactionTransfer>(this);
+    		TransAccountMappingDA.getInstance().deleteTransAccountMapping(transactionID, accountID);
+    		announceChange(change);
+    	}
+    	else
+    	{
+	    	if(isAmountModified)
+	    	{
+	    		final JpasDataChange<TransactionTransfer> change = new JpasDataChange.AmountModify<TransactionTransfer>(this);
+	    		TransAccountMappingDA.getInstance().updateTAMAmount(transactionID, accountID, amount);
+	    		announceChange(change);
+	    	}
+	    	if(isCategoryModified)
+	    	{
+	    		final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Modify<TransactionTransfer>(this);
+	    		TransAccountMappingDA.getInstance().updateTAMAmount(transactionID, accountID, amount);
+	    		announceChange(change);
+	    	}
+    	}
     }
 
     public void setAmount(final long amount)
     {
         assert (!isDeleted);
-        TransAccountMappingDA.getInstance().updateTAMAmount(
-                transactionID, accountID, amount);
         if (isLoaded)
         {
             loadData();
         }
-        final Transaction trans = Transaction
-                .getTransactionForID(transactionID);
-        announceModify();
-        trans.amountChanged();
-        Category.getCategoryForID(accountID).amountChanged();
-        Account.getAccountForID(accountID).amountChanged();
+        if(this.amount != amount)
+        {
+        	isAmountModified = true;
+        	this.amount = amount;
+        }
     }
 
     void setCategory(final Category category)
     {
         assert (!isDeleted);
-        TransAccountMappingDA.getInstance().updateTAMAccount(
-                transactionID, accountID, category.id);
-        this.accountID = category.id;
-        
         if (isLoaded)
         {
             loadData();
         }
-
-        announceModify();
-        
-        Transaction.getTransactionForID(transactionID).amountChanged();
-        Category.getCategoryForID(accountID).amountChanged();
-        Account.getAccountForID(accountID).amountChanged();
+        if(this.accountID != category.id)
+        {
+        	isCategoryModified = true;
+        	this.accountID = category.id;
+        }
     }
 
+    public void delete()
+    {
+        if(!isDeleted)
+        {
+        	isDeleted = true;
+        }
+    }
     
     public boolean isDeleted()
     {
@@ -171,44 +215,21 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         return isLoaded;
     }
 
-    public void delete()
+    public boolean isModified()
     {
-        delete(false);
+    	return isCategoryModified || isAmountModified;
     }
     
-    void delete(final boolean internalCall)
+    public boolean isCategoryModified()
     {
-        if (!internalCall)
-        {
-            TransAccountMappingDA.getInstance().deleteTransAccountMapping(
-                    transactionID, accountID);
-        }
-        
-        final WeakValueMap<Integer, TransactionTransfer> map = transTransferCache
-                .get(transactionID);
-        
-        if(map != null)
-        {
-		    map.remove(accountID);
-		    
-		    if (map.size() == 0)
-		    {
-		        transTransferCache.remove(transactionID);
-		    }
-        }
-        
-        isDeleted = true;
-        announceDelete();
-        
-        if (!internalCall)
-        {
-            Transaction.getTransactionForID(transactionID).amountChanged();
-        }
-        
-        Category.getCategoryForID(accountID).amountChanged();
-        Account.getAccountForID(accountID).amountChanged();
+    	return isCategoryModified;
     }
-
+    
+    public boolean isAmountModified()
+    {
+    	return isAmountModified;
+    }
+    
     public static void main(String[] args)
     {
     }

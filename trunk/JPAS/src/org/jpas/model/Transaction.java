@@ -27,23 +27,28 @@ import org.jpas.da.TransAccountMappingDA;
 import org.jpas.da.TransactionDA;
 import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
+import org.jpas.util.JpasObserver;
 import org.jpas.util.WeakValueMap;
 
-public class Transaction extends JpasObservable<Transaction>
+public class Transaction extends JpasObservable<Transaction> implements JpasObserver<TransactionTransfer>
 {
     private static Logger defaulLogger = Logger.getLogger(Transaction.class);
 
     private static WeakValueMap<Integer, Transaction> transactionCache = new WeakValueMap<Integer, Transaction>();
-
     private static JpasObservable<Transaction> observable = new JpasObservable<Transaction>();
-
-    public static JpasObservable<Transaction> getObservable()
+    private static Comparator<Transaction> dateComparator = new Comparator<Transaction>()
     {
-        return observable;
-    }
+        public int compare(final Transaction a, final Transaction b)
+        {
+            final int dateComp = a.getDate().compareTo(b.getDate());
+            return dateComp != 0 ? dateComp : a.id.intValue()
+                            - b.id.intValue();
+        }
+    };
 
-    private boolean isDeleted = false;
     private boolean isLoaded = false;
+    private boolean isDeleted = false;
+    private boolean isModified = false;
 
     private long balance;
 
@@ -59,17 +64,14 @@ public class Transaction extends JpasObservable<Transaction>
 
     public static Comparator<Transaction> getDateComparator()
     {
-        return new Comparator<Transaction>()
-        {
-            public int compare(final Transaction a, final Transaction b)
-            {
-                final int dateComp = a.getDate().compareTo(b.getDate());
-                return dateComp != 0 ? dateComp : a.id.intValue()
-                                - b.id.intValue();
-            }
-        };
+        return dateComparator;
     }
 
+    public static JpasObservable<Transaction> getObservable()
+    {
+        return observable;
+    }
+    
     public static Transaction[] getAllTransactionsAffecting(final Account account)
     {
         final Integer[] ids = TransactionDA.getInstance()
@@ -86,7 +88,7 @@ public class Transaction extends JpasObservable<Transaction>
             else
             {
                 final Category cat = Category.getCategoryForAccount(account);
-                balance += trans[i].getTransfer(cat).getAmount();
+                //TODO balance += trans[i].getTransfer(cat).getAmount();
             }
             trans[i].setBalance(balance);
         }
@@ -120,69 +122,6 @@ public class Transaction extends JpasObservable<Transaction>
         this.id = id;
     }
 
-    void setBalance(final long balance)
-    {
-        this.balance = balance;
-    }
-
-    public long getBalance()
-    {
-        return balance;
-    }
-
-    public void delete()
-    {
-        delete(false);
-    }
-
-    void delete(final boolean internalCall)
-    {
-        if (!internalCall)
-        {
-            TransactionDA.getInstance().deleteTransaction(id);
-        }
-        transactionCache.remove(id);
-
-        final Integer[] accountIDs = TransAccountMappingDA.getInstance()
-                        .getAllTranfersForTransaction(id);
-        for (int i = 0; i < accountIDs.length; i++)
-        {
-            TransactionTransfer.getTransactionTransferforIDs(id, accountIDs[i])
-                            .delete(true);
-        }
-
-        isDeleted = true;
-
-        if (!internalCall)
-        {
-            Account.getAccountForID(accountID).amountChanged();
-        }
-    }
-
-    public void announceDelete()
-    {
-        final JpasDataChange<Transaction> change = new JpasDataChange.Delete<Transaction>(
-                        this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
-    }
-
-    public void announceModify()
-    {
-        final JpasDataChange<Transaction> change = new JpasDataChange.Modify<Transaction>(
-                        this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
-    }
-
-    public void amountChanged()
-    {
-        amountLoaded = false;
-        announceModify();
-        Category.getCategoryForID(accountID).amountChanged();
-        Account.getAccountForID(accountID).amountChanged();
-    }
-
     private void loadData()
     {
         assert (!isDeleted);
@@ -205,8 +144,76 @@ public class Transaction extends JpasObservable<Transaction>
                         });
     }
 
+    public long getAmount()
+    {
+    	assert(!isDeleted);
+        if (!amountLoaded)
+        {
+            amount = TransAccountMappingDA.getInstance().getTransactionAmount(id);
+            amountLoaded = true;
+        }
+        return amount;
+    }
+
+	public void update(JpasObservable<TransactionTransfer> ob, JpasDataChange<TransactionTransfer> ch) 
+	{
+    	assert(!isDeleted);
+    	final JpasDataChange<Transaction> myChange = new JpasDataChange.Modify<Transaction>(this);
+    	amountLoaded = false;
+    	if(true)
+		{
+			observable.notifyObservers(myChange);
+		}
+        notifyObservers(myChange);
+	}
+    
+    public void commit(final boolean broadcastForAll)
+    {
+    	if(isModified)
+    	{
+    		final JpasDataChange<Transaction> change;
+			if(isDeleted)
+			{
+				change = new JpasDataChange.Delete<Transaction>(this);
+		        TransactionDA.getInstance().deleteTransaction(id);
+			}
+			else
+			{
+				change = new JpasDataChange.Modify<Transaction>(this);
+				TransactionDA.getInstance().updateTransaction(id, payee, memo, num,
+                        new java.sql.Date(date.getTime()));
+
+			}
+			if(broadcastForAll)
+			{
+				observable.notifyObservers(change);
+			}
+	        notifyObservers(change);
+    	}
+    }
+    
+    private void setBalance(final long balance)
+    {
+        this.balance = balance;
+    }
+
+    public long getBalance()
+    {
+        return balance;
+    }
+
+    public void delete()
+    {
+        if(!isDeleted)
+        {
+        	isDeleted = true;
+        	isModified = true;
+        }
+    }
+
     public Account getAccount()
     {
+    	assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
@@ -216,6 +223,7 @@ public class Transaction extends JpasObservable<Transaction>
 
     public String getPayee()
     {
+    	assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
@@ -225,6 +233,7 @@ public class Transaction extends JpasObservable<Transaction>
 
     public String getMemo()
     {
+    	assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
@@ -234,6 +243,7 @@ public class Transaction extends JpasObservable<Transaction>
 
     public String getNum()
     {
+    	assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
@@ -243,120 +253,72 @@ public class Transaction extends JpasObservable<Transaction>
 
     public Date getDate()
     {
+    	assert (!isDeleted);
         if (!isLoaded)
         {
             loadData();
         }
         return date;
     }
-
-    public TransactionTransfer[] getAllTransfers()
-    {
-        final Integer[] accountIDs = TransAccountMappingDA.getInstance()
-                        .getAllTranfersForTransaction(id);
-        final TransactionTransfer[] ttArray = new TransactionTransfer[accountIDs.length];
-        for (int i = 0; i < accountIDs.length; i++)
-        {
-            ttArray[i] = TransactionTransfer.getTransactionTransferforIDs(id,
-                            accountIDs[i]);
-        }
-        return ttArray;
-    }
-
-    public TransactionTransfer getTransfer(final Category cat)
-    {
-        if (affects(cat))
-        {
-            return TransactionTransfer.getTransactionTransferforIDs(id, cat.id);
-        }
-        return null;
-    }
-
-    public TransactionTransfer addTransfer(final Category category,
-                                           final long amount)
-    {
-        assert (!isDeleted);
-        if (TransAccountMappingDA.getInstance().doesTransAccountTransferExist(
-                        id, category.id))
-        {
-            TransAccountMappingDA.getInstance().updateTAMAmount(id,
-                            category.id, amount);
-        }
-        else
-        {
-            TransAccountMappingDA.getInstance().createTransAccountMapping(id,
-                            category.id, amount);
-        }
-        return TransactionTransfer
-                        .getTransactionTransferforIDs(id, category.id);
-    }
-
+    
     public void setPayee(final String payee)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionPayee(id, payee);
-        if (isLoaded)
+        if(!isLoaded)
         {
-            loadData();
+        	loadData();
+        }
+        if(!this.payee.equals(payee))
+        {
+        	isModified = true;
+        	this.payee = payee;
         }
     }
 
     public void setMemo(final String memo)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionMemo(id, memo);
-        if (isLoaded)
+        if(!isLoaded)
         {
-            loadData();
+        	loadData();
+        }
+        if(!this.memo.equals(memo))
+        {
+        	isModified = true;
+        	this.memo = memo;
         }
     }
 
     public void setNum(final String num)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionMemo(id, num);
-        if (isLoaded)
+        if(!isLoaded)
         {
-            loadData();
+        	loadData();
+        }
+        if(!this.num.equals(num))
+        {
+        	isModified = true;
+        	this.num = num;
         }
     }
 
     public void setDate(final Date date)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionDate(id,
-                        new java.sql.Date(date.getTime()));
-        if (isLoaded)
+        if(!isLoaded)
         {
-            loadData();
+        	loadData();
+        }
+        if(!this.date.equals(date))
+        {
+        	isModified = true;
+        	this.date = date;
         }
     }
 
-    public void set(final String payee, final String memo, final String num,
-                    final Date date)
-    {
-        assert (!isDeleted);
-        TransactionDA.getInstance().updateTransaction(id, payee, memo, num,
-                        new java.sql.Date(date.getTime()));
-        if (isLoaded)
-        {
-            loadData();
-        }
-    }
-
-    public long getAmount()
-    {
-        if (!amountLoaded)
-        {
-            defaulLogger.debug("Loading amount");
-            amount = TransAccountMappingDA.getInstance().getTransactionAmount(
-                            id);
-            amountLoaded = true;
-        }
-        defaulLogger.debug("Amount: " + amount);
-        return amount;
-    }
-
+    
+    
     public boolean isDeleted()
     {
         return isDeleted;
@@ -367,6 +329,13 @@ public class Transaction extends JpasObservable<Transaction>
         return isLoaded;
     }
 
+    public boolean isModified()
+    {
+    	return isModified;
+    }
+    
+    
+    
     public boolean affects(final Category category)
     {
         return TransactionDA.getInstance().doesTransactionAffectAccount(id,
@@ -378,5 +347,4 @@ public class Transaction extends JpasObservable<Transaction>
         return TransactionDA.getInstance().doesTransactionAffectAccount(id,
                         account.id);
     }
-
 }
