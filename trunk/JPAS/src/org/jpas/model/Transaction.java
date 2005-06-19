@@ -25,17 +25,12 @@ import java.util.Comparator;
 import org.apache.log4j.Logger;
 import org.jpas.da.TransAccountMappingDA;
 import org.jpas.da.TransactionDA;
-import org.jpas.util.JpasDataChange;
-import org.jpas.util.JpasObservable;
-import org.jpas.util.JpasObserver;
-import org.jpas.util.WeakValueMap;
+import org.jpas.util.*;
 
-public class Transaction extends JpasObservable<Transaction> implements JpasObserver<TransactionTransfer>
+public class Transaction extends JpasObservableImpl
 {
     private static Logger defaulLogger = Logger.getLogger(Transaction.class);
 
-    private static WeakValueMap<Integer, Transaction> transactionCache = new WeakValueMap<Integer, Transaction>();
-    private static JpasObservable<Transaction> observable = new JpasObservable<Transaction>();
     private static Comparator<Transaction> dateComparator = new Comparator<Transaction>()
     {
         public int compare(final Transaction a, final Transaction b)
@@ -44,7 +39,29 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
             return dateComp != 0 ? dateComp : a.id.intValue() - b.id.intValue();
         }
     };
+	
+    public static Comparator<Transaction> getDateComparator()
+    {
+        return dateComparator;
+    }
 
+    static
+    {
+    	ModelFactory.getInstance().getTransactionTransferObservable().addObserver(new JpasObserver()
+		{
+			public void update(JpasObservable observable, JpasDataChange change) 
+			{
+				if(change instanceof JpasDataChange.Delete || change instanceof JpasDataChange.AmountModify)
+				{
+					final TransactionTransfer transfer = (TransactionTransfer)change.getValue();
+					ModelFactory.getInstance().getTransactionForID(transfer.transactionID).amountChanged();
+				}
+			}
+		});
+    }
+
+    
+    
     private boolean isLoaded = false;
     private boolean isDeleted = false;
     private boolean isModified = false;
@@ -61,62 +78,8 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
     private boolean amountLoaded = false;
     private long amount;
 
-    public static Comparator<Transaction> getDateComparator()
-    {
-        return dateComparator;
-    }
 
-    public static JpasObservable<Transaction> getObservable()
-    {
-        return observable;
-    }
-    
-    public static Transaction[] getAllTransactionsAffecting(final Account account)
-    {
-        final Integer[] ids = TransactionDA.getInstance()
-                        .getAllAffectingTransactionIDs(account.id);
-        final Transaction[] trans = new Transaction[ids.length];
-        long balance = 0;
-        for (int i = 0; i < ids.length; i++)
-        {
-            trans[i] = getTransactionForID(ids[i]);
-            if (trans[i].getAccount().equals(account))
-            {
-                balance -= trans[i].getAmount();
-            }
-            else
-            {
-                final Category cat = Category.getCategoryForAccount(account);
-                //TODO balance += trans[i].getTransfer(cat).getAmount();
-            }
-            trans[i].setBalance(balance);
-        }
-        return trans;
-    }
-
-    static Transaction getTransactionForID(final Integer id)
-    {
-        Transaction trans = transactionCache.get(id);
-        if (trans == null)
-        {
-            trans = new Transaction(id);
-            transactionCache.put(id, trans);
-        }
-        return trans;
-    }
-
-    public static Transaction createTransaction(final Account account,
-                                                final String payee,
-                                                final String memo,
-                                                final String num,
-                                                final Date date)
-    {
-        return getTransactionForID(TransactionDA.getInstance()
-                        .createTransaction(account.id, payee, memo, num,
-                                        new java.sql.Date(date.getTime())));
-    }
-
-    private Transaction(final Integer id)
+    Transaction(final Integer id)
     {
         this.id = id;
     }
@@ -154,61 +117,43 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
         return amount;
     }
 
-    private void announceAmountChange()
+    private void amountChanged()
     {
-        final JpasDataChange<Transaction> myChange = new JpasDataChange.AmountModify<Transaction>(this);
+        final JpasDataChange myChange = new JpasDataChange.AmountModify(this);
         amountLoaded = false;
-        if(true)
-        {
-            observable.notifyObservers(myChange);
-        }
         notifyObservers(myChange);
     }
-    
-	public void update(JpasObservable<TransactionTransfer> ob, JpasDataChange<TransactionTransfer> change) 
-	{
-    	assert(!isDeleted);
-        if(change instanceof JpasDataChange.Delete)
-        {
-            ob.deleteObserver(this);
-        }
-        announceAmountChange();
-	}
-    
-    public void commit(final boolean broadcastForAll)
+	
+    public void commit()
     {
     	if(isModified)
     	{
-    		final JpasDataChange<Transaction> change;
+    		final JpasDataChange change;
 			if(isDeleted)
 			{
-                final TransactionTransfer[] transfers = TransactionTransfer.getTransfersForTransaction(this);
+                final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(this);
                 for(int i = 0; i < transfers.length; i++)
                 {
-                    transfers[i].deleteObserver(this);
                     transfers[i].delete();
-                    transfers[i].commit(false);
+                    transfers[i].commit();
                 }
-                
-				change = new JpasDataChange.Delete<Transaction>(this);
+				change = new JpasDataChange.Delete(this);
 		        TransactionDA.getInstance().deleteTransaction(id);
+		        deleteObservers();
+				isModified = false;
 			}
 			else
 			{
-				change = new JpasDataChange.Modify<Transaction>(this);
+				change = new JpasDataChange.Modify(this);
 				TransactionDA.getInstance().updateTransaction(id, payee, memo, num,
                         new java.sql.Date(date.getTime()));
-
-			}
-			if(broadcastForAll)
-			{
-				observable.notifyObservers(change);
+				isModified = false;
 			}
 	        notifyObservers(change);
     	}
     }
     
-    private void setBalance(final long balance)
+    void setBalance(final long balance)
     {
         this.balance = balance;
     }
@@ -234,7 +179,7 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
         {
             loadData();
         }
-        return Account.getAccountForID(accountID);
+        return ModelFactory.getInstance().getAccountImplForID(accountID);
     }
 
     public String getPayee()
@@ -354,13 +299,11 @@ public class Transaction extends JpasObservable<Transaction> implements JpasObse
     
     public boolean affects(final Category category)
     {
-        return TransactionDA.getInstance().doesTransactionAffectAccount(id,
-                        category.id);
+        return TransactionDA.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)category).id);
     }
 
     public boolean affects(final Account account)
     {
-        return TransactionDA.getInstance().doesTransactionAffectAccount(id,
-                        account.id);
+        return TransactionDA.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)account).id);
     }
 }

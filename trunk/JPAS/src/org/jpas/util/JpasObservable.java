@@ -23,98 +23,19 @@
  */
 package org.jpas.util;
 
-import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * @author jsmith
  *
  */
-public class JpasObservable<V>
+public interface JpasObservable
 {
-	//TODO Test this class
+	public void addObserver(final JpasObserver o);
 	
-	private final Set<JpasObserver<V>> observerSet = new HashSet<JpasObserver<V>>();
-	private final Set<WeakReference<JpasObserver<V>>> observerWeakSet = new HashSet<WeakReference<JpasObserver<V>>>();
+	public void addObserverWeak(JpasObserver ob);
 	
-	public void addObserver(final JpasObserver<V> o)
-	{
-		synchronized(observerSet)
-		{
-			observerSet.add(o);
-		}
-	}
+	public boolean deleteObserver(final JpasObserver o);
 	
-	public void addObserverWeak(JpasObserver<V> ob)
-	{
-		synchronized(observerSet)
-		{
-			observerWeakSet.add(new WeakReference<JpasObserver<V>>(ob));
-		}
-	}
+	public void notifyObservers(JpasDataChange arg);
 	
-	public boolean deleteObserver(final JpasObserver<V> o)
-	{
-		synchronized(observerSet)
-		{
-			if(!observerSet.remove(o))
-			{
-				for(WeakReference<JpasObserver<V>> wr : observerWeakSet)
-				{
-					final JpasObserver<V> ob = wr.get();
-					
-					if(ob == null)
-					{
-						observerWeakSet.remove(wr);
-						continue;
-					}
-					if(ob.equals(o))
-					{
-						return observerWeakSet.remove(wr);
-					}
-				}
-				return false;
-			}
-			return true;
-		}
-	}
-	
-	public void notifyObservers(JpasDataChange<V> arg)
-	{
-		synchronized(observerSet)
-		{
-			for(JpasObserver<V> ob : observerSet)
-			{
-				ob.update(this, arg);
-			}
-			for(WeakReference<JpasObserver<V>> wr : observerWeakSet)
-			{
-				final JpasObserver<V> ob = wr.get();
-				
-				if(ob == null)
-				{
-					observerWeakSet.remove(wr);
-					continue;
-				}
-				ob.update(this, arg);
-			}
-		}
-	}
-	
-	protected void deleteObservers()
-	{
-		synchronized(observerSet)
-		{
-			observerSet.clear();
-		}
-	}
-	
-	public int countObservers()
-	{
-		synchronized(observerSet)
-		{
-			return observerSet.size();
-		}
-	}
+	public int countObservers();
 }

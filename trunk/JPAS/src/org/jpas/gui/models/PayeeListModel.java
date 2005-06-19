@@ -46,7 +46,7 @@ public class PayeeListModel extends JpasListModel<String>
 	/* (non-Javadoc)
 	 * @see org.jpas.gui.model.JpasListModel#initObserver(null)
 	 */
-	protected void initObserver(final JpasObserver<String> observer) 
+	protected void initObserver(final JpasObserver observer) 
 	{
 	}
 

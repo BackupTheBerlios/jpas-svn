@@ -53,11 +53,11 @@ public class TransactionTableModel extends AbstractTableModel
      */
     public TransactionTableModel()
     {
-        Transaction.getObservable().addObserver(new JpasObserver<Transaction>()
+    	ModelFactory.getInstance().getTransactionObservable().addObserver(new JpasObserver()
                 {
-            		public void update(final JpasObservable<Transaction> observable, final JpasDataChange<Transaction> change)
+            		public void update(final JpasObservable observable, final JpasDataChange change)
             		{
-            		    if(account != null && change.getValue().affects(account))
+            		    if(account != null && ((Transaction)change.getValue()).affects(account))
             		    {
             		        loadData();
             		    }
@@ -68,7 +68,7 @@ public class TransactionTableModel extends AbstractTableModel
     private void loadData()
     {
         transactionList.clear();
-        final Transaction[] transArray = Transaction.getAllTransactionsAffecting(account);
+        final Transaction[] transArray = ModelFactory.getInstance().getAllTransactionsAffecting(account);
         Arrays.sort(transArray, Transaction.getDateComparator());
 	    transactionList.addAll(Arrays.asList(transArray));
         fireTableStructureChanged();
@@ -144,14 +144,17 @@ public class TransactionTableModel extends AbstractTableModel
 		{
 			if(transData.getWithdraw() > 0 || transData.getDeposit() > 0)
 			{
-				final Transaction trans = Transaction.createTransaction(getAccount(), transData.getPayee(), transData.getMemo(), transData.getNum(), transData.getDate());
-				trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
-				trans.amountChanged();
+				final Transaction trans = ModelFactory.getInstance().createTransaction(getAccount(), transData.getPayee(), transData.getMemo(), transData.getNum(), transData.getDate());
+				ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
 			}
 			return;
 		}
+		
 		final Transaction trans = transactionList.get(rowIndex);
-		trans.set(transData.getPayee(), transData.getMemo(), transData.getNum(), transData.getDate());
+		trans.setPayee(transData.getPayee());
+		trans.setMemo(transData.getMemo());
+		trans.setNum(transData.getNum());
+		trans.setDate(transData.getDate());
 		
 		if(trans.getAccount().equals(account))
 		{
@@ -161,14 +164,16 @@ public class TransactionTableModel extends AbstractTableModel
 			if(categories.length == 1)
 			{
 				defaultLogger.debug("Clearing all transfers");
-				final TransactionTransfer[] transfers = trans.getAllTransfers();
+				final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(trans);
 				for(int i = 0; i < transfers.length; i++)
 				{
+					defaultLogger.debug("Deleting transfer");
 					transfers[i].delete();
+					transfers[i].commit();
 				}
 				defaultLogger.debug("Adding new transfer");
-				trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
-				trans.amountChanged();
+				ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+				trans.commit();
 				return;
 			}
 			defaultLogger.debug("Ignoring the amount b/c it is a split transaction?");
@@ -176,23 +181,23 @@ public class TransactionTableModel extends AbstractTableModel
 		else
 		{
 			// Should only affect the tranfer to this account
-			final TransactionTransfer[] transfers = trans.getAllTransfers();
+			final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(trans);
 			for(int i = 0; i < transfers.length; i++)
 			{
 				//System.out.println("To account:" + transfers[i].getCategory().getName());
-				if(transfers[i].getCategory().equals(Category.getCategoryForAccount(account)))
+				if(transfers[i].getCategory().equals(ModelFactory.getInstance().getCategoryForAccount(account)))
 				{
 					defaultLogger.debug("Setting amount:");
 					transfers[i].setAmount(transData.getDeposit() - transData.getWithdraw());
-					trans.amountChanged();
+					trans.commit();
 					return;
 				}
 			}
 			// TODO: Should this even happen?
 			defaultLogger.debug("Should this even be possible?");
-			trans.addTransfer( transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
-			trans.amountChanged();
+			ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
 		}
+		trans.commit();
     }
 
     public static void main(String[] args)

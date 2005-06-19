@@ -29,22 +29,19 @@ import java.util.Map;
 
 import org.jpas.da.ReminderAccountMappingDA;
 import org.jpas.da.ReminderDA;
-import org.jpas.da.TransactionDA;
-import org.jpas.util.JpasDataChange;
-import org.jpas.util.JpasObservable;
-import org.jpas.util.WeakValueMap;
+import org.jpas.util.*;
 
 /**
  * @author jsmith
  *  
  */
-public class Reminder extends JpasObservable<Reminder>
+public class Reminder extends JpasObservableImpl implements JpasObserver
 {
     /** TODO covert this to an enum. */
     public static class AmountMethod
     {
         private static final Map<ReminderDA.AmountMethod, AmountMethod> valueMap = new HashMap<ReminderDA.AmountMethod, AmountMethod>();
-        private final ReminderDA.AmountMethod daAmountMethod;
+        final ReminderDA.AmountMethod daAmountMethod;
 
         private AmountMethod(final ReminderDA.AmountMethod amountMethod)
         {
@@ -72,7 +69,7 @@ public class Reminder extends JpasObservable<Reminder>
     public static class RepeatMethod
     {
         private static final Map<ReminderDA.RepeatMethod, RepeatMethod> valueMap = new HashMap<ReminderDA.RepeatMethod, RepeatMethod>();
-        private final ReminderDA.RepeatMethod daRepeatMethod;
+        final ReminderDA.RepeatMethod daRepeatMethod;
 
         private RepeatMethod(final ReminderDA.RepeatMethod repeatMethod)
         {
@@ -96,49 +93,27 @@ public class Reminder extends JpasObservable<Reminder>
                 ReminderDA.RepeatMethod.YEARLY);
     }
 
-    private static WeakValueMap<Integer, Reminder> reminderCache = new WeakValueMap<Integer, Reminder>();
-    private static JpasObservable<Reminder> observable = new JpasObservable<Reminder>();
-
-    public static JpasObservable<Reminder> getObservable()
+    static
     {
-        return observable;
+    	ModelFactory.getInstance().getReminderTransferObservable().addObserver(new JpasObserver()
+		{
+			public void update(JpasObservable observable, JpasDataChange change) 
+			{
+				if(change instanceof JpasDataChange.Delete || change instanceof JpasDataChange.AmountModify)
+				{
+					final ReminderTransfer transfer = (ReminderTransfer)change.getValue();
+					ModelFactory.getInstance().getReminderForID(transfer.reminderID).amountChange();
+				}
+			}
+		});
     }
-
-    public static Reminder[] getAllReminders()
-    {
-        final Integer[] ids = ReminderDA.getInstance().getAllReminderIDs();
-        final Reminder[] reminders = new Reminder[ids.length];
-        for (int i = 0; i < ids.length; i++)
-        {
-            reminders[i] = getReminderForID(ids[i]);
-        }
-        return reminders;
-    }
-
-    static Reminder getReminderForID(final Integer id)
-    {
-        Reminder rem = reminderCache.get(id);
-        if (rem == null)
-        {
-            rem = new Reminder(id);
-            reminderCache.put(id, rem);
-        }
-        return rem;
-    }
-
-    public static Reminder createReminder(final Account account,
-            final String payee, final String memo, final Date date,
-            final AmountMethod amountMethod, final RepeatMethod repeatMethod,
-            final int repeatValue)
-    {
-        return getReminderForID(ReminderDA.getInstance().createReminder(
-                account.id, payee, memo, date, amountMethod.daAmountMethod,
-                repeatMethod.daRepeatMethod, repeatValue));
-    }
-
+    
+    private boolean isModified = false;
     private boolean isDeleted = false;
     private boolean isLoaded = false;
+    
     final Integer id;
+
     private Integer accountId;
     private String payee;
     private String memo;
@@ -150,7 +125,7 @@ public class Reminder extends JpasObservable<Reminder>
     private boolean amountLoaded = false;
     private long amount;
     
-    private Reminder(final Integer id)
+    Reminder(final Integer id)
     {
         this.id = id;
     }
@@ -183,48 +158,50 @@ public class Reminder extends JpasObservable<Reminder>
 
     public void delete()
     {
-        delete(false);
-    }
-
-    void delete(final boolean internalCall)
-    {
-        if (!internalCall)
+        if(!isDeleted)
         {
-            ReminderDA.getInstance().deleteReminder(id);
+        	isDeleted = true;
+        	isModified = true;
         }
-        reminderCache.remove(id);
-        
-        final Integer[] accountIDs = ReminderAccountMappingDA.getInstance()
-        	.getAllReminderAccountTranfers(id);
-		for (int i = 0; i < accountIDs.length; i++)
-		{
-		    ReminderTransfer.getReminderTransferforIDs(id, accountIDs[i]).delete(true);
-		}
-        
-        isDeleted = true;
-        announceDelete();
     }
 
-    private void announceDelete()
+    public void commit()
     {
-        final JpasDataChange<Reminder> change = new JpasDataChange.Delete<Reminder>(
-                this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
-        deleteObservers();
+    	if(isModified)
+    	{
+    		final JpasDataChange change;
+    		if(isDeleted)
+    		{
+		    	final Integer[] accountIDs = ReminderAccountMappingDA.getInstance()
+		        	.getAllReminderAccountTranfers(id);
+				for (int i = 0; i < accountIDs.length; i++)
+				{
+					final ReminderTransfer transfer = ModelFactory.getInstance().getReminderTransferforIDs(id, accountIDs[i]);
+					transfer.deleteObserver(this);
+				    transfer.delete();
+					transfer.commit();
+				}
+		        change = new JpasDataChange.Delete(this);
+		        ReminderDA.getInstance().deleteReminder(id);
+		        deleteObservers();
+		        isModified = false;
+    		}
+    		else
+    		{
+				change = new JpasDataChange.Modify(this);
+				ReminderDA.getInstance().updateReminder(id, accountId, payee, memo, new java.sql.Date(date.getTime()), amountMethod.daAmountMethod, repeatMethod.daRepeatMethod, repeatValue);
+				isModified = false;
+    		}
+	        notifyObservers(change);
+    	}
     }
 
-    private void announceModify()
+    
+    private void amountChange()
     {
-        final JpasDataChange<Reminder> change = new JpasDataChange.Modify<Reminder>(
-                this);
-        observable.notifyObservers(change);
-        notifyObservers(change);
-    }
-
-    void amountChanged()
-    {
-        announceModify();
+        final JpasDataChange myChange = new JpasDataChange.AmountModify(this);
+        amountLoaded = false;
+        notifyObservers(myChange);
     }
 
     public Account getAccount()
@@ -233,7 +210,7 @@ public class Reminder extends JpasObservable<Reminder>
         {
             loadData();
         }
-        return Account.getAccountForID(accountId);
+        return ModelFactory.getInstance().getAccountImplForID(accountId);
     }
 
     public String getPayee()
@@ -290,96 +267,102 @@ public class Reminder extends JpasObservable<Reminder>
         return repeatValue;
     }
 
-    public ReminderTransfer[] getTransfers()
-    {
-        final Integer[] accountIDs = ReminderAccountMappingDA.getInstance()
-                .getAllReminderAccountTranfers(id);
-        final ReminderTransfer[] ttArray = new ReminderTransfer[accountIDs.length];
-        for (int i = 0; i < accountIDs.length; i++)
-        {
-            ttArray[i] = ReminderTransfer.getReminderTransferforIDs(id,
-                    accountIDs[i]);
-        }
-        return ttArray;
-    }
-
     public void setPayee(final String payee)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionPayee(id, payee);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(!this.payee.equals(payee))
+        {
+        	this.payee = payee;
+        	isModified = true;
+        }
     }
 
     public void setMemo(final String memo)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionMemo(id, memo);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(!this.memo.equals(memo))
+        {
+        	this.memo = memo;
+        	isModified = true;
+        }
     }
 
     public void setDate(final Date date)
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().updateTransactionDate(id, date);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(!this.date.equals(date))
+        {
+        	this.date = date;
+        	isModified = true;
+        }
     }
 
     public void setAccount(final Integer accountID)
     {
         assert (!isDeleted);
-        ReminderDA.getInstance().updateReminderAccount(id, accountID);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(!this.accountId.equals(accountID))
+        {
+        	this.accountId = accountID;
+        	isModified = true;
+        }
     }
 
     public void setAmountMethod(final AmountMethod amountMethod)
     {
         assert (!isDeleted);
-        ReminderDA.getInstance().updateReminderAmountMethod(id,
-                amountMethod.daAmountMethod);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(!this.amountMethod.equals(amountMethod))
+        {
+        	this.amountMethod = amountMethod;
+        	isModified = true;
+        }
     }
 
     public void setRepeatMethod(final RepeatMethod repeatMethod)
     {
         assert (!isDeleted);
-        ReminderDA.getInstance().updateReminderRepeatMethod(id,
-                repeatMethod.daRepeatMethod);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(!this.repeatMethod.equals(repeatMethod))
+        {
+        	this.repeatMethod = repeatMethod;
+        	isModified = true;
+        }
     }
 
     public void setRepeatValue(final int repeatValue)
     {
         assert (!isDeleted);
-        ReminderDA.getInstance().updateReminderRepeatValue(id, repeatValue);
-        if (isLoaded)
+        if (!isLoaded)
         {
             loadData();
         }
-        announceModify();
+        if(this.repeatValue != repeatValue)
+        {
+        	this.repeatValue = repeatValue;
+        	isModified = true;
+        }
     }
 
     public long getAmount()
@@ -395,4 +378,16 @@ public class Reminder extends JpasObservable<Reminder>
     public static void main(String[] args)
     {
     }
+
+	public void update(JpasObservable ob, JpasDataChange change) 
+	{
+    	assert(!isDeleted);
+        if(change instanceof JpasDataChange.Delete)
+        {
+            ob.deleteObserver(this);
+        }
+        final JpasDataChange myChange = new JpasDataChange.AmountModify(this);
+        amountLoaded = false;
+        notifyObservers(myChange);
+	}
 }

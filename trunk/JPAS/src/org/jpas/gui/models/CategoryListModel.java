@@ -24,22 +24,23 @@
 package org.jpas.gui.models;
 
 import org.jpas.model.Category;
+import org.jpas.model.ModelFactory;
 import org.jpas.util.JpasObserver;
 
 /**
  * @author jsmith
  *
  */
-public class CategoryListModel extends JpasListModel<Category>
+public class CategoryListModel extends JpasListModel
 {
 
-	protected void initObserver(final JpasObserver<Category> observer)
+	protected void initObserver(final JpasObserver observer)
 	{
-		Category.getObservable().addObserver(observer);
+		ModelFactory.getInstance().getAccountObservable().addObserver(observer);
 	}
 	protected Category[] loadData()
 	{
-		return Category.getAllCategories();
+		return ModelFactory.getInstance().getAllCategories();
 	}
 	
 	public void setSelectedItem(final Object anItem) 

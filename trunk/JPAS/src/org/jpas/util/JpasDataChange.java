@@ -27,48 +27,48 @@ package org.jpas.util;
  * @author jsmith
  *
  */
-public class JpasDataChange<V> 
+public class JpasDataChange
 {
-	private V value;
+	private Object value;
 	
-	JpasDataChange(final V value)
+	JpasDataChange(final Object value)
 	{
 		this.value = value;
 	}
 	
-	public V getValue()
+	public Object getValue()
 	{
 		return value;
 	}
 
-	public static class AmountModify<V> extends JpasDataChange<V>
+	public static class AmountModify extends JpasDataChange
 	{
-		public AmountModify(final V value)
+		public AmountModify(final Object value)
 		{
 			super(value);
 		}
 	}
 
 	
-	public static class Modify<V> extends JpasDataChange<V>
+	public static class Modify extends JpasDataChange
 	{
-		public Modify(final V value)
+		public Modify(final Object value)
 		{
 			super(value);
 		}
 	}
 
-	public static class Delete<V> extends JpasDataChange<V>
+	public static class Delete extends JpasDataChange
 	{
-		public Delete(final V value)
+		public Delete(final Object value)
 		{
 			super(value);
 		}
 	}
 	
-	public static class Add<V> extends JpasDataChange<V>
+	public static class Add extends JpasDataChange
 	{
-		public Add(final V value)
+		public Add(final Object value)
 		{
 			super(value);
 		}

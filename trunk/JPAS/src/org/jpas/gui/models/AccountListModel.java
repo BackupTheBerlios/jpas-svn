@@ -24,21 +24,22 @@
 package org.jpas.gui.models;
 
 import org.jpas.model.Account;
+import org.jpas.model.ModelFactory;
 import org.jpas.util.JpasObserver;
 
 /**
  * @author Justin W Smith
  *
  */
-public class AccountListModel extends JpasListModel<Account>
+public class AccountListModel extends JpasListModel
 {
-	protected void initObserver(final JpasObserver<Account> observer)
+	protected void initObserver(final JpasObserver observer)
 	{
-		Account.getObservable().addObserver(observer);
+		ModelFactory.getInstance().getAccountObservable().addObserver(observer);
 	}
 	protected Account[] loadData()
 	{
-		return Account.getAllAccounts();
+		return ModelFactory.getInstance().getAllAccounts();
 	}
 	public void setSelectedItem(final Object anItem) 
 	{

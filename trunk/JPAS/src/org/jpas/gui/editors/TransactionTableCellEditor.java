@@ -272,7 +272,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 		        	depositDoc.setAmount(-currentTrans.getAmount());
 	        	}
 	        	
-	        	final TransactionTransfer[] transfers = currentTrans.getAllTransfers();
+	        	final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(currentTrans);
 	        	if(transfers.length == 0)
 	        	{
 	        	    setCategoryPanel();
@@ -299,8 +299,8 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	}
         	else
         	{
-        	    final Category cat = Category.getCategoryForAccount(account);
-	            final long amount = currentTrans.getTransfer(cat).getAmount();
+        	    final Category cat = ModelFactory.getInstance().getCategoryForAccount(account);
+	            final long amount = ModelFactory.getInstance().getTransfer(currentTrans, cat).getAmount();
 
 	            if(amount <= 0)
 	            {
@@ -314,7 +314,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	            }
 
         	    setCategoryPanel();
-        	    categoryList.getModel().setSelectedItem(Category.getCategoryForAccount(currentTrans.getAccount()));
+        	    categoryList.getModel().setSelectedItem(ModelFactory.getInstance().getCategoryForAccount(currentTrans.getAccount()));
         	}
         }
 		SwingUtilities.invokeLater(new Runnable()

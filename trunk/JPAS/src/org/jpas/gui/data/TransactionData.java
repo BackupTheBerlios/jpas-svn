@@ -98,7 +98,7 @@ public class TransactionData
 		
 		for(int i = 0; i < categories.length; i++)
 		{
-        	buffer.append(categories[i].getName());
+        	buffer.append(categories[i].getCategoryName());
 			if(i + 1 < categories.length)
 			{
 				buffer.append(", ");

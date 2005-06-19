@@ -43,9 +43,9 @@ public abstract class JpasListModel <T> extends AbstractListModel implements Com
 	
 	private List<T> data = new ArrayList<T>();
 
-    final JpasObserver<T> observer = new JpasObserver<T>()
+    final JpasObserver observer = new JpasObserver()
     {
-        public void update(final JpasObservable<T> obs, final JpasDataChange<T> change)
+        public void update(final JpasObservable obs, final JpasDataChange change)
         {
             populateData();
 
@@ -59,7 +59,7 @@ public abstract class JpasListModel <T> extends AbstractListModel implements Com
 		initObserver(observer);
 	}
 	
-	protected abstract void initObserver(final JpasObserver<T> observer);
+	protected abstract void initObserver(final JpasObserver observer);
 	protected abstract T[] loadData();
 	
 	public void reload()

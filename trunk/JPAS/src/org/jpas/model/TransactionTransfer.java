@@ -24,117 +24,38 @@
 package org.jpas.model;
 
 import org.jpas.da.TransAccountMappingDA;
-import org.jpas.util.JpasDataChange;
-import org.jpas.util.JpasObservable;
-import org.jpas.util.WeakValueMap;
+import org.jpas.util.*;
 
 /**
  * @author Justin W Smith
  *  
  */
-public class TransactionTransfer extends JpasObservable<TransactionTransfer>
+public class TransactionTransfer extends JpasObservableImpl
 {
-	static class TransTransferKey 
-	{
-		final Integer transactionID;
-		final Integer categoryID;
-		TransTransferKey(final Integer transactionID, final Integer categoryID)
-		{
-			this.transactionID = transactionID;
-			this.categoryID = categoryID;
-		}
-		
-		public boolean equals(final Object o)
-		{
-			return o instanceof TransTransferKey 
-				&& ((TransTransferKey)o).transactionID.equals(transactionID)
-				&& ((TransTransferKey)o).categoryID.equals(categoryID);
-		}
-		
-		public int hashCode()
-		{
-			return transactionID.intValue() * categoryID.intValue();
-		}
-	}
-	
-    private static WeakValueMap<TransTransferKey, TransactionTransfer> transTransferCache = new WeakValueMap<TransTransferKey, TransactionTransfer>();
-    private static JpasObservable<TransactionTransfer> observable = new JpasObservable<TransactionTransfer>();
-
-    public static JpasObservable<TransactionTransfer> getObservable()
-    {
-        return observable;
-    }
-
     private boolean isLoaded = false;
     private boolean isDeleted = false;
     private boolean isModified = false;
     
     final Integer transactionID;
-    Integer accountID;
+    final Integer accountID;
     private long amount;
 
     
-    public static TransactionTransfer[] getTransfersForTransaction(final Transaction trans)
-    {
-        final Integer[] accountIDs = TransAccountMappingDA.getInstance()
-                        .getAllTranfersForTransaction(trans.id);
-        final TransactionTransfer[] ttArray = new TransactionTransfer[accountIDs.length];
-        for (int i = 0; i < accountIDs.length; i++)
-        {
-            ttArray[i] = getTransactionTransferforIDs(trans.id, accountIDs[i]);
-        }
-        return ttArray;
-    }
-
-    public static TransactionTransfer getTransfer(final Transaction trans,  final Category cat)
-    {
-        if(TransAccountMappingDA.getInstance().doesTransAccountTransferExist(trans.id, cat.id))
-        {
-            return getTransactionTransferforIDs(trans.id, cat.id);
-        }
-        return null;
-    }
-
-    public static TransactionTransfer createTransfer(final Transaction trans, final Category category, final long amount)
-    {
-        TransAccountMappingDA.getInstance().createTransAccountMapping(trans.id, category.id, amount);
-
-        return getTransactionTransferforIDs(trans.id, category.id);
-    }
-    
-    static TransactionTransfer getTransactionTransferforIDs(final Integer transactionID, final Integer categoryID)
-    {
-        assert(TransAccountMappingDA.getInstance().doesTransAccountTransferExist(transactionID, categoryID));
-        
-		final TransTransferKey key = new TransTransferKey(transactionID, categoryID);
-		TransactionTransfer transfer = transTransferCache.get(key);
-
-		if(transfer == null)
-	    {
-			transfer = new TransactionTransfer(transactionID, categoryID);
-			transTransferCache.put(key, transfer);
-	    }
-		return transfer;
-    }
-    
-    private TransactionTransfer(final Integer transactionID,
+    TransactionTransfer(final Integer transactionID,
             final Integer accountID)
     {
         this.transactionID = transactionID;
         this.accountID = accountID;
-        addObserver(Transaction.getTransactionForID(transactionID));
-        addObserver(Category.getCategoryForID(accountID));
-        announceChange(new JpasDataChange.AmountModify<TransactionTransfer>(this), true);
     }
 
     public Category getCategory()
     {
-        return Category.getCategoryForID(accountID);
+        return ModelFactory.getInstance().getAccountImplForID(accountID);
     }
 
     public Transaction getTransaction()
     {
-        return Transaction.getTransactionForID(transactionID);
+        return ModelFactory.getInstance().getTransactionForID(transactionID);
     }
 
     private void loadData()
@@ -161,28 +82,25 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         return amount;
     }
 
-    private void announceChange(final JpasDataChange<TransactionTransfer> change, final boolean broadcastForAll)
+    public void commit()
     {
-    	if(broadcastForAll)
+    	if(isModified)
     	{
-    		observable.notifyObservers(change);
-    	}
-    	notifyObservers(change);
-    }
-    
-    public void commit(final boolean broadcastForAll)
-    {
-    	if(isDeleted)
-    	{
-    		final JpasDataChange<TransactionTransfer> change = new JpasDataChange.Delete<TransactionTransfer>(this);
-    		TransAccountMappingDA.getInstance().deleteTransAccountMapping(transactionID, accountID);
-    		announceChange(change, broadcastForAll);
-    	}
-    	else if(isModified)
-    	{
-    		final JpasDataChange<TransactionTransfer> change = new JpasDataChange.AmountModify<TransactionTransfer>(this);
-    		TransAccountMappingDA.getInstance().updateTAMAmount(transactionID, accountID, amount);
-    		announceChange(change, broadcastForAll);
+    		if(isDeleted)
+    		{
+	    		final JpasDataChange change = new JpasDataChange.Delete(this);
+	    		TransAccountMappingDA.getInstance().deleteTransAccountMapping(transactionID, accountID);
+	    		notifyObservers(change);
+	    		deleteObservers();
+	    		isModified = false;
+	    	}
+	    	else
+	    	{
+	    		final JpasDataChange change = new JpasDataChange.AmountModify(this);
+	    		TransAccountMappingDA.getInstance().updateTAMAmount(transactionID, accountID, amount);
+	    		notifyObservers(change);
+	    		isModified = false;
+	    	}
     	}
     }
 
@@ -205,6 +123,7 @@ public class TransactionTransfer extends JpasObservable<TransactionTransfer>
         if(!isDeleted)
         {
         	isDeleted = true;
+        	isModified = true;
         }
     }
     

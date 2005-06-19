@@ -110,13 +110,13 @@ public class AccountDA
 		}
 	}
 
-	public void updateAccount(final Integer id, final String name, final boolean isBankAccount)
+	public void updateAccount(final Integer id, final String name, final AccountType type)
 	{
 		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
 										 + " SET " + DBNames.CN_ACCOUNT_NAME
 										 + " = '" + name + "' , "
 										 + DBNames.CN_ACCOUNT_TYPE
-										 + " = '" + isBankAccount
+										 + " = '" + type.dbValue
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
 											 + " = " + id;
 
@@ -160,11 +160,11 @@ public class AccountDA
 		}
 	}
 
-	public void updateAccountIsBank(final Integer id, final boolean isBank)
+	public void updateAccountType(final Integer id, final AccountType type)
 	{
 		final String sqlStr = "UPDATE " + DBNames.TN_ACCOUNT
 										 + " SET " + DBNames.CN_ACCOUNT_TYPE
-										 + " = '" + isBank
+										 + " = '" + type.dbValue
 										 + "' WHERE " + DBNames.CN_ACCOUNT_ID
 											 + " = " + id;
 

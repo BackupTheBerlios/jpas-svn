@@ -194,14 +194,14 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 		            depositLabel.setText(AmountDocument.getTextForAmount(-amount));
 	            }
 	            
-	            final TransactionTransfer[] transfers = trans.getAllTransfers();
+	            final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(trans);
 	            if(transfers.length == 0)
 	            {
 	            	categoryLabel.setText("[NONE]");
 	            }
 	            else if(transfers.length == 1)
 	            {
-	            	categoryLabel.setText(transfers[0].getCategory().getName());
+	            	categoryLabel.setText(transfers[0].getCategory().getCategoryName());
 	            }
 	            else
 	            {
@@ -210,8 +210,8 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         	}
         	else
         	{
-        	    final Category cat = Category.getCategoryForAccount(account);
-	            final long amount = trans.getTransfer(cat).getAmount();
+        	    final Category cat = ModelFactory.getInstance().getCategoryForAccount(account);
+	            final long amount = ModelFactory.getInstance().getTransfer(trans, cat).getAmount();
 
 	            if(amount <= 0)
 	            {
@@ -224,7 +224,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 		            depositLabel.setText(AmountDocument.getTextForAmount(amount));
 	            }
 	            
-            	categoryLabel.setText(Category.getCategoryForAccount(trans.getAccount()).getName());
+            	categoryLabel.setText(ModelFactory.getInstance().getCategoryForAccount(trans.getAccount()).getCategoryName());
         	}
         }
         return this;

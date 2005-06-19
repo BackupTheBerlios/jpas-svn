@@ -27,7 +27,7 @@ package org.jpas.util;
  * @author jsmith
  *
  */
-public interface JpasObserver<T>
+public interface JpasObserver
 {
-	public void update(JpasObservable<T> observable, final JpasDataChange<T> change);
+	public void update(JpasObservable observable, final JpasDataChange change);
 }

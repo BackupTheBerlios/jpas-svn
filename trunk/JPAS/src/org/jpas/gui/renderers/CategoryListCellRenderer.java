@@ -33,6 +33,6 @@ public class CategoryListCellRenderer extends JpasListCellRenderer<Category>
 {
 	protected String getTextFor(final Category value)
 	{
-		return value.getName();
+		return value.getCategoryName();
 	}
 }
