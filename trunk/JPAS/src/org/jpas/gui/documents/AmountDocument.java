@@ -193,13 +193,40 @@ public class AmountDocument extends PlainDocument
     
     public static String getTextForAmount(final long amount)
     {
+        return getTextForAmount(amount, false);
+    }
+    
+    public static String getTextForAmount(final long amount, final boolean formatForLabel)
+    {
         final StringBuffer buff = new StringBuffer();
         final DecimalFormat dollarFormat = new DecimalFormat("###,###,###,###");
         final DecimalFormat twoFormat = new DecimalFormat("00");
-        buff.append(dollarFormat.format(amount / 100));
-        buff.append(".");
-        buff.append(twoFormat.format(amount % 100));
         
+        final long absAmount = Math.abs(amount);
+        buff.append(dollarFormat.format(absAmount / 100));
+        buff.append(".");
+        buff.append(twoFormat.format(absAmount % 100));
+
+        if(amount < 0)
+        {
+            if(formatForLabel)
+            {
+                buff.insert(0, " (");
+                buff.append(")");
+            }
+            else
+            {
+                buff.insert(0, "-");
+            }
+        }
+        else
+        {
+            if(formatForLabel)
+            {
+                buff.insert(0, " ");
+            }
+        }
+
         return buff.toString();
     }
     
