@@ -156,6 +156,8 @@ public class TransactionTableModel extends AbstractTableModel
 		trans.setNum(transData.getNum());
 		trans.setDate(transData.getDate());
 		
+        final long amount = transData.getWithdraw() - transData.getDeposit();
+        
 		if(trans.getAccount().equals(account))
 		{
 			final Category[] categories = transData.getCategories();
@@ -172,7 +174,7 @@ public class TransactionTableModel extends AbstractTableModel
 					transfers[i].commit();
 				}
 				defaultLogger.debug("Adding new transfer");
-				ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+				ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], amount);
 				trans.commit();
 				return;
 			}
@@ -184,18 +186,19 @@ public class TransactionTableModel extends AbstractTableModel
 			final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(trans);
 			for(int i = 0; i < transfers.length; i++)
 			{
-				//System.out.println("To account:" + transfers[i].getCategory().getName());
+                defaultLogger.debug("Seraching transfer: " + transfers[i].getCategory().getCategoryName());
 				if(transfers[i].getCategory().equals(ModelFactory.getInstance().getCategoryForAccount(account)))
 				{
 					defaultLogger.debug("Setting amount:");
-					transfers[i].setAmount(transData.getDeposit() - transData.getWithdraw());
-					trans.commit();
+					transfers[i].setAmount(-amount);
+                    transfers[i].commit();
+                    trans.commit();
 					return;
 				}
 			}
 			// TODO: Should this even happen?
 			defaultLogger.debug("Should this even be possible?");
-			ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], transData.getWithdraw() - transData.getDeposit());
+			ModelFactory.getInstance().createTransfer(trans, transData.getCategories()[0], amount);
 		}
 		trans.commit();
     }
