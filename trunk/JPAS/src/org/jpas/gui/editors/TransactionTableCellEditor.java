@@ -31,15 +31,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import org.jpas.gui.components.CategoryComboBox;
-import org.jpas.gui.components.PayeeComboBox;
+import org.jpas.gui.components.*;
 import org.jpas.gui.data.TransactionData;
 import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
@@ -64,12 +62,12 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final JTextField depositField;
 	private final AmountDocument depositDoc = new AmountDocument();
 	private final JTextField memoField;
-	private final JLabel balanceLabel;
+	private final AmountLabel balanceLabel;
 	private final JComboBox categoryList;
 	private final JLabel categoryLabel = new JLabel("[SPLIT]");
 	private final JButton btnEnter = new JButton("Enter");
 	private final JButton btnSplit = new JButton("Split");
-	private final JButton btnDelete = new JButton("Delete");
+	private final JButton btnDelete = new JButton("Edit");
 	
 	private final JPanel splitPanel = new JPanel(new GridLayout(1, 2));
 	
@@ -98,7 +96,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	withdrawField = new JTextField();
     	depositField = new JTextField();
     	memoField = new JTextField();
-    	balanceLabel = new JLabel();
+    	balanceLabel = new AmountLabel();
     	categoryList = new CategoryComboBox();
     	
         init();
@@ -255,7 +253,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	payeeList.setSelectedItem(currentTrans.getPayee());
         	
         	//TODO set balance value appropriately
-        	balanceLabel.setText("");
+        	balanceLabel.setAmount(currentTrans.getBalance());
         	memoField.setText(currentTrans.getMemo());
         	
         	if(currentTrans.getAccount().equals(account))
