@@ -37,6 +37,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.jpas.gui.documents.AmountDocument;
+import org.jpas.gui.components.*;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.Transaction;
 import org.jpas.model.*;
@@ -55,9 +56,9 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 	private final JLabel dateLabel = new JLabel();
 	private final JLabel numLabel = new JLabel();
 	private final JLabel payeeLabel = new JLabel();
-	private final JLabel withdrawLabel = new JLabel();
-	private final JLabel depositLabel = new JLabel();
-	private final JLabel balanceLabel = new JLabel();
+	private final AmountLabel withdrawLabel = new AmountLabel();
+	private final AmountLabel depositLabel = new AmountLabel();
+	private final AmountLabel balanceLabel = new AmountLabel();
 	private final JLabel categoryLabel = new JLabel();
 	private final JLabel memoLabel = new JLabel();
     
@@ -176,7 +177,7 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 
         	dateLabel.setText(format.format(trans.getDate()));
         	numLabel.setText(trans.getNum());
-            balanceLabel.setText(String.valueOf(trans.getBalance()));
+            balanceLabel.setAmount(trans.getBalance());
             memoLabel.setText(trans.getMemo());
             payeeLabel.setText(trans.getPayee());
             
@@ -185,13 +186,13 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 	            final long amount = trans.getAmount();
 	            if(amount >= 0)
 	            {
-		            withdrawLabel.setText(AmountDocument.getTextForAmount(amount));
+		            withdrawLabel.setAmount(amount);
 		            depositLabel.setText("");
 	            }
 	            else
 	            {
 		            withdrawLabel.setText("");
-		            depositLabel.setText(AmountDocument.getTextForAmount(-amount));
+		            depositLabel.setAmount(-amount);
 	            }
 	            
 	            final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(trans);
@@ -215,13 +216,13 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
 
 	            if(amount <= 0)
 	            {
-		            withdrawLabel.setText(AmountDocument.getTextForAmount(-amount));
+		            withdrawLabel.setAmount(-amount);
 		            depositLabel.setText("");
 	            }
 	            else
 	            {
 		            withdrawLabel.setText("");
-		            depositLabel.setText(AmountDocument.getTextForAmount(amount));
+		            depositLabel.setAmount(amount);
 	            }
 	            
             	categoryLabel.setText(ModelFactory.getInstance().getCategoryForAccount(trans.getAccount()).getCategoryName());
