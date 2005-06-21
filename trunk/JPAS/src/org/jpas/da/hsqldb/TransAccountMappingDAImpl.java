@@ -1,4 +1,4 @@
-package org.jpas.da;
+package org.jpas.da.hsqldb;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,6 +7,10 @@ import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.jpas.da.ConnectionManager;
+import org.jpas.da.DBNames;
+import org.jpas.da.TransactionAccountMappingDA;
+import org.jpas.da.TransactionAccountMappingDA.TransAccountTranferHandler;
 
 /**
  * Created on Sep 11, 2004 - 9:59:59 AM
@@ -31,27 +35,18 @@ import org.apache.log4j.Logger;
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-public class TransAccountMappingDA
+public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 {
     private static Logger defaultLogger = Logger
-            .getLogger(TransAccountMappingDA.class);
+            .getLogger(TransAccountMappingDAImpl.class);
 
-    private static TransAccountMappingDA instance = new TransAccountMappingDA();
-
-    public static TransAccountMappingDA getInstance()
-    {
-        return instance;
-    }
-
-    public static interface TransAccountTranferHandler
-    {
-        public void setData(final long amount);
-    }
-
-    private TransAccountMappingDA()
+    public TransAccountMappingDAImpl()
     {
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#createTransAccountMapping(java.lang.Integer, java.lang.Integer, long)
+     */
     public void createTransAccountMapping(final Integer transactionID,
             final Integer accountID, final long amount)
     {
@@ -79,6 +74,9 @@ public class TransAccountMappingDA
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#loadTransAccountMapping(java.lang.Integer, java.lang.Integer, org.jpas.da.TransAccountMappingDAImpl.TransAccountTranferHandler)
+     */
     public void loadTransAccountMapping(final Integer transactionID,
             final Integer accountID, final TransAccountTranferHandler handler)
     {
@@ -108,6 +106,9 @@ public class TransAccountMappingDA
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#updateTAMAccount(java.lang.Integer, java.lang.Integer, java.lang.Integer)
+     */
     public void updateTAMAccount(final Integer transactionID,
             final Integer accountID, final Integer newAccountID)
     {
@@ -135,6 +136,9 @@ public class TransAccountMappingDA
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#updateTAMAmount(java.lang.Integer, java.lang.Integer, long)
+     */
     public void updateTAMAmount(final Integer transactionID,
             final Integer accountID, final long amount)
     {
@@ -162,6 +166,9 @@ public class TransAccountMappingDA
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#deleteTransAccountMapping(java.lang.Integer, java.lang.Integer)
+     */
     public void deleteTransAccountMapping(final Integer transactionID,
             final Integer accountID)
     {
@@ -186,6 +193,9 @@ public class TransAccountMappingDA
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#getTransactionAmount(java.lang.Integer)
+     */
     public long getTransactionAmount(final Integer transactionID)
     {
         final String sqlStr = "SELECT SUM(" + DBNames.CN_TAM_AMOUNT + ") FROM "
@@ -213,6 +223,9 @@ public class TransAccountMappingDA
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#getAccountBalance(java.lang.Integer)
+     */
     public long getAccountBalance(final Integer accountID)
     {
         final String outflowsSql = "SELECT SUM("
@@ -285,6 +298,9 @@ public class TransAccountMappingDA
         return inflowsTotal - outflowsTotal;
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#getAllTranfersForAccount(java.lang.Integer)
+     */
     public Integer[] getAllTranfersForAccount(final Integer accountID)
     {
         final String sqlStr = "SELECT " + DBNames.CN_TAM_TRANSACTION_ID + " FROM "
@@ -311,6 +327,9 @@ public class TransAccountMappingDA
     }
 
     
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#getAllTranfersForTransaction(java.lang.Integer)
+     */
     public Integer[] getAllTranfersForTransaction(final Integer transactionID)
     {
         final String sqlStr = "SELECT " + DBNames.CN_TAM_ACCOUNT_ID + " FROM "
@@ -336,6 +355,9 @@ public class TransAccountMappingDA
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.jpas.da.TransactionAccountMappingDA#doesTransAccountTransferExist(java.lang.Integer, java.lang.Integer)
+     */
     public boolean doesTransAccountTransferExist(final Integer transId, final Integer accountId)
     {
 		final String sqlStr = "SELECT " + DBNames.CN_TAM_TRANSACTION_ID

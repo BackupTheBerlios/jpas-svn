@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.jpas.da.*;
+import org.jpas.da.hsqldb.*;
 import org.jpas.model.Reminder.AmountMethod;
 import org.jpas.model.Reminder.RepeatMethod;
 import org.jpas.util.*;
@@ -131,7 +132,7 @@ public class ModelFactory implements JpasObserver
     
     public TransactionTransfer[] getTransfersForTransaction(final Transaction trans)
     {
-        final Integer[] accountIDs = TransAccountMappingDA.getInstance()
+        final Integer[] accountIDs = TransAccountMappingDAImpl.getInstance()
                         .getAllTranfersForTransaction(trans.id);
         final TransactionTransfer[] ttArray = new TransactionTransfer[accountIDs.length];
         for (int i = 0; i < accountIDs.length; i++)
@@ -143,7 +144,7 @@ public class ModelFactory implements JpasObserver
 
     public  TransactionTransfer getTransfer(final Transaction trans,  final Category cat)
     {
-        if(TransAccountMappingDA.getInstance().doesTransAccountTransferExist(trans.id, ((AccountImpl)cat).id))
+        if(TransAccountMappingDAImpl.getInstance().doesTransAccountTransferExist(trans.id, ((AccountImpl)cat).id))
         {
             return getTransactionTransferforIDs(trans.id, ((AccountImpl)cat).id);
         }
@@ -152,7 +153,7 @@ public class ModelFactory implements JpasObserver
 
     public TransactionTransfer createTransfer(final Transaction trans, final Category category, final long amount)
     {
-        TransAccountMappingDA.getInstance().createTransAccountMapping(trans.id, ((AccountImpl)category).id, amount);
+        TransAccountMappingDAImpl.getInstance().createTransAccountMapping(trans.id, ((AccountImpl)category).id, amount);
 
         final TransactionTransfer transfer =  getTransactionTransferforIDs(trans.id, ((AccountImpl)category).id);
         
@@ -163,7 +164,7 @@ public class ModelFactory implements JpasObserver
     
     TransactionTransfer getTransactionTransferforIDs(final Integer transactionID, final Integer categoryID)
     {
-        assert(TransAccountMappingDA.getInstance().doesTransAccountTransferExist(transactionID, categoryID));
+        assert(TransAccountMappingDAImpl.getInstance().doesTransAccountTransferExist(transactionID, categoryID));
         
 		final DoubleIntegerKey key = new DoubleIntegerKey(transactionID, categoryID);
 		TransactionTransfer transfer = transTransferCache.get(key);
@@ -181,7 +182,7 @@ public class ModelFactory implements JpasObserver
     
     public Transaction[] getAllTransactionsAffecting(final Account account)
     {
-        final Integer[] ids = TransactionDA.getInstance().getAllAffectingTransactionIDs(((AccountImpl)account).id);
+        final Integer[] ids = TransactionDAImpl.getInstance().getAllAffectingTransactionIDs(((AccountImpl)account).id);
         final Transaction[] trans = new Transaction[ids.length];
         long balance = 0;
         for (int i = 0; i < ids.length; i++)
@@ -219,7 +220,7 @@ public class ModelFactory implements JpasObserver
                                                 final String num,
                                                 final Date date)
     {
-        final Transaction trans = getTransactionForID(TransactionDA.getInstance()
+        final Transaction trans = getTransactionForID(TransactionDAImpl.getInstance()
                         .createTransaction(((AccountImpl)account).id, payee, memo, num,
                                         new java.sql.Date(date.getTime())));
         
@@ -237,7 +238,7 @@ public class ModelFactory implements JpasObserver
 	
     public Category[] getAllCategories()
     {
-        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs();
+        final Integer[] ids = AccountDAImpl.getInstance().getAllAccountIDs();
         final Category[] categories = new AccountImpl[ids.length];
         for (int i = 0; i < ids.length; i++)
         {
@@ -248,12 +249,12 @@ public class ModelFactory implements JpasObserver
 
     public Category getDeletedBankCategory()
     {
-        return getAccountImplForID(AccountDA.getInstance().getDeletedBankAccountID());
+        return getAccountImplForID(AccountDAImpl.getInstance().getDeletedBankAccountID());
     }
     
     public Category getUnknownCategory()
     {
-        return getAccountImplForID(AccountDA.getInstance().getUnknownCategoryID());
+        return getAccountImplForID(AccountDAImpl.getInstance().getUnknownCategoryID());
     }
     
     public Category getCategoryForAccount(final Account account)
@@ -263,14 +264,14 @@ public class ModelFactory implements JpasObserver
     
     public Category createIncomeCategory(final String name)
     {
-        return getAccountImplForID(AccountDA.getInstance().createAccount(name,
-                AccountDA.AccountType.INCOME_CATEGORY));
+        return getAccountImplForID(AccountDAImpl.getInstance().createAccount(name,
+                AccountDAImpl.AccountType.INCOME_CATEGORY));
     }
 
     public Category createExpenseCategory(final String name)
     {
-        return getAccountImplForID(AccountDA.getInstance().createAccount(name,
-                AccountDA.AccountType.EXPENSE_CATEGORY));
+        return getAccountImplForID(AccountDAImpl.getInstance().createAccount(name,
+                AccountDAImpl.AccountType.EXPENSE_CATEGORY));
     }
 
     
@@ -294,16 +295,16 @@ public class ModelFactory implements JpasObserver
     
     public Account createAccount(final String name)
     {
-        final Account account = getAccountImplForID(AccountDA.getInstance()
-                .createAccount(name, AccountDA.AccountType.BANK));
+        final Account account = getAccountImplForID(AccountDAImpl.getInstance()
+                .createAccount(name, AccountDAImpl.AccountType.BANK));
         accountObservable.notifyObservers(new JpasDataChange.Add(account));
         return account;
     }
     
     public Account[] getAllAccounts()
     {
-        final Integer[] ids = AccountDA.getInstance().getAllAccountIDs(
-                AccountDA.AccountType.BANK);
+        final Integer[] ids = AccountDAImpl.getInstance().getAllAccountIDs(
+                AccountDAImpl.AccountType.BANK);
         final Account[] accounts = new Account[ids.length];
         for (int i = 0; i < ids.length; i++)
         {
@@ -315,12 +316,12 @@ public class ModelFactory implements JpasObserver
     
     public Account getDeletedBankAccount()
     {
-        return getAccountImplForID(AccountDA.getInstance().getDeletedBankAccountID());
+        return getAccountImplForID(AccountDAImpl.getInstance().getDeletedBankAccountID());
     }
     
     public Reminder[] getAllReminders()
     {
-        final Integer[] ids = ReminderDA.getInstance().getAllReminderIDs();
+        final Integer[] ids = ReminderDAImpl.getInstance().getAllReminderIDs();
         final Reminder[] reminders = new Reminder[ids.length];
         for (int i = 0; i < ids.length; i++)
         {
@@ -346,7 +347,7 @@ public class ModelFactory implements JpasObserver
             final AmountMethod amountMethod, final RepeatMethod repeatMethod,
             final int repeatValue)
     {
-        return getReminderForID(ReminderDA.getInstance().createReminder(
+        return getReminderForID(ReminderDAImpl.getInstance().createReminder(
                 ((AccountImpl)account).id, payee, memo, new java.sql.Date(date.getTime()), amountMethod.daAmountMethod,
                 repeatMethod.daRepeatMethod, repeatValue));
     }
@@ -355,7 +356,7 @@ public class ModelFactory implements JpasObserver
 
     public ReminderTransfer[] getTransfersForReminder(final Reminder rem)
     {
-        final Integer[] accountIDs = ReminderAccountMappingDA.getInstance()
+        final Integer[] accountIDs = ReminderAccountMappingDAImpl.getInstance()
                 .getAllReminderAccountTranfers(rem.id);
         final ReminderTransfer[] ttArray = new ReminderTransfer[accountIDs.length];
         for (int i = 0; i < accountIDs.length; i++)

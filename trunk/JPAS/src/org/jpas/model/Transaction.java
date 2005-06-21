@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.Comparator;
 
 import org.apache.log4j.Logger;
-import org.jpas.da.TransAccountMappingDA;
-import org.jpas.da.TransactionDA;
+import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
+import org.jpas.da.hsqldb.TransactionDAImpl;
 import org.jpas.util.*;
 
 public class Transaction extends JpasObservableImpl
@@ -87,8 +87,8 @@ public class Transaction extends JpasObservableImpl
     private void loadData()
     {
         assert (!isDeleted);
-        TransactionDA.getInstance().loadTransaction(id,
-                        new TransactionDA.TransactionHandler()
+        TransactionDAImpl.getInstance().loadTransaction(id,
+                        new TransactionDAImpl.TransactionHandler()
                         {
                             public void setData(final Integer accountId,
                                                 final String payee,
@@ -111,7 +111,7 @@ public class Transaction extends JpasObservableImpl
     	assert(!isDeleted);
         if (!amountLoaded)
         {
-            amount = TransAccountMappingDA.getInstance().getTransactionAmount(id);
+            amount = TransAccountMappingDAImpl.getInstance().getTransactionAmount(id);
             amountLoaded = true;
         }
         return amount;
@@ -138,14 +138,14 @@ public class Transaction extends JpasObservableImpl
                     transfers[i].commit();
                 }
 				change = new JpasDataChange.Delete(this);
-		        TransactionDA.getInstance().deleteTransaction(id);
+		        TransactionDAImpl.getInstance().deleteTransaction(id);
 		        deleteObservers();
 				isModified = false;
 			}
 			else
 			{
 				change = new JpasDataChange.Modify(this);
-				TransactionDA.getInstance().updateTransaction(id, payee, memo, num,
+				TransactionDAImpl.getInstance().updateTransaction(id, payee, memo, num,
                         new java.sql.Date(date.getTime()));
 				isModified = false;
 			}
@@ -299,11 +299,11 @@ public class Transaction extends JpasObservableImpl
     
     public boolean affects(final Category category)
     {
-        return TransactionDA.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)category).id);
+        return TransactionDAImpl.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)category).id);
     }
 
     public boolean affects(final Account account)
     {
-        return TransactionDA.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)account).id);
+        return TransactionDAImpl.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)account).id);
     }
 }

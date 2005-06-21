@@ -27,8 +27,8 @@ import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jpas.da.ReminderAccountMappingDA;
-import org.jpas.da.ReminderDA;
+import org.jpas.da.hsqldb.ReminderAccountMappingDAImpl;
+import org.jpas.da.hsqldb.ReminderDAImpl;
 import org.jpas.util.*;
 
 /**
@@ -40,57 +40,57 @@ public class Reminder extends JpasObservableImpl implements JpasObserver
     /** TODO covert this to an enum. */
     public static class AmountMethod
     {
-        private static final Map<ReminderDA.AmountMethod, AmountMethod> valueMap = new HashMap<ReminderDA.AmountMethod, AmountMethod>();
-        final ReminderDA.AmountMethod daAmountMethod;
+        private static final Map<ReminderDAImpl.AmountMethod, AmountMethod> valueMap = new HashMap<ReminderDAImpl.AmountMethod, AmountMethod>();
+        final ReminderDAImpl.AmountMethod daAmountMethod;
 
-        private AmountMethod(final ReminderDA.AmountMethod amountMethod)
+        private AmountMethod(final ReminderDAImpl.AmountMethod amountMethod)
         {
             this.daAmountMethod = amountMethod;
             valueMap.put(amountMethod, this);
         }
 
         public static AmountMethod getAmountMethodFor(
-                final ReminderDA.AmountMethod am)
+                final ReminderDAImpl.AmountMethod am)
         {
             return valueMap.get(am);
         }
 
         public static final AmountMethod FIXED = new AmountMethod(
-                ReminderDA.AmountMethod.FIXED);
+                ReminderDAImpl.AmountMethod.FIXED);
         public static final AmountMethod AVERAGE_TWO = new AmountMethod(
-                ReminderDA.AmountMethod.AVERAGE_TWO);
+                ReminderDAImpl.AmountMethod.AVERAGE_TWO);
         public static final AmountMethod AVERAGE_THREE = new AmountMethod(
-                ReminderDA.AmountMethod.AVERAGE_THREE);
+                ReminderDAImpl.AmountMethod.AVERAGE_THREE);
         public static final AmountMethod LAST = new AmountMethod(
-                ReminderDA.AmountMethod.LAST);
+                ReminderDAImpl.AmountMethod.LAST);
     }
 
     /** TODO covert this to an enum. */
     public static class RepeatMethod
     {
-        private static final Map<ReminderDA.RepeatMethod, RepeatMethod> valueMap = new HashMap<ReminderDA.RepeatMethod, RepeatMethod>();
-        final ReminderDA.RepeatMethod daRepeatMethod;
+        private static final Map<ReminderDAImpl.RepeatMethod, RepeatMethod> valueMap = new HashMap<ReminderDAImpl.RepeatMethod, RepeatMethod>();
+        final ReminderDAImpl.RepeatMethod daRepeatMethod;
 
-        private RepeatMethod(final ReminderDA.RepeatMethod repeatMethod)
+        private RepeatMethod(final ReminderDAImpl.RepeatMethod repeatMethod)
         {
             this.daRepeatMethod = repeatMethod;
             valueMap.put(repeatMethod, this);
         }
 
         public static RepeatMethod getRepeatMethodFor(
-                final ReminderDA.RepeatMethod rm)
+                final ReminderDAImpl.RepeatMethod rm)
         {
             return valueMap.get(rm);
         }
 
         public static final RepeatMethod DAILY = new RepeatMethod(
-                ReminderDA.RepeatMethod.DAILY);
+                ReminderDAImpl.RepeatMethod.DAILY);
         public static final RepeatMethod WEEKLY = new RepeatMethod(
-                ReminderDA.RepeatMethod.WEEKLY);
+                ReminderDAImpl.RepeatMethod.WEEKLY);
         public static final RepeatMethod MONTHLY = new RepeatMethod(
-                ReminderDA.RepeatMethod.MONTHLY);
+                ReminderDAImpl.RepeatMethod.MONTHLY);
         public static final RepeatMethod YEARLY = new RepeatMethod(
-                ReminderDA.RepeatMethod.YEARLY);
+                ReminderDAImpl.RepeatMethod.YEARLY);
     }
 
     static
@@ -132,14 +132,14 @@ public class Reminder extends JpasObservableImpl implements JpasObserver
 
     private void loadData()
     {
-        ReminderDA.getInstance().loadReminder(id,
-                new ReminderDA.ReminderHandler()
+        ReminderDAImpl.getInstance().loadReminder(id,
+                new ReminderDAImpl.ReminderHandler()
                 {
                     public void setData(final Integer accountId,
                             final String payee, final String memo,
                             final Date date,
-                            final ReminderDA.AmountMethod amountMethod,
-                            final ReminderDA.RepeatMethod repeatMethod,
+                            final ReminderDAImpl.AmountMethod amountMethod,
+                            final ReminderDAImpl.RepeatMethod repeatMethod,
                             final int repeatValue)
                     {
                         Reminder.this.accountId = accountId;
@@ -172,7 +172,7 @@ public class Reminder extends JpasObservableImpl implements JpasObserver
     		final JpasDataChange change;
     		if(isDeleted)
     		{
-		    	final Integer[] accountIDs = ReminderAccountMappingDA.getInstance()
+		    	final Integer[] accountIDs = ReminderAccountMappingDAImpl.getInstance()
 		        	.getAllReminderAccountTranfers(id);
 				for (int i = 0; i < accountIDs.length; i++)
 				{
@@ -182,14 +182,14 @@ public class Reminder extends JpasObservableImpl implements JpasObserver
 					transfer.commit();
 				}
 		        change = new JpasDataChange.Delete(this);
-		        ReminderDA.getInstance().deleteReminder(id);
+		        ReminderDAImpl.getInstance().deleteReminder(id);
 		        deleteObservers();
 		        isModified = false;
     		}
     		else
     		{
 				change = new JpasDataChange.Modify(this);
-				ReminderDA.getInstance().updateReminder(id, accountId, payee, memo, new java.sql.Date(date.getTime()), amountMethod.daAmountMethod, repeatMethod.daRepeatMethod, repeatValue);
+				ReminderDAImpl.getInstance().updateReminder(id, accountId, payee, memo, new java.sql.Date(date.getTime()), amountMethod.daAmountMethod, repeatMethod.daRepeatMethod, repeatValue);
 				isModified = false;
     		}
 	        notifyObservers(change);
@@ -369,7 +369,7 @@ public class Reminder extends JpasObservableImpl implements JpasObserver
     {
         if(!amountLoaded)
         {
-            amount = ReminderAccountMappingDA.getInstance().getReminderAmount(id);
+            amount = ReminderAccountMappingDAImpl.getInstance().getReminderAmount(id);
             amountLoaded = true;
         }
         return amount;

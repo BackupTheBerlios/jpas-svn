@@ -23,8 +23,8 @@
  */
 package org.jpas.model;
 
-import org.jpas.da.ReminderAccountMappingDA;
-import org.jpas.da.TransAccountMappingDA;
+import org.jpas.da.hsqldb.ReminderAccountMappingDAImpl;
+import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
 import org.jpas.util.*;
 
 /**
@@ -62,9 +62,9 @@ public class ReminderTransfer extends JpasObservableImpl
     private void loadData()
     {
         assert (!isDeleted);
-        TransAccountMappingDA.getInstance().loadTransAccountMapping(
+        TransAccountMappingDAImpl.getInstance().loadTransAccountMapping(
                 reminderID, accountID,
-                new TransAccountMappingDA.TransAccountTranferHandler()
+                new TransAccountMappingDAImpl.TransAccountTranferHandler()
                 {
                     public void setData(final long amount)
                     {
@@ -95,7 +95,7 @@ public class ReminderTransfer extends JpasObservableImpl
     		if(isDeleted)
     		{
 	    		final JpasDataChange change = new JpasDataChange.Delete(this);
-	    		TransAccountMappingDA.getInstance().deleteTransAccountMapping(reminderID, accountID);
+	    		TransAccountMappingDAImpl.getInstance().deleteTransAccountMapping(reminderID, accountID);
 	    		announceChange(change);
 	    		deleteObservers();
 	    		isModified = false;
@@ -103,7 +103,7 @@ public class ReminderTransfer extends JpasObservableImpl
 	    	else
 	    	{
 	    		final JpasDataChange change = new JpasDataChange.AmountModify(this);
-	    		TransAccountMappingDA.getInstance().updateTAMAmount(reminderID, accountID, amount);
+	    		TransAccountMappingDAImpl.getInstance().updateTAMAmount(reminderID, accountID, amount);
 	    		announceChange(change);
 	    		isModified = false;
 	    	}
