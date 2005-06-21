@@ -156,8 +156,8 @@ public class TransactionTableModel extends AbstractTableModel
 		trans.setNum(transData.getNum());
 		trans.setDate(transData.getDate());
 		
-        final long amount = transData.getWithdraw() - transData.getDeposit();
-        
+		final long amount = transData.getWithdraw() - transData.getDeposit();
+		
 		if(trans.getAccount().equals(account))
 		{
 			final Category[] categories = transData.getCategories();
@@ -167,6 +167,12 @@ public class TransactionTableModel extends AbstractTableModel
 			{
 				defaultLogger.debug("Clearing all transfers");
 				final TransactionTransfer[] transfers = ModelFactory.getInstance().getTransfersForTransaction(trans);
+				if(transfers.length == 1 && transfers[0].getAmount() == amount && transfers[0].getCategory().equals(categories[0]))
+				{
+					trans.commit();
+					return;
+				}
+				
 				for(int i = 0; i < transfers.length; i++)
 				{
 					defaultLogger.debug("Deleting transfer");
@@ -192,7 +198,7 @@ public class TransactionTableModel extends AbstractTableModel
 					defaultLogger.debug("Setting amount:");
 					transfers[i].setAmount(-amount);
                     transfers[i].commit();
-                    trans.commit();
+					trans.commit();
 					return;
 				}
 			}
