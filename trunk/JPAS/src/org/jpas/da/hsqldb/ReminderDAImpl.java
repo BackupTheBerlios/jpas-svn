@@ -62,7 +62,7 @@ public class ReminderDAImpl extends ReminderDA
 		final Integer id;
 		try
 		{
-			final ResultSet rs = ConnectionManager.getInstance().query(sqlSequenceStr);
+			final ResultSet rs = DAFactory.getConnectionManager().query(sqlSequenceStr);
 			if(!rs.next())
 			{
 				defaultLogger.error("Unable to get next reminder ID: \"" + sqlSequenceStr + "\"");
@@ -98,7 +98,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Unable to create transaction: \"" + sqlStr + "\"");
@@ -121,7 +121,7 @@ public class ReminderDAImpl extends ReminderDA
 	{
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(
+			final int result = DAFactory.getConnectionManager().update(
 											  "DELETE FROM " + DBNames.TN_REMINDER
 											 + " WHERE " + DBNames.CN_REMINDER_ID
 											 + " = '" + id + "'");
@@ -148,7 +148,7 @@ public class ReminderDAImpl extends ReminderDA
 							+ " ORDER BY " + DBNames.CN_REMINDER_DATE;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 			final List<Integer> idList = new ArrayList<Integer>();
 			while(rs.next())
 			{
@@ -174,7 +174,7 @@ public class ReminderDAImpl extends ReminderDA
 										 + " = " + id;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 
 			if(rs.next())
 			{
@@ -225,7 +225,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -252,7 +252,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -280,7 +280,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -307,7 +307,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -334,7 +334,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -361,7 +361,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -388,7 +388,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -415,7 +415,7 @@ public class ReminderDAImpl extends ReminderDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Reminder id not found: \""+ sqlStr +"\"");
@@ -440,7 +440,7 @@ public class ReminderDAImpl extends ReminderDA
 								+ " = " + id;
 		try
 		{
-			return ConnectionManager.getInstance().query(sqlStr).next();
+			return DAFactory.getConnectionManager().query(sqlStr).next();
 		}
 		catch(final SQLException sqle)
 		{
@@ -449,15 +449,4 @@ public class ReminderDAImpl extends ReminderDA
 		}	
 	}
 
-    public static void unitTest_Create()
-    {
-        getInstance().createReminder(new Integer(0), "My Utilities", "memo", new Date(System.currentTimeMillis()), AmountMethod.FIXED, RepeatMethod.WEEKLY, 1);
-    }
-    
-    
-    public static void main(final String[] args)
-    {
-		BasicConfigurator.configure();
-		unitTest_Create();
-    }
 }

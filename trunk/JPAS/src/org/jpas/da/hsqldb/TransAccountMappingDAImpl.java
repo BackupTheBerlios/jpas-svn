@@ -7,10 +7,11 @@ import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.jpas.da.*;
 import org.jpas.da.ConnectionManager;
 import org.jpas.da.DBNames;
-import org.jpas.da.TransactionAccountMappingDA;
-import org.jpas.da.TransactionAccountMappingDA.TransAccountTranferHandler;
+import org.jpas.da.TransAccountMappingDA;
+import org.jpas.da.TransAccountMappingDA.TransAccountTranferHandler;
 
 /**
  * Created on Sep 11, 2004 - 9:59:59 AM
@@ -35,7 +36,7 @@ import org.jpas.da.TransactionAccountMappingDA.TransAccountTranferHandler;
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
+public class TransAccountMappingDAImpl extends TransAccountMappingDA
 {
     private static Logger defaultLogger = Logger
             .getLogger(TransAccountMappingDAImpl.class);
@@ -45,7 +46,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#createTransAccountMapping(java.lang.Integer, java.lang.Integer, long)
+     * @see org.jpas.da.TransAccountMappingDA#createTransAccountMapping(java.lang.Integer, java.lang.Integer, long)
      */
     public void createTransAccountMapping(final Integer transactionID,
             final Integer accountID, final long amount)
@@ -58,7 +59,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
                 + amount + ")";
         try
         {
-            final int result = ConnectionManager.getInstance().update(sqlStr);
+            final int result = DAFactory.getConnectionManager().update(sqlStr);
             if (result < 1)
             {
                 defaultLogger
@@ -75,7 +76,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#loadTransAccountMapping(java.lang.Integer, java.lang.Integer, org.jpas.da.TransAccountMappingDAImpl.TransAccountTranferHandler)
+     * @see org.jpas.da.TransAccountMappingDA#loadTransAccountMapping(java.lang.Integer, java.lang.Integer, org.jpas.da.TransAccountMappingDAImpl.TransAccountTranferHandler)
      */
     public void loadTransAccountMapping(final Integer transactionID,
             final Integer accountID, final TransAccountTranferHandler handler)
@@ -86,7 +87,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
                 + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             if (rs.next())
             {
                 handler.setData(rs.getLong(DBNames.CN_TAM_AMOUNT));
@@ -107,7 +108,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#updateTAMAccount(java.lang.Integer, java.lang.Integer, java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#updateTAMAccount(java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
     public void updateTAMAccount(final Integer transactionID,
             final Integer accountID, final Integer newAccountID)
@@ -119,7 +120,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
         try
         {
-            final int result = ConnectionManager.getInstance().update(sqlStr);
+            final int result = DAFactory.getConnectionManager().update(sqlStr);
             if (result < 1)
             {
                 defaultLogger.error("Transaction/Account id's not found: \""
@@ -137,7 +138,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
     
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#updateTAMAmount(java.lang.Integer, java.lang.Integer, long)
+     * @see org.jpas.da.TransAccountMappingDA#updateTAMAmount(java.lang.Integer, java.lang.Integer, long)
      */
     public void updateTAMAmount(final Integer transactionID,
             final Integer accountID, final long amount)
@@ -149,7 +150,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
         try
         {
-            final int result = ConnectionManager.getInstance().update(sqlStr);
+            final int result = DAFactory.getConnectionManager().update(sqlStr);
             if (result < 1)
             {
                 defaultLogger.error("Transaction/Account id's not found: \""
@@ -167,7 +168,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#deleteTransAccountMapping(java.lang.Integer, java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#deleteTransAccountMapping(java.lang.Integer, java.lang.Integer)
      */
     public void deleteTransAccountMapping(final Integer transactionID,
             final Integer accountID)
@@ -178,7 +179,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
                 + " AND " + DBNames.CN_TAM_ACCOUNT_ID + " = " + accountID;
         try
         {
-            if (ConnectionManager.getInstance().update(sqlStr) < 1)
+            if (DAFactory.getConnectionManager().update(sqlStr) < 1)
             {
                 defaultLogger.error("TransAccountMap not found: \"" + sqlStr
                         + "\"");
@@ -194,7 +195,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#getTransactionAmount(java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#getTransactionAmount(java.lang.Integer)
      */
     public long getTransactionAmount(final Integer transactionID)
     {
@@ -204,7 +205,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             if (rs.next())
             {
                 return rs.getLong(1);
@@ -224,7 +225,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#getAccountBalance(java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#getAccountBalance(java.lang.Integer)
      */
     public long getAccountBalance(final Integer accountID)
     {
@@ -249,7 +250,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
         final long inflowsTotal;
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(
+            final ResultSet rs = DAFactory.getConnectionManager().query(
                     outflowsSql);
             if (rs.next())
             {
@@ -273,7 +274,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(
+            final ResultSet rs = DAFactory.getConnectionManager().query(
                     inflowsSql);
             if (rs.next())
             {
@@ -299,7 +300,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#getAllTranfersForAccount(java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#getAllTranfersForAccount(java.lang.Integer)
      */
     public Integer[] getAllTranfersForAccount(final Integer accountID)
     {
@@ -309,7 +310,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             final List<Integer> idList = new ArrayList<Integer>();
             while (rs.next())
             {
@@ -328,7 +329,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
     
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#getAllTranfersForTransaction(java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#getAllTranfersForTransaction(java.lang.Integer)
      */
     public Integer[] getAllTranfersForTransaction(final Integer transactionID)
     {
@@ -338,7 +339,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             final List<Integer> idList = new ArrayList<Integer>();
             while (rs.next())
             {
@@ -356,7 +357,7 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
     }
 
     /* (non-Javadoc)
-     * @see org.jpas.da.TransactionAccountMappingDA#doesTransAccountTransferExist(java.lang.Integer, java.lang.Integer)
+     * @see org.jpas.da.TransAccountMappingDA#doesTransAccountTransferExist(java.lang.Integer, java.lang.Integer)
      */
     public boolean doesTransAccountTransferExist(final Integer transId, final Integer accountId)
     {
@@ -368,48 +369,12 @@ public class TransAccountMappingDAImpl extends TransactionAccountMappingDA
 								+ " = " + accountId;
 		try
 		{
-			return ConnectionManager.getInstance().query(sqlStr).next();
+			return DAFactory.getConnectionManager().query(sqlStr).next();
 		}
 		catch(final SQLException sqle)
 		{
 			defaultLogger.error("SQLException while loading account name!", sqle);
 			throw new RuntimeException("Unable to load transaction id's!", sqle);
 		}	
-    }
-    
-    public static void unitTest_Create()
-    {
-        getInstance().createTransAccountMapping(new Integer(0), new Integer(3),
-                435);
-        getInstance().createTransAccountMapping(new Integer(0), new Integer(4),
-                755);
-        getInstance().createTransAccountMapping(new Integer(1), new Integer(5),78945);
-    }
-
-    public static void unitTest_GetAmount()
-    {
-        System.out.println("Amount: "
-                + getInstance().getTransactionAmount(new Integer(0)));
-    }
-
-    public static void unitTest_GetBalance()
-    {
-        System.out.println("Balance: "
-                + getInstance().getAccountBalance(new Integer(0)));
-        System.out.println("Balance: "
-                + getInstance().getAccountBalance(new Integer(1)));
-        System.out.println("Balance: "
-                + getInstance().getAccountBalance(new Integer(2)));
-        System.out.println("Balance: "
-                + getInstance().getAccountBalance(new Integer(3)));
-    }
-
-    public static void main(String[] args)
-    {
-        BasicConfigurator.configure();
-
-        //unitTest_Create();
-        //unitTest_GetBalance();
-        unitTest_GetAmount();
     }
 }

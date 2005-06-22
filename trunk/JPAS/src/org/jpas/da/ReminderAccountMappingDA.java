@@ -1,17 +1,10 @@
 package org.jpas.da;
 
-import org.jpas.da.hsqldb.ReminderAccountMappingDAImpl;
+import org.apache.log4j.BasicConfigurator;
 
 
 public abstract class ReminderAccountMappingDA
 {
-    private static ReminderAccountMappingDA instance = new ReminderAccountMappingDAImpl();
-    
-    public static ReminderAccountMappingDA getInstance()
-    {
-        return instance;
-    }
-
     public static interface ReminderAccountTranferHandler
     {
         public void setData(final long amount);
@@ -37,5 +30,28 @@ public abstract class ReminderAccountMappingDA
                                                       final long amount);
 
     public abstract long getReminderAmount(final Integer reminderID);
+
+   public static void unitTest_GetAmount()
+    {
+        System.out.println("Amount: "
+                + DAFactory.getReminderAccountMappingDA().getReminderAmount(new Integer(0)));
+    }
+
+    
+    public static void unitTest_Create()
+    {
+        DAFactory.getReminderAccountMappingDA().createReminderAccountMapping(new Integer(0), new Integer(2),
+                7735);
+        DAFactory.getReminderAccountMappingDA().createReminderAccountMapping(new Integer(0), new Integer(3),
+                5855);
+    }
+
+    public static void main(String[] args)
+    {
+        BasicConfigurator.configure();
+
+        unitTest_GetAmount();
+    }
+
 
 }

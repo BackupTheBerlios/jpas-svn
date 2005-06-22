@@ -12,7 +12,7 @@ public class ConnectionManagerImpl extends ConnectionManager
 
     public ConnectionManagerImpl()
     {
-        final String dbMode = PropertyManager.instance.getProperty(
+        final String dbMode = PropertyManager.getInstance().getProperty(
                                        PropertyManager.DB_MODE,
                                         "SERVER");
         final String dbDriver = "org.hsqldb.jdbcDriver";
@@ -27,7 +27,7 @@ public class ConnectionManagerImpl extends ConnectionManager
             
             if(dbMode.equalsIgnoreCase("SERVER"))
             {
-                dbName += "hsql://localhost/" + PropertyManager.instance.getProperty(
+                dbName += "hsql://localhost/" + PropertyManager.getInstance().getProperty(
                                                     PropertyManager.DB_NAME,
                                                     "jpasdb");
                 tempConn = DriverManager.getConnection(dbName,
@@ -56,10 +56,10 @@ public class ConnectionManagerImpl extends ConnectionManager
             }
             else
             {
-                final String dbFileDir = PropertyManager.instance.getProperty(
+                final String dbFileDir = PropertyManager.getInstance().getProperty(
                                                 PropertyManager.DB_FILE_DIR,
                                                  "db/");
-                final String dbFilePrefix = PropertyManager.instance.getProperty(
+                final String dbFilePrefix = PropertyManager.getInstance().getProperty(
                                                 PropertyManager.DB_FILE_PREFIX,
                                                  "jpasdb");
 

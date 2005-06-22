@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.jpas.da.*;
 import org.jpas.da.ConnectionManager;
 import org.jpas.da.DBNames;
 import org.jpas.da.ReminderAccountMappingDA;
@@ -57,7 +58,7 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
                 + accountID + " , " + amount + ")";
         try
         {
-            final int result = ConnectionManager.getInstance().update(sqlStr);
+            final int result = DAFactory.getConnectionManager().update(sqlStr);
             if (result < 1)
             {
                 defaultLogger.error("Unable to create reminder/account mapping: \"" + sqlStr
@@ -83,7 +84,7 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             final List<Integer> idList = new ArrayList<Integer>();
             while (rs.next())
             {
@@ -111,7 +112,7 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
                 + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " = " + accountID;
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             if (rs.next())
             {
                 handler.setData(rs.getLong(DBNames.CN_RAM_AMOUNT));
@@ -140,7 +141,7 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
                 + " AND " + DBNames.CN_RAM_ACCOUNT_ID + " = " + accountID;
         try
         {
-            if(ConnectionManager.getInstance().update(sqlStr) < 1)
+            if(DAFactory.getConnectionManager().update(sqlStr) < 1)
             {
                 defaultLogger.error("ReminderAccountMap not found: \"" + sqlStr + "\"");
                 throw new RuntimeException("ReminderAccountMap not found: \"" + sqlStr + "\"");
@@ -166,7 +167,7 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
 
         try
         {
-            final int result = ConnectionManager.getInstance().update(sqlStr);
+            final int result = DAFactory.getConnectionManager().update(sqlStr);
             if (result < 1)
             {
                 defaultLogger.error("Reminder/Account id's not found: \""
@@ -195,7 +196,7 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
 
 		try
 		{
-		    final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+		    final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
 		    if(rs.next())
 		    {
 		        return rs.getLong(1);
@@ -211,27 +212,4 @@ public class ReminderAccountMappingDAImpl extends ReminderAccountMappingDA
 
 		}
     }
-
-    public static void unitTest_GetAmount()
-    {
-        System.out.println("Amount: "
-                + getInstance().getReminderAmount(new Integer(0)));
-    }
-
-    
-    public static void unitTest_Create()
-    {
-        getInstance().createReminderAccountMapping(new Integer(0), new Integer(2),
-                7735);
-        getInstance().createReminderAccountMapping(new Integer(0), new Integer(3),
-                5855);
-    }
-
-    public static void main(String[] args)
-    {
-        BasicConfigurator.configure();
-
-        unitTest_GetAmount();
-    }
-
 }

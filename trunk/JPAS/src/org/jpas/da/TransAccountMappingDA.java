@@ -1,16 +1,9 @@
 package org.jpas.da;
 
-import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
+import org.apache.log4j.BasicConfigurator;
 
-
-public abstract class TransactionAccountMappingDA
+public abstract class TransAccountMappingDA
 {
-    private static TransactionAccountMappingDA instance = new TransAccountMappingDAImpl();
-
-    public static TransactionAccountMappingDA getInstance()
-    {
-        return instance;
-    }
 
     public static interface TransAccountTranferHandler
     {
@@ -50,5 +43,40 @@ public abstract class TransactionAccountMappingDA
     public abstract boolean doesTransAccountTransferExist(
                                                           final Integer transId,
                                                           final Integer accountId);
+    public static void unitTest_Create()
+    {
+        DAFactory.getTransAccountMappingDA().createTransAccountMapping(new Integer(0), new Integer(3),
+                435);
+        DAFactory.getTransAccountMappingDA().createTransAccountMapping(new Integer(0), new Integer(4),
+                755);
+        DAFactory.getTransAccountMappingDA().createTransAccountMapping(new Integer(1), new Integer(5),78945);
+    }
+
+    public static void unitTest_GetAmount()
+    {
+        System.out.println("Amount: "
+                + DAFactory.getTransAccountMappingDA().getTransactionAmount(new Integer(0)));
+    }
+
+    public static void unitTest_GetBalance()
+    {
+        System.out.println("Balance: "
+                + DAFactory.getTransAccountMappingDA().getAccountBalance(new Integer(0)));
+        System.out.println("Balance: "
+                + DAFactory.getTransAccountMappingDA().getAccountBalance(new Integer(1)));
+        System.out.println("Balance: "
+                + DAFactory.getTransAccountMappingDA().getAccountBalance(new Integer(2)));
+        System.out.println("Balance: "
+                + DAFactory.getTransAccountMappingDA().getAccountBalance(new Integer(3)));
+    }
+
+    public static void main(String[] args)
+    {
+        BasicConfigurator.configure();
+
+        //unitTest_Create();
+        //unitTest_GetBalance();
+        unitTest_GetAmount();
+    }
 
 }

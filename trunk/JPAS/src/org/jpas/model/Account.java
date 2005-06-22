@@ -23,7 +23,6 @@
 package org.jpas.model;
 
 import org.jpas.util.JpasObservable;
-import org.jpas.util.JpasObserver;
 
 public interface Account extends JpasObservable
 {

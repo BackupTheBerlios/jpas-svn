@@ -13,7 +13,7 @@ public class ConnectionManagerImpl extends ConnectionManager
 
     public ConnectionManagerImpl()
     {
-        final String dbMode = PropertyManager.instance.getProperty(
+        final String dbMode = PropertyManager.getInstance().getProperty(
                                        PropertyManager.DB_MODE,
                                         "SERVER");
         String dbName = "jdbc:derby:";
@@ -28,7 +28,7 @@ public class ConnectionManagerImpl extends ConnectionManager
 
                 Class.forName(dbDriver).newInstance();
                 
-                dbName += "//localhost/" + PropertyManager.instance.getProperty(
+                dbName += "//localhost/" + PropertyManager.getInstance().getProperty(
                                                     PropertyManager.DB_NAME,
                                                     "jpasdb");
                 tempConn = DriverManager.getConnection(dbName,
@@ -61,7 +61,7 @@ public class ConnectionManagerImpl extends ConnectionManager
 
                 Class.forName(dbDriver).newInstance();
                 
-                final String dbFileDir = PropertyManager.instance.getProperty(
+                final String dbFileDir = PropertyManager.getInstance().getProperty(
                                                 PropertyManager.DB_FILE_DIR,
                                                  "jpasdb");
 

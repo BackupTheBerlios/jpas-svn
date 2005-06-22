@@ -19,12 +19,12 @@
  */
 package org.jpas.model;
 
-import java.util.Date;
 import java.util.Comparator;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
-import org.jpas.da.hsqldb.TransactionDAImpl;
+import org.jpas.da.DAFactory;
+import org.jpas.da.TransactionDA;
 import org.jpas.util.*;
 
 public class Transaction extends JpasObservableImpl
@@ -87,8 +87,8 @@ public class Transaction extends JpasObservableImpl
     private void loadData()
     {
         assert (!isDeleted);
-        TransactionDAImpl.getInstance().loadTransaction(id,
-                        new TransactionDAImpl.TransactionHandler()
+        DAFactory.getTransactionDA().loadTransaction(id,
+                        new TransactionDA.TransactionHandler()
                         {
                             public void setData(final Integer accountId,
                                                 final String payee,
@@ -111,7 +111,7 @@ public class Transaction extends JpasObservableImpl
     	assert(!isDeleted);
         if (!amountLoaded)
         {
-            amount = TransAccountMappingDAImpl.getInstance().getTransactionAmount(id);
+            amount = DAFactory.getTransAccountMappingDA().getTransactionAmount(id);
             amountLoaded = true;
         }
         return amount;
@@ -138,14 +138,14 @@ public class Transaction extends JpasObservableImpl
                     transfers[i].commit();
                 }
 				change = new JpasDataChange.Delete(this);
-		        TransactionDAImpl.getInstance().deleteTransaction(id);
+                DAFactory.getTransactionDA().deleteTransaction(id);
 		        deleteObservers();
 				isModified = false;
 			}
 			else
 			{
 				change = new JpasDataChange.Modify(this);
-				TransactionDAImpl.getInstance().updateTransaction(id, payee, memo, num,
+                DAFactory.getTransactionDA().updateTransaction(id, payee, memo, num,
                         new java.sql.Date(date.getTime()));
 				isModified = false;
 			}
@@ -299,11 +299,11 @@ public class Transaction extends JpasObservableImpl
     
     public boolean affects(final Category category)
     {
-        return TransactionDAImpl.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)category).id);
+        return DAFactory.getTransactionDA().doesTransactionAffectAccount(id, ((AccountImpl)category).id);
     }
 
     public boolean affects(final Account account)
     {
-        return TransactionDAImpl.getInstance().doesTransactionAffectAccount(id, ((AccountImpl)account).id);
+        return DAFactory.getTransactionDA().doesTransactionAffectAccount(id, ((AccountImpl)account).id);
     }
 }

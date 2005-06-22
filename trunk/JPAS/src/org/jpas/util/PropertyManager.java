@@ -21,7 +21,12 @@ import org.apache.log4j.Logger;
 public class PropertyManager
 {
 	private static final Logger defaultLogger = Logger.getLogger(PropertyManager.class);
-	public static final PropertyManager instance = new PropertyManager();
+	private static final PropertyManager instance = new PropertyManager();
+    
+    public static final PropertyManager getInstance()
+    {
+        return instance;
+    }
 
 	public static class PropertyManagerKey extends Observable
 	{
@@ -55,6 +60,7 @@ public class PropertyManager
 	public static PropertyManagerKey DB_FILE_PREFIX = new PropertyManagerKey("DB_FILE_PREFIX");
 	public static PropertyManagerKey DB_NAME = new PropertyManagerKey("DB_NAME");
 	public static PropertyManagerKey DB_MODE = new PropertyManagerKey("DB_MODE");
+	public static PropertyManagerKey DB_IMPL = new PropertyManagerKey("DB_IMPL");
 
 	private final Properties props = new Properties();
 

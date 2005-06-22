@@ -1,15 +1,9 @@
 package org.jpas.da;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import org.apache.log4j.Logger;
 import org.hsqldb.Server;
-import org.jpas.da.hsqldb.ConnectionManagerImpl;
-import org.jpas.util.PropertyManager;
 
 
 /**
@@ -37,13 +31,6 @@ import org.jpas.util.PropertyManager;
 public abstract class ConnectionManager
 {
 	private static final Logger defaultLogger = Logger.getLogger(ConnectionManager.class);
-	private static final ConnectionManager instance = new ConnectionManagerImpl();
-    //private static final ConnectionManager instance = new ConnectionManagerImpl(); //
-	
-    public static ConnectionManager getInstance()
-	{
-		return instance;
-	}
     
     protected Connection conn;
     

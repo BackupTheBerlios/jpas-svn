@@ -1,18 +1,40 @@
 package org.jpas.da;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.BasicConfigurator;
-import org.jpas.da.hsqldb.AccountDAImpl;
-import org.jpas.da.hsqldb.AccountDAImpl.AccountHandler;
-import org.jpas.da.hsqldb.AccountDAImpl.AccountType;
 
 public abstract class AccountDA
 {
-    private static AccountDA instance = new AccountDAImpl();
+	public static class AccountType
+	{
+	    private static final Map<Integer, AccountType> valueMap = new HashMap<Integer, AccountType>();
+	    
+	    public final int dbValue;
+	    private AccountType(final int value)
+	    {
+	        this.dbValue = value;
+	        valueMap.put(new Integer(value), this);
+	    }
+	    
+	    public static AccountType getAccountTypeFor(final int value)
+	    {
+	        return valueMap.get(new Integer(value));
+	    }
+	    
+	    public static final AccountType BANK = new AccountType(0);
+	    public static final AccountType EXPENSE_CATEGORY = new AccountType(1);
+	    public static final AccountType INCOME_CATEGORY = new AccountType(2);
+	    public static final AccountType DELETED_BANK = new AccountType(3);
+	    public static final AccountType UNKNOWN_CATEGORY = new AccountType(4); 
+	}
 
-    public static AccountDA getInstance()
-    {
-        return instance;
-    }
+	public static interface AccountHandler
+	{
+		public void setData(String name, AccountType bankAccount);
+	}
+
     
     public abstract void loadAccount(final Integer id,
                                      final AccountHandler handler);
@@ -48,10 +70,12 @@ public abstract class AccountDA
 
     public static void unitTest_Create()
     {
-        instance.createAccount("Checking", AccountType.BANK);
-        instance.createAccount("Savings", AccountType.BANK);
-        instance.createAccount("Utility", AccountType.EXPENSE_CATEGORY);
-        instance.createAccount("Entertainment", AccountType.EXPENSE_CATEGORY);
+        DAFactory.getAccountDA().createAccount("DELETED", AccountType.DELETED_BANK);
+        DAFactory.getAccountDA().createAccount("UNKNOWN", AccountType.UNKNOWN_CATEGORY);
+        DAFactory.getAccountDA().createAccount("Checking", AccountType.BANK);
+        DAFactory.getAccountDA().createAccount("Savings", AccountType.BANK);
+        DAFactory.getAccountDA().createAccount("Utility", AccountType.EXPENSE_CATEGORY);
+        DAFactory.getAccountDA().createAccount("Entertainment", AccountType.EXPENSE_CATEGORY);
     }
     
     public static void main(final String[] args)

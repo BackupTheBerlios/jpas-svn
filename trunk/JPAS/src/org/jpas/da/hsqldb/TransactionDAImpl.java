@@ -30,12 +30,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.ConnectionManager;
+import org.jpas.da.DAFactory;
 import org.jpas.da.DBNames;
 import org.jpas.da.TransactionDA;
-import org.jpas.da.TransactionDA.TransactionHandler;
 
 public class TransactionDAImpl extends TransactionDA
 {
@@ -55,7 +53,7 @@ public class TransactionDAImpl extends TransactionDA
 										 + " = " + id;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 
 			if(rs.next())
 			{
@@ -98,7 +96,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Transaction id not found: \""+ sqlStr +"\"");
@@ -125,7 +123,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Transaction id not found: \""+ sqlStr +"\"");
@@ -152,7 +150,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Transaction id not found: \""+ sqlStr +"\"");
@@ -179,7 +177,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Transaction id not found: \""+ sqlStr +"\"");
@@ -206,7 +204,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Transaction id not found: \""+ sqlStr +"\"");
@@ -230,7 +228,7 @@ public class TransactionDAImpl extends TransactionDA
 		final Integer id;
 		try
 		{
-			final ResultSet rs = ConnectionManager.getInstance().query(sqlSequenceStr);
+			final ResultSet rs = DAFactory.getConnectionManager().query(sqlSequenceStr);
 			if(!rs.next())
 			{
 				defaultLogger.error("Unable to get next transaction ID: \"" + sqlSequenceStr + "\"");
@@ -262,7 +260,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Unable to create transaction: \"" + sqlStr + "\"");
@@ -286,7 +284,7 @@ public class TransactionDAImpl extends TransactionDA
 	{
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(
+			final int result = DAFactory.getConnectionManager().update(
 											  "DELETE FROM " + DBNames.TN_TRANSACTION
 											 + " WHERE " + DBNames.CN_TRANSACTION_ID
 											 + " = " + id);
@@ -314,7 +312,7 @@ public class TransactionDAImpl extends TransactionDA
 								+ " = " + id;
 		try
 		{
-			return ConnectionManager.getInstance().query(sqlStr).next();
+			return DAFactory.getConnectionManager().query(sqlStr).next();
 		}
 		catch(final SQLException sqle)
 		{
@@ -357,7 +355,7 @@ public class TransactionDAImpl extends TransactionDA
 
 		try
 		{
-			return ConnectionManager.getInstance().query(sqlStr).next();
+			return DAFactory.getConnectionManager().query(sqlStr).next();
 		}
 		catch(final SQLException sqle)
 		{
@@ -379,7 +377,7 @@ public class TransactionDAImpl extends TransactionDA
 							+ " ORDER BY " + DBNames.CN_TRANSACTION_DATE;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 			final List<Integer> idList = new ArrayList<Integer>();
 			while(rs.next())
 			{
@@ -430,7 +428,7 @@ public class TransactionDAImpl extends TransactionDA
 
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             final List<Integer> idList = new ArrayList<Integer>();
             while (rs.next())
             {
@@ -445,17 +443,4 @@ public class TransactionDAImpl extends TransactionDA
             throw new RuntimeException("Unable to load transaction id's!", sqle);
         }
 	}
-	
-    public static void unitTest_Create()
-    {
-        getInstance().createTransaction(new Integer(2), "Joe`s bar and grill", "memo", "23", new Date(System.currentTimeMillis()));
-        getInstance().createTransaction(new Integer(2), "Kat`s Home Cooking", "memos", "21", new Date(System.currentTimeMillis()));
-    }
-    
-    
-    public static void main(final String[] args)
-    {
-		BasicConfigurator.configure();
-		unitTest_Create();
-    }
 }

@@ -9,9 +9,7 @@ import java.util.Map;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.AccountDA;
-import org.jpas.da.ConnectionManager;
-import org.jpas.da.DBNames;
+import org.jpas.da.*;
 /**
  * Title: JPAS
  * Description: Java based Personal Accounting System
@@ -38,29 +36,6 @@ public class AccountDAImpl extends AccountDA
 {
 	private static final Logger defaultLogger = Logger.getLogger(AccountDAImpl.class);
 
-	public static class AccountType
-	{
-	    private static final Map<Integer, AccountType> valueMap = new HashMap<Integer, AccountType>();
-	    
-	    private final int dbValue;
-	    private AccountType(final int value)
-	    {
-	        this.dbValue = value;
-	        valueMap.put(new Integer(value), this);
-	    }
-	    
-	    private static AccountType getAccountTypeFor(final int value)
-	    {
-	        return valueMap.get(new Integer(value));
-	    }
-	    
-	    public static final AccountType BANK = new AccountType(0);
-	    public static final AccountType EXPENSE_CATEGORY = new AccountType(1);
-	    public static final AccountType INCOME_CATEGORY = new AccountType(2);
-	    public static final AccountType DELETED_BANK = new AccountType(3);
-	    public static final AccountType UNKNOWN_CATEGORY = new AccountType(4); 
-	}
-	
 	public AccountDAImpl()
 	{
 	    if(!doesAccountExist(AccountType.DELETED_BANK))
@@ -73,11 +48,6 @@ public class AccountDAImpl extends AccountDA
 	    }
 	}
 
-	public static interface AccountHandler
-	{
-		public void setData(String name, AccountType bankAccount);
-	}
-
 	/* (non-Javadoc)
      * @see org.jpas.da.hsqldb.AccountDA#loadAccount(java.lang.Integer, org.jpas.da.hsqldb.AccountDAImpl.AccountHandler)
      */
@@ -88,7 +58,7 @@ public class AccountDAImpl extends AccountDA
 										 + " = " + id;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 
 			if(rs.next())
 			{
@@ -124,7 +94,7 @@ public class AccountDAImpl extends AccountDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Account id not found: \""+ sqlStr +"\"");
@@ -151,7 +121,7 @@ public class AccountDAImpl extends AccountDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Account id not found: \""+ sqlStr +"\"");
@@ -178,7 +148,7 @@ public class AccountDAImpl extends AccountDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Account id not found: \""+ sqlStr +"\"");
@@ -202,7 +172,7 @@ public class AccountDAImpl extends AccountDA
                 + " = " + AccountType.DELETED_BANK.dbValue;
         try
         {
-        	final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+        	final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
         	rs.next();
             return (Integer)rs.getObject(DBNames.CN_ACCOUNT_ID);
         }
@@ -224,7 +194,7 @@ public class AccountDAImpl extends AccountDA
                 + " = " + AccountType.UNKNOWN_CATEGORY.dbValue;
         try
         {
-            final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+            final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
             rs.next();
             return (Integer)rs.getObject(DBNames.CN_ACCOUNT_ID);
         }
@@ -247,7 +217,7 @@ public class AccountDAImpl extends AccountDA
 		final Integer id;
 		try
 		{
-			final ResultSet rs = ConnectionManager.getInstance().query(sqlSequenceStr);
+			final ResultSet rs = DAFactory.getConnectionManager().query(sqlSequenceStr);
 			if(!rs.next())
 			{
 				defaultLogger.error("Unable to get next Account ID: \"" + sqlSequenceStr + "\"");
@@ -272,7 +242,7 @@ public class AccountDAImpl extends AccountDA
 
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(sqlStr);
+			final int result = DAFactory.getConnectionManager().update(sqlStr);
 			if(result < 1)
 			{
 				defaultLogger.error("Unable to create account: \"" + sqlStr + "\"");
@@ -295,7 +265,7 @@ public class AccountDAImpl extends AccountDA
 	{
 		try
 		{
-			final int result = ConnectionManager.getInstance().update(
+			final int result = DAFactory.getConnectionManager().update(
 											  "DELETE FROM " + DBNames.TN_ACCOUNT
 											 + " WHERE " + DBNames.CN_ACCOUNT_ID
 											 + " = " + id);
@@ -323,7 +293,7 @@ public class AccountDAImpl extends AccountDA
 								+ " = " + id;
 		try
 		{
-			return ConnectionManager.getInstance().query(sqlStr).next();
+			return DAFactory.getConnectionManager().query(sqlStr).next();
 		}
 		catch(final SQLException sqle)
 		{
@@ -343,7 +313,7 @@ public class AccountDAImpl extends AccountDA
 								+ " = " + type.dbValue;
 		try
 		{
-			return ConnectionManager.getInstance().query(sqlStr).next();
+			return DAFactory.getConnectionManager().query(sqlStr).next();
 		}
 		catch(final SQLException sqle)
 		{
@@ -365,7 +335,7 @@ public class AccountDAImpl extends AccountDA
 							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 			final List<Integer> idList = new ArrayList<Integer>();
 			while(rs.next())
 			{
@@ -393,7 +363,7 @@ public class AccountDAImpl extends AccountDA
 							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 			final List<Integer> idList = new ArrayList<Integer>();
 			while(rs.next())
 			{
@@ -419,7 +389,7 @@ public class AccountDAImpl extends AccountDA
 				+ " ORDER BY " + DBNames.CN_TRANSACTION_DATE;
 		try 
 		{
-			final ResultSet rs = ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs = DAFactory.getConnectionManager().query(sqlStr);
 			final List<String> idList = new ArrayList<String>();
 			
 			while (rs.next()) 
@@ -448,7 +418,7 @@ public class AccountDAImpl extends AccountDA
 							+ " ORDER BY " + DBNames.CN_ACCOUNT_NAME;
 		try
 		{
-			final ResultSet rs =  ConnectionManager.getInstance().query(sqlStr);
+			final ResultSet rs =  DAFactory.getConnectionManager().query(sqlStr);
 			final List<Integer> idList = new ArrayList<Integer>();
 			while(rs.next())
 			{

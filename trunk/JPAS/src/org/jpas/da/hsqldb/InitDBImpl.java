@@ -4,9 +4,7 @@ import java.sql.SQLException;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.ConnectionManager;
-import org.jpas.da.DBNames;
-import org.jpas.da.InitDB;
+import org.jpas.da.*;
 
 /**
  * Title: JPAS
@@ -42,7 +40,7 @@ public class InitDBImpl extends InitDB
 		final String sqlDeleteStr = "DROP TABLE " + tableName + " IF EXISTS";
 		try
 		{
-			ConnectionManager.getInstance().update(sqlDeleteStr);
+            DAFactory.getConnectionManager().update(sqlDeleteStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -58,7 +56,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlDeleteStr);
+            DAFactory.getConnectionManager().update(sqlDeleteStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -76,7 +74,7 @@ public class InitDBImpl extends InitDB
 		final String sqlCreate = "CREATE USER " + userName + " PASSWORD " + passwd + (admin ? "ADMIN" : "");
 		try
 		{
-			ConnectionManager.getInstance().update(sqlCreate);
+            DAFactory.getConnectionManager().update(sqlCreate);
 		}
 		catch(final SQLException sqle)
 		{
@@ -93,7 +91,7 @@ public class InitDBImpl extends InitDB
 		final String sqlDrop = "DROP USER " + userName;
 		try
 		{
-			ConnectionManager.getInstance().update(sqlDrop);
+            DAFactory.getConnectionManager().update(sqlDrop);
 		}
 		catch(final SQLException sqle)
 		{
@@ -110,7 +108,7 @@ public class InitDBImpl extends InitDB
 		final String sqlAlter = "ALTER USER " + userName + " SET PASSWORD " + passwd;
 		try
 		{
-			ConnectionManager.getInstance().update(sqlAlter);
+            DAFactory.getConnectionManager().update(sqlAlter);
 		}
 		catch(final SQLException sqle)
 		{
@@ -148,7 +146,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-		  ConnectionManager.getInstance().update(sqlCreateStr);
+            DAFactory.getConnectionManager().update(sqlCreateStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -158,7 +156,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlSequenceStr);
+            DAFactory.getConnectionManager().update(sqlSequenceStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -205,7 +203,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlCreateStr);
+            DAFactory.getConnectionManager().update(sqlCreateStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -215,7 +213,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlIndexAccount);
+            DAFactory.getConnectionManager().update(sqlIndexAccount);
 		}
 		catch(final SQLException sqle)
 		{
@@ -225,7 +223,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlSequenceStr);
+            DAFactory.getConnectionManager().update(sqlSequenceStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -275,7 +273,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlCreateStr);
+            DAFactory.getConnectionManager().update(sqlCreateStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -285,7 +283,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlIndexAccount);
+            DAFactory.getConnectionManager().update(sqlIndexAccount);
 		}
 		catch(final SQLException sqle)
 		{
@@ -295,7 +293,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlIndexTransaction);
+            DAFactory.getConnectionManager().update(sqlIndexTransaction);
 		}
 		catch(final SQLException sqle)
 		{
@@ -340,7 +338,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlCreateStr);
+            DAFactory.getConnectionManager().update(sqlCreateStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -350,7 +348,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlSequenceStr);
+            DAFactory.getConnectionManager().update(sqlSequenceStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -399,7 +397,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlCreateStr);
+            DAFactory.getConnectionManager().update(sqlCreateStr);
 		}
 		catch(final SQLException sqle)
 		{
@@ -409,7 +407,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlIndexAccount);
+            DAFactory.getConnectionManager().update(sqlIndexAccount);
 		}
 		catch(final SQLException sqle)
 		{
@@ -419,7 +417,7 @@ public class InitDBImpl extends InitDB
 
 		try
 		{
-			ConnectionManager.getInstance().update(sqlIndexTransaction);
+            DAFactory.getConnectionManager().update(sqlIndexTransaction);
 		}
 		catch(final SQLException sqle)
 		{

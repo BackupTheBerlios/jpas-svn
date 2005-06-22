@@ -24,9 +24,8 @@
 package org.jpas.model;
 
 import org.apache.log4j.Logger;
-import org.jpas.da.hsqldb.AccountDAImpl;
-import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
-import org.jpas.da.hsqldb.TransactionDAImpl;
+import org.jpas.da.AccountDA;
+import org.jpas.da.DAFactory;
 import org.jpas.util.*;
 
 class AccountImpl extends JpasObservableImpl implements Category, Account
@@ -39,7 +38,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
     private boolean isLoaded = false;
     
     private String name;
-    private AccountDAImpl.AccountType type;
+    private AccountDA.AccountType type;
 
     private boolean balanceLoaded = false;
     private long balance;
@@ -91,7 +90,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
                 }
                 
                 final Category cat = ModelFactory.getInstance().getUnknownCategory();
-                final Integer[] transferIDs = TransAccountMappingDAImpl.getInstance().getAllTranfersForAccount(id);
+                final Integer[] transferIDs = DAFactory.getTransAccountMappingDA().getAllTranfersForAccount(id);
                 for(int i = 0; i < transferIDs.length; i++)
                 {
                     final TransactionTransfer transfer = ModelFactory.getInstance().getTransactionTransferforIDs(transferIDs[i], id);
@@ -101,7 +100,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
                 }
 
                 final Account account = ModelFactory.getInstance().getDeletedBankAccount();
-                final Integer[] transactionsIDs = TransactionDAImpl.getInstance().getAllTransactionIDs(id);
+                final Integer[] transactionsIDs = DAFactory.getTransactionDA().getAllTransactionIDs(id);
                 for(int i = 0; i < transactionsIDs.length; i++)
                 {
                     final Transaction trans = ModelFactory.getInstance().getTransactionForID(transactionsIDs[i]);
@@ -109,14 +108,14 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
                     trans.commit();
                 }
                 
-                AccountDAImpl.getInstance().deleteAccount(id);
+                DAFactory.getAccountDA().deleteAccount(id);
                 isModified = false;
 
                 announceDelete();
             }
             else
             {
-            	AccountDAImpl.getInstance().updateAccount(id, name, type);
+                DAFactory.getAccountDA().updateAccount(id, name, type);
             	isModified = false;
             	
             	announceModify();
@@ -154,7 +153,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
 
     public String getCategoryName()
     {
-        return (type == AccountDAImpl.AccountType.BANK || type == AccountDAImpl.AccountType.DELETED_BANK) ? "TXFR["
+        return (type == AccountDA.AccountType.BANK || type == AccountDA.AccountType.DELETED_BANK) ? "TXFR["
                 + getName() + "]"
                 : getName();
     }
@@ -177,8 +176,8 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
         {
             loadData();
         }
-        return type == AccountDAImpl.AccountType.BANK
-                || type == AccountDAImpl.AccountType.DELETED_BANK;
+        return type == AccountDA.AccountType.BANK
+                || type == AccountDA.AccountType.DELETED_BANK;
     }
 
     public boolean isIncome()
@@ -188,7 +187,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
         {
             loadData();
         }
-        return type == AccountDAImpl.AccountType.INCOME_CATEGORY;
+        return type == AccountDA.AccountType.INCOME_CATEGORY;
     }
 
     public boolean isExpense()
@@ -198,7 +197,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
         {
             loadData();
         }
-        return type == AccountDAImpl.AccountType.EXPENSE_CATEGORY;
+        return type == AccountDA.AccountType.EXPENSE_CATEGORY;
     }
     
     public boolean isUnknown()
@@ -208,15 +207,15 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
         {
             loadData();
         }
-        return type == AccountDAImpl.AccountType.UNKNOWN_CATEGORY;
+        return type == AccountDA.AccountType.UNKNOWN_CATEGORY;
     }
     
     private void loadData()
     {
-        AccountDAImpl.getInstance().loadAccount(id, new AccountDAImpl.AccountHandler()
+        DAFactory.getAccountDA().loadAccount(id, new AccountDA.AccountHandler()
         {
             public void setData(final String name,
-                    final AccountDAImpl.AccountType type)
+                    final AccountDA.AccountType type)
             {
                 AccountImpl.this.name = name;
                 AccountImpl.this.type = type;
@@ -228,7 +227,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
     public void setName(final String name)
     {
         assert (!isDeleted);
-        AccountDAImpl.getInstance().updateAccountName(id, name);
+        DAFactory.getAccountDA().updateAccountName(id, name);
         if (isLoaded)
         {
             loadData();
@@ -244,7 +243,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
     {
         if(!balanceLoaded)
         {
-            balance = TransAccountMappingDAImpl.getInstance().getAccountBalance(id);
+            balance = DAFactory.getTransAccountMappingDA().getAccountBalance(id);
             balanceLoaded = true;
         }
         return balance;
@@ -252,7 +251,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
     
     public String[] getAllPayees()
     {
-    	return AccountDAImpl.getInstance().getAllPayeesForAccount(id);
+    	return DAFactory.getAccountDA().getAllPayeesForAccount(id);
     }
     
     public boolean canBeDeleted()
@@ -261,7 +260,7 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
         {
             loadData();
         }
-        return type != AccountDAImpl.AccountType.DELETED_BANK && type != AccountDAImpl.AccountType.UNKNOWN_CATEGORY && type != AccountDAImpl.AccountType.BANK;
+        return type != AccountDA.AccountType.DELETED_BANK && type != AccountDA.AccountType.UNKNOWN_CATEGORY && type != AccountDA.AccountType.BANK;
     }
     
     public boolean isDeleted()

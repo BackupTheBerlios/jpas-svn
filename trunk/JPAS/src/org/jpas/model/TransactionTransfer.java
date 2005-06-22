@@ -23,8 +23,10 @@
  */
 package org.jpas.model;
 
-import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
-import org.jpas.util.*;
+import org.jpas.da.DAFactory;
+import org.jpas.da.TransAccountMappingDA;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservableImpl;
 
 /**
  * @author Justin W Smith
@@ -61,9 +63,9 @@ public class TransactionTransfer extends JpasObservableImpl
     private void loadData()
     {
         assert (!isDeleted);
-        TransAccountMappingDAImpl.getInstance().loadTransAccountMapping(
+        DAFactory.getTransAccountMappingDA().loadTransAccountMapping(
                 transactionID, accountID,
-                new TransAccountMappingDAImpl.TransAccountTranferHandler()
+                new TransAccountMappingDA.TransAccountTranferHandler()
                 {
                     public void setData(final long amount)
                     {
@@ -89,7 +91,7 @@ public class TransactionTransfer extends JpasObservableImpl
     		if(isDeleted)
     		{
 	    		final JpasDataChange change = new JpasDataChange.Delete(this);
-	    		TransAccountMappingDAImpl.getInstance().deleteTransAccountMapping(transactionID, accountID);
+                DAFactory.getTransAccountMappingDA().deleteTransAccountMapping(transactionID, accountID);
 	    		notifyObservers(change);
 	    		deleteObservers();
 	    		isModified = false;
@@ -97,7 +99,7 @@ public class TransactionTransfer extends JpasObservableImpl
 	    	else
 	    	{
 	    		final JpasDataChange change = new JpasDataChange.AmountModify(this);
-	    		TransAccountMappingDAImpl.getInstance().updateTAMAmount(transactionID, accountID, amount);
+                DAFactory.getTransAccountMappingDA().updateTAMAmount(transactionID, accountID, amount);
 	    		notifyObservers(change);
 	    		isModified = false;
 	    	}

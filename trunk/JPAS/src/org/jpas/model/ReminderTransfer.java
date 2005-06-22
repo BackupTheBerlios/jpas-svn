@@ -23,9 +23,10 @@
  */
 package org.jpas.model;
 
-import org.jpas.da.hsqldb.ReminderAccountMappingDAImpl;
-import org.jpas.da.hsqldb.TransAccountMappingDAImpl;
-import org.jpas.util.*;
+import org.jpas.da.DAFactory;
+import org.jpas.da.TransAccountMappingDA;
+import org.jpas.util.JpasDataChange;
+import org.jpas.util.JpasObservableImpl;
 
 /**
  * @author Justin W Smith
@@ -62,9 +63,9 @@ public class ReminderTransfer extends JpasObservableImpl
     private void loadData()
     {
         assert (!isDeleted);
-        TransAccountMappingDAImpl.getInstance().loadTransAccountMapping(
+        DAFactory.getTransAccountMappingDA().loadTransAccountMapping(
                 reminderID, accountID,
-                new TransAccountMappingDAImpl.TransAccountTranferHandler()
+                new TransAccountMappingDA.TransAccountTranferHandler()
                 {
                     public void setData(final long amount)
                     {
@@ -95,7 +96,7 @@ public class ReminderTransfer extends JpasObservableImpl
     		if(isDeleted)
     		{
 	    		final JpasDataChange change = new JpasDataChange.Delete(this);
-	    		TransAccountMappingDAImpl.getInstance().deleteTransAccountMapping(reminderID, accountID);
+                DAFactory.getTransAccountMappingDA().deleteTransAccountMapping(reminderID, accountID);
 	    		announceChange(change);
 	    		deleteObservers();
 	    		isModified = false;
@@ -103,7 +104,7 @@ public class ReminderTransfer extends JpasObservableImpl
 	    	else
 	    	{
 	    		final JpasDataChange change = new JpasDataChange.AmountModify(this);
-	    		TransAccountMappingDAImpl.getInstance().updateTAMAmount(reminderID, accountID, amount);
+                DAFactory.getTransAccountMappingDA().updateTAMAmount(reminderID, accountID, amount);
 	    		announceChange(change);
 	    		isModified = false;
 	    	}

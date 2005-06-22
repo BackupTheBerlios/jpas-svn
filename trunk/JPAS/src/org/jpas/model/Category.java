@@ -1,6 +1,6 @@
 package org.jpas.model;
 
-import org.jpas.util.*;
+import org.jpas.util.JpasObservable;
 
 public interface Category extends JpasObservable
 {

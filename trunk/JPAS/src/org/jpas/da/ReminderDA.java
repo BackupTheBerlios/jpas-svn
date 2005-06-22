@@ -4,19 +4,10 @@ import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jpas.da.hsqldb.ReminderDAImpl;
+import org.apache.log4j.BasicConfigurator;
 
 public abstract class ReminderDA
 {
-
-    private static final ReminderDA instance = new ReminderDAImpl();
-    
-    public static ReminderDA getInstance()
-    {
-        return instance;
-    }
-
-    
     /** TODO covert this to an enum. */
     public static class AmountMethod 
     {
@@ -115,4 +106,16 @@ public abstract class ReminderDA
 
     public abstract boolean doesReminderExist(final Integer id);
 
+    
+    public static void unitTest_Create()
+    {
+        DAFactory.getReminderDA().createReminder(new Integer(0), "My Utilities", "memo", new Date(System.currentTimeMillis()), AmountMethod.FIXED, RepeatMethod.WEEKLY, 1);
+    }
+    
+    
+    public static void main(final String[] args)
+    {
+        BasicConfigurator.configure();
+        unitTest_Create();
+    }
 }
