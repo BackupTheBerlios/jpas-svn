@@ -45,7 +45,7 @@ import org.jpas.da.ReminderDA.RepeatMethod;
  */
 public class ReminderDAImpl extends ReminderDA
 {
-    private static final Logger defaultLogger = Logger.getLogger(TransactionDAImpl.class);
+    private static final Logger defaultLogger = Logger.getLogger(ReminderDAImpl.class);
 
     public ReminderDAImpl()
     { 
