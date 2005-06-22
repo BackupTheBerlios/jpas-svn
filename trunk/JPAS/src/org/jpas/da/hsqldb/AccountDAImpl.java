@@ -3,13 +3,12 @@ package org.jpas.da.hsqldb;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.*;
+import org.jpas.da.AccountDA;
+import org.jpas.da.DAFactory;
+import org.jpas.da.DBNames;
 /**
  * Title: JPAS
  * Description: Java based Personal Accounting System

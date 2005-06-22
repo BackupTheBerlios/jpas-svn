@@ -2,9 +2,10 @@ package org.jpas.da.hsqldb;
 
 import java.sql.SQLException;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.*;
+import org.jpas.da.DAFactory;
+import org.jpas.da.DBNames;
+import org.jpas.da.InitDB;
 
 /**
  * Title: JPAS

@@ -5,13 +5,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jpas.da.*;
-import org.jpas.da.ConnectionManager;
+import org.jpas.da.DAFactory;
 import org.jpas.da.DBNames;
 import org.jpas.da.TransAccountMappingDA;
-import org.jpas.da.TransAccountMappingDA.TransAccountTranferHandler;
 
 /**
  * Created on Sep 11, 2004 - 9:59:59 AM
