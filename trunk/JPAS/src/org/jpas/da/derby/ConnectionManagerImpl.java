@@ -1,6 +1,8 @@
 package org.jpas.da.derby;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.jpas.da.ConnectionManager;
@@ -9,6 +11,7 @@ import org.jpas.util.PropertyManager;
 
 public class ConnectionManagerImpl extends ConnectionManager
 {
+    
     private static final Logger defaultLogger = Logger.getLogger(ConnectionManagerImpl.class);
 
     public ConnectionManagerImpl()
