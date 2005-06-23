@@ -23,23 +23,14 @@
  */
 package org.jpas.gui.renderers;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.text.SimpleDateFormat;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
-import org.jpas.gui.documents.AmountDocument;
-import org.jpas.gui.components.*;
+import org.jpas.gui.components.AmountLabel;
 import org.jpas.gui.layouts.FlexGridLayout;
-import org.jpas.model.Transaction;
 import org.jpas.model.*;
 
 /**
