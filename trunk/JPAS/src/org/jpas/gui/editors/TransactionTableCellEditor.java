@@ -23,9 +23,7 @@
  */
 package org.jpas.gui.editors;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -113,13 +111,22 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 
 					public void run() 
 					{
-						stopCellEditing();
+                        TransactionTableCellEditor.super.stopCellEditing();
 					}
 				});
 			}
 		});
 	}
     
+    @Override
+    public boolean stopCellEditing()
+    {
+        final int response = JOptionPane.showConfirmDialog(cellPanel, "This transaction has not been saved.  Any changes will be lost if continued.  Continue?", "Unsaved changes", JOptionPane.YES_NO_OPTION);
+
+        return response == JOptionPane.YES_OPTION;
+        
+    }
+
     private void init()
     {
         final FlexGridLayout layout = new FlexGridLayout(rowHeights, columnWidths);
