@@ -55,11 +55,11 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final JDateChooser dateChooser;
 	private final JComboBox numList;
 	private final PayeeComboBox payeeList;
-	private final JTextField withdrawField;
+	private final CheckpointTextField withdrawField;
 	private final AmountDocument withdrawDoc = new AmountDocument(); 
-	private final JTextField depositField;
+	private final CheckpointTextField depositField;
 	private final AmountDocument depositDoc = new AmountDocument();
-	private final JTextField memoField;
+	private final CheckpointTextField memoField;
 	private final AmountLabel balanceLabel;
 	private final JComboBox categoryList;
 	private final JLabel categoryLabel = new JLabel("[SPLIT]");
@@ -91,9 +91,10 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	numList.setEditable(true);
     	payeeList = new PayeeComboBox();
     	payeeList.setEditable(true);
-    	withdrawField = new JTextField();
-    	depositField = new JTextField();
-    	memoField = new JTextField();
+    	withdrawField = new CheckpointTextField();
+    	depositField = new CheckpointTextField();
+    	memoField = new CheckpointTextField();
+        
     	balanceLabel = new AmountLabel();
     	categoryList = new CategoryComboBox();
     	
@@ -241,14 +242,15 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         final Transaction currentTrans = (Transaction)value;
 
         setPanelEnabled(false);
-		if(currentTrans == null)
+        
+        if(currentTrans == null)
         {
         	dateChooser.setDate(new java.util.Date());
         	numList.setSelectedItem("");
         	payeeList.setSelectedItem("");
         	withdrawField.setText("");
         	depositField.setText("");
-        	balanceLabel.setText("");
+            balanceLabel.setText("");
         	memoField.setText("");
         	categoryList.getModel().setSelectedItem(null);
     	    setCategoryPanel();
@@ -329,7 +331,11 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 				setPanelEnabled(true);
 			}
 		});
-		
+
+        withdrawField.resetCheckpoint();
+        depositField.resetCheckpoint();
+        memoField.resetCheckpoint();
+        
         return cellPanel;
     }
     
