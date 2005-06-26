@@ -28,6 +28,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 
+import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.Account;
 
@@ -114,9 +115,9 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     public String createAccountText(final String name)
     {
         buff.setLength(0);
-        buff.append("<html><body><p align=\"left\"><b>");
+        buff.append("<html><body><table><tr><td align=\"left\"><font size=\"4\">");
         buff.append(name);
-        buff.append("</b></p></body></html>");
+        buff.append("</font></td></tr></table></body></html>");
         return buff.toString();        
 
     }
@@ -124,15 +125,8 @@ public class AccountListCellRenderer extends JPanel implements ListCellRenderer
     public String createAmountText(long value)
     {
         buff.setLength(0);
-        buff.append("<html><body><p align=\"right\"><b>");
-        if(value < 0)
-        {
-            buff.append('-');
-            value = Math.abs(value);
-        }
-        buff.append(value / 100);
-        buff.append('.');
-        buff.append(value % 100);
+        buff.append("<html><body><p align=\"right\" valign=\"middle\"><b>");
+        buff.append(AmountDocument.getTextForAmount(value, true));
         buff.append("</b></p></body></html>");
         return buff.toString();        
     }
