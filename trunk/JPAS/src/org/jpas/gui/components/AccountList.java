@@ -26,23 +26,24 @@ package org.jpas.gui.components;
 import java.awt.*;
 
 import javax.swing.JList;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import org.jpas.model.*;
 
 import org.jpas.gui.models.AccountListModel;
 import org.jpas.gui.models.JpasListModel;
 import org.jpas.gui.renderers.AccountListCellRenderer;
-
+import org.jpas.gui.util.*;
 /**
  * @author Justin W Smith
  *
  */
-public class AccountList extends JList
+public class AccountList extends JList implements Checkpointable
 {
-    //final ListSelectionModel model = new DefaultListSelectionModel();
+    private boolean selectionChanged = false;
     
- 
-	public JpasListModel model = new AccountListModel();
-
-
+	public JpasListModel<Account> model = new AccountListModel();
 
     public AccountList()
     {
@@ -51,6 +52,15 @@ public class AccountList extends JList
         model.reload();
         setCellRenderer(new AccountListCellRenderer(true));
         setBackground(new Color(239, 239, 239));
+        
+        getSelectionModel().addListSelectionListener(new ListSelectionListener()
+        {
+
+            public void valueChanged(ListSelectionEvent e)
+            {
+                selectionChanged = true;
+            }
+        });
     }
     
     public Dimension getPreferredSize()
@@ -58,10 +68,19 @@ public class AccountList extends JList
         final Dimension dim = getCellRenderer().getListCellRendererComponent(this, "WWWWWWWWWWWW", 0, false, false).getPreferredSize();
         dim.height *= getModel().getSize();
         return dim;
-        
     }
     
     public static void main(String[] args)
     {
+    }
+
+    public void resetCheckpoint()
+    {
+        selectionChanged = false;
+    }
+
+    public boolean hasChanged()
+    {
+        return selectionChanged;
     }
 }
