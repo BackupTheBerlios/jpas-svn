@@ -31,7 +31,7 @@ import org.jpas.util.JpasObserver;
  * @author Justin W Smith
  *
  */
-public class AccountListModel extends JpasListModel
+public class AccountListModel extends JpasListModel<Account>
 {
 	protected void initObserver(final JpasObserver observer)
 	{
