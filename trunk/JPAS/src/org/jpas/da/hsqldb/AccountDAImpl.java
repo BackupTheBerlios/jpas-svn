@@ -37,14 +37,21 @@ public class AccountDAImpl extends AccountDA
 
 	public AccountDAImpl()
 	{
-	    if(!doesAccountExist(AccountType.DELETED_BANK))
-	    {
-	        createAccount("DELETED", AccountType.DELETED_BANK);
-	    }
-	    if(!doesAccountExist(AccountType.UNKNOWN_CATEGORY))
-	    {
-	        createAccount("UNKNOWN", AccountType.UNKNOWN_CATEGORY);
-	    }
+        try
+        {
+    	    if(!doesAccountExist(AccountType.DELETED_BANK))
+    	    {
+    	        createAccount("DELETED", AccountType.DELETED_BANK);
+    	    }
+    	    if(!doesAccountExist(AccountType.UNKNOWN_CATEGORY))
+    	    {
+    	        createAccount("UNKNOWN", AccountType.UNKNOWN_CATEGORY);
+    	    }
+        }
+        catch(final Exception e)
+        {
+            defaultLogger.error("Error while querying database.  Database may not be initialized.", e);
+        }
 	}
 
 	/* (non-Javadoc)
