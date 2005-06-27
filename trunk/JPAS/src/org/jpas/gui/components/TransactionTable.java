@@ -58,6 +58,7 @@ public class TransactionTable extends JTable
         this.rowHeights = createRowHeights();
     	transactionRenderer = new TransactionTableCellRenderer(columnWidths, rowHeights);
     	transactionEditor = new TransactionTableCellEditor(columnWidths, rowHeights);
+    	getTableHeader().setReorderingAllowed(false);
     	this.setModel(model);
         this.setDefaultRenderer(Transaction.class, transactionRenderer);
         this.setDefaultEditor(Transaction.class, transactionEditor);
