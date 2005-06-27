@@ -26,8 +26,7 @@ package org.jpas.gui.editors;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -121,7 +120,52 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 				});
 			}
 		});
+        addMouseListener(memoField);
+        addMouseListener(withdrawField);
+        addMouseListener(depositField);
+        addMouseListener((JTextField)numList.getEditor().getEditorComponent());
+        addMouseListener((JTextField)payeeList.getEditor().getEditorComponent());
 	}
+    
+   
+    private void addMouseListener(final JTextField tf)
+    {
+        tf.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                if(tf.isEditable() && !tf.hasFocus())
+                {
+                    tf.requestFocus();
+                    SwingUtilities.invokeLater(new Runnable()
+                    {
+                        public void run()
+                        {
+                            tf.setSelectionStart(0);
+                            tf.setSelectionEnd(tf.getText().length());
+                        }
+                    });
+                }
+            }
+            @Override
+            public void mouseReleased(MouseEvent e)
+            {
+                if(tf.isEditable() && !tf.hasFocus())
+                {
+                    tf.requestFocus();
+                    SwingUtilities.invokeLater(new Runnable()
+                    {
+                        public void run()
+                        {
+                            tf.setSelectionStart(0);
+                            tf.setSelectionEnd(tf.getText().length());
+                        }
+                    });
+                }
+            }
+        });
+    }
     
     @Override
     public boolean stopCellEditing()
