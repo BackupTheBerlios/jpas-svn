@@ -23,22 +23,23 @@
  */
 package org.jpas.gui.components;
 
-import javax.swing.JComboBox;
-
 import org.jpas.gui.models.PayeeListModel;
+import org.jpas.gui.renderers.PayeeListCellRenderer;
 import org.jpas.model.Account;
 
 /**
  * @author jsmith
  *
  */
-public class PayeeComboBox extends JComboBox 
+public class PayeeComboBox extends CheckpointComboBox 
 {
 	private final PayeeListModel model = new PayeeListModel();
 	
 	public PayeeComboBox()
 	{
 		setModel(model);
+        setRenderer(new PayeeListCellRenderer());
+        setOpaque(false);
 	}
 	
 	public void setAccount(final Account account)

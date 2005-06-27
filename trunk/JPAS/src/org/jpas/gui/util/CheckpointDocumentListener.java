@@ -1,9 +1,11 @@
+package org.jpas.gui.util;
+
 /*
- * Created on Oct 26, 2004
+ * Created on Jun 25, 2005
  *
  * Title: JPAS
  * Description: Java based Personal Accounting System
- * Copyright: Copyright (c) 2004 Justin W Smith
+ * Copyright: Copyright (c) 2005 Justin W Smith
  * @author Justin W Smith
  * @version 1.0
  * 
@@ -21,30 +23,31 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.jpas.gui.models;
 
-import org.jpas.model.Category;
-import org.jpas.model.ModelFactory;
-import org.jpas.util.JpasObserver;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-/**
- * @author jsmith
- *
- */
-public class CategoryListModel extends JpasListModel<Category>
+public class CheckpointDocumentListener implements DocumentListener
 {
-
-	protected void initObserver(final JpasObserver observer)
-	{
-		ModelFactory.getInstance().getAccountObservable().addObserver(observer);
-	}
-	protected Category[] loadData()
-	{
-		return ModelFactory.getInstance().getAllCategories();
-	}
-	
-	public void setSelectedItem(final Object anItem) 
-	{
-		super.setSelectedItem((Category)anItem);
-	}
+    private Checkpointable checkpointable;
+    
+    public CheckpointDocumentListener(final Checkpointable checkpointable)
+    {
+        this.checkpointable = checkpointable;
+    }
+    
+    public void insertUpdate(DocumentEvent e)
+    {
+        checkpointable.setChanged(true);
+    }
+    
+    public void removeUpdate(DocumentEvent e)
+    {
+        checkpointable.setChanged(true);
+    }
+    
+    public void changedUpdate(DocumentEvent e)
+    {
+        checkpointable.setChanged(true);
+    }
 }

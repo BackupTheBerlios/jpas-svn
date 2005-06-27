@@ -23,8 +23,11 @@
  */
 package org.jpas.gui.editors;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,9 +35,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
+import org.apache.log4j.Logger;
 import org.jpas.gui.components.*;
 import org.jpas.gui.data.TransactionData;
 import org.jpas.gui.documents.AmountDocument;
@@ -50,10 +52,12 @@ import com.toedter.calendar.JDateChooser;
  */
 public class TransactionTableCellEditor extends AbstractCellEditor implements TableCellEditor 
 {
+    private static final Logger defaultLogger = Logger.getLogger(TransactionTableCellEditor.class);
+    
 	private final JPanel cellPanel = new JPanel();
     
 	private final JDateChooser dateChooser;
-	private final JComboBox numList;
+	private final CheckpointComboBox numList;
 	private final PayeeComboBox payeeList;
 	private final CheckpointTextField withdrawField;
 	private final AmountDocument withdrawDoc = new AmountDocument(); 
@@ -61,7 +65,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final AmountDocument depositDoc = new AmountDocument();
 	private final CheckpointTextField memoField;
 	private final AmountLabel balanceLabel;
-	private final JComboBox categoryList;
+	private final CategoryComboBox categoryList;
 	private final JLabel categoryLabel = new JLabel("[SPLIT]");
 	private final JButton btnEnter = new JButton("Enter");
 	private final JButton btnSplit = new JButton("Split");
@@ -87,7 +91,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         cellPanel.setOpaque(false);
     	dateChooser = new JDateChooser("MM/dd/yyyy", false);
 		// TODO create a "real" combo box for the "num" field
-    	numList = new JComboBox(new String[]{"TXFR", "ATM", "100"});
+    	numList = new CheckpointComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
     	payeeList = new PayeeComboBox();
     	payeeList.setEditable(true);
@@ -122,10 +126,14 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     @Override
     public boolean stopCellEditing()
     {
-        final int response = JOptionPane.showConfirmDialog(cellPanel, "This transaction has not been saved.  Any changes will be lost if continued.  Continue?", "Unsaved changes", JOptionPane.YES_NO_OPTION);
-
-        return response == JOptionPane.YES_OPTION;
+        if(valueHasChanged())
+        {
+            final int response = JOptionPane.showConfirmDialog(cellPanel, "This transaction has not been saved.  Any changes will be lost if continued.  Continue?", "Unsaved changes", JOptionPane.YES_NO_OPTION);
+    
+            return response == JOptionPane.YES_OPTION;
+        }
         
+        return true;
     }
 
     private void init()
@@ -149,29 +157,27 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	withdrawField.setDocument(withdrawDoc);
     	depositField.setDocument(depositDoc);
     
-    	createClearDocListener(withdrawDoc, depositDoc);
-    	createClearDocListener(depositDoc, withdrawDoc);
+    	createClearDocListener(withdrawField, depositField);
+    	createClearDocListener(depositField, withdrawField);
 		initListeners();
     }
     
-    private void createClearDocListener(final Document doc, final Document opposite)
+    private void createClearDocListener(final CheckpointTextField tf, final CheckpointTextField opposite)
     {
-        doc.addDocumentListener(new DocumentListener()
-                {
-            		public void insertUpdate(DocumentEvent e)
-            		{
-            		    try
-            		    {
-            		        opposite.remove(0, opposite.getLength()) ;
-            		    }catch(BadLocationException ble){}
-            		}
-            		public void removeUpdate(DocumentEvent e)
-            		{
-            		}
-            		public void changedUpdate(DocumentEvent e)
-            		{
-            		}
-                });        
+        tf.getDocument().addDocumentListener(new DocumentListener()
+        {
+    		public void insertUpdate(DocumentEvent e)
+    		{
+                opposite.setText("");
+                opposite.setChanged(false);
+    		}
+    		public void removeUpdate(DocumentEvent e)
+    		{
+    		}
+    		public void changedUpdate(DocumentEvent e)
+    		{
+    		}
+        });        
     }
     
     public void setAccount(final Account account)
@@ -324,19 +330,37 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         	    categoryList.getModel().setSelectedItem(ModelFactory.getInstance().getCategoryForAccount(currentTrans.getAccount()));
         	}
         }
-		SwingUtilities.invokeLater(new Runnable()
+        resetCheckpoints();
+        
+        SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				setPanelEnabled(true);
 			}
 		});
-
-        withdrawField.resetCheckpoint();
-        depositField.resetCheckpoint();
-        memoField.resetCheckpoint();
         
         return cellPanel;
+    }
+    
+    private boolean valueHasChanged()
+    {
+        return withdrawField.hasChanged()
+            || depositField.hasChanged()
+            || memoField.hasChanged()
+            || categoryList.hasChanged()
+            || payeeList.hasChanged()
+            || numList.hasChanged();
+    }
+    
+    private void resetCheckpoints()
+    {
+        withdrawField.setChanged(false);
+        depositField.setChanged(false);
+        memoField.setChanged(false);
+        categoryList.setChanged(false);
+        payeeList.setChanged(false);
+        numList.setChanged(false);
     }
     
     public Object getCellEditorValue()

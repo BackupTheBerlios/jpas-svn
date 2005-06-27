@@ -57,7 +57,8 @@ public abstract class JpasListCellRenderer<T> extends JLabel implements ListCell
 		}
 		else
 		{
-			setText(getTextFor((T)value));
+            final T tVal = (T)value;
+			setText(getTextFor(tVal));
 		}
 		if(isSelected)
 		{

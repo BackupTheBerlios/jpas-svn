@@ -74,9 +74,9 @@ public class AccountList extends JList implements Checkpointable
     {
     }
 
-    public void resetCheckpoint()
+    public void setChanged(boolean changed)
     {
-        selectionChanged = false;
+        selectionChanged = changed;
     }
 
     public boolean hasChanged()

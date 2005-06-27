@@ -26,7 +26,7 @@ package org.jpas.gui.util;
 
 public interface Checkpointable
 {
-    public void resetCheckpoint();
+    public void setChanged(boolean changed);
     
     public boolean hasChanged();
 }

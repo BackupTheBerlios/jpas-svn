@@ -26,33 +26,18 @@ package org.jpas.gui.components;
 import java.awt.Color;
 
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import org.jpas.gui.util.CheckpointDocumentListener;
 import org.jpas.gui.util.Checkpointable;
 
 public class CheckpointTextField extends JTextField implements Checkpointable
 {
     private boolean valueAltered = false;
-    protected static final Color highlightColor = new Color(255, 239, 239);
+    protected static final Color highlightColor = new Color(255, 223, 223);
     
-    private final DocumentListener docListener = new DocumentListener(){
-
-        public void insertUpdate(DocumentEvent e)
-        {
-            System.out.println("changed");
-            setCheckpoint();
-        }
-        public void removeUpdate(DocumentEvent e)
-        {
-            System.out.println("changed");
-            setCheckpoint();
-        }
-        public void changedUpdate(DocumentEvent e)
-        {
-            setCheckpoint();
-        }};
+    private final DocumentListener docListener = new CheckpointDocumentListener(this);
     
     public CheckpointTextField()
     {
@@ -100,7 +85,7 @@ public class CheckpointTextField extends JTextField implements Checkpointable
         }
         super.setDocument(doc);
         doc.addDocumentListener(getDocumentListener());
-        resetCheckpoint();
+        setChanged(false);
     }
 
     protected DocumentListener getDocumentListener()
@@ -108,9 +93,14 @@ public class CheckpointTextField extends JTextField implements Checkpointable
         return docListener;
     }
     
+    protected Color getDisabledColor()
+    {
+        return Color.lightGray;
+    }
+    
     protected Color getStandardColor()
     {
-        return Color.WHITE;
+        return Color.white;
     }
     
     protected Color getHighlightColor()
@@ -118,21 +108,25 @@ public class CheckpointTextField extends JTextField implements Checkpointable
         return highlightColor;
     }
     
-    public void setCheckpoint()
+    public void setChanged(final boolean changed)
     {
-        valueAltered = true;
-        setBackground(getHighlightColor());
-    }
-    
-    public void resetCheckpoint()
-    {
-        valueAltered = false;
-        setBackground(getStandardColor());
+        valueAltered = changed;
+        if(valueAltered)
+        {
+            setBackground(getHighlightColor());
+        }
+        else if(isEditable())
+        {
+            setBackground(getStandardColor());
+        }
+        else
+        {
+            setBackground(getDisabledColor());
+        }
     }
 
     public boolean hasChanged()
     {
-        // TODO Auto-generated method stub
         return valueAltered;
     }
 }

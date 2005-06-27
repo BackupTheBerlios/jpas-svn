@@ -23,8 +23,6 @@
  */
 package org.jpas.gui.components;
 
-import javax.swing.JComboBox;
-
 import org.jpas.gui.models.CategoryListModel;
 import org.jpas.gui.renderers.CategoryListCellRenderer;
 
@@ -32,7 +30,7 @@ import org.jpas.gui.renderers.CategoryListCellRenderer;
  * @author jsmith
  *
  */
-public class CategoryComboBox extends JComboBox 
+public class CategoryComboBox extends CheckpointComboBox 
 {
 	private final CategoryListModel model = new CategoryListModel();
 	

@@ -1,9 +1,11 @@
+package org.jpas.gui.renderers;
+
 /*
- * Created on Oct 26, 2004
+ * Created on Jun 26, 2005
  *
  * Title: JPAS
  * Description: Java based Personal Accounting System
- * Copyright: Copyright (c) 2004 Justin W Smith
+ * Copyright: Copyright (c) 2005 Justin W Smith
  * @author Justin W Smith
  * @version 1.0
  * 
@@ -21,30 +23,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.jpas.gui.models;
 
-import org.jpas.model.Category;
-import org.jpas.model.ModelFactory;
-import org.jpas.util.JpasObserver;
-
-/**
- * @author jsmith
- *
- */
-public class CategoryListModel extends JpasListModel<Category>
+public class PayeeListCellRenderer extends JpasListCellRenderer<String>
 {
+    @Override
+    protected String getTextFor(final String value)
+    {
+        return value;
+    }
 
-	protected void initObserver(final JpasObserver observer)
-	{
-		ModelFactory.getInstance().getAccountObservable().addObserver(observer);
-	}
-	protected Category[] loadData()
-	{
-		return ModelFactory.getInstance().getAllCategories();
-	}
-	
-	public void setSelectedItem(final Object anItem) 
-	{
-		super.setSelectedItem((Category)anItem);
-	}
 }
