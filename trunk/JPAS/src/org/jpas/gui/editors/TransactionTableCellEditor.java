@@ -68,7 +68,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final JLabel categoryLabel = new JLabel("[SPLIT]");
 	private final JButton btnEnter = new JButton("Enter");
 	private final JButton btnSplit = new JButton("Split");
-	private final JButton btnDelete = new JButton("Edit");
+    private final JComboBox editMenu = new JComboBox(new EditComboBoxModel());
 	
 	private final JPanel splitPanel = new JPanel(new GridLayout(1, 2));
 	
@@ -78,7 +78,39 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 	private final int[] rowHeights;
 	
 	private Account account;
-	
+
+    private static final String actionDelete = "Delete";
+
+    private Transaction currentTrans;
+    
+    private static class EditComboBoxModel extends AbstractListModel implements ComboBoxModel
+    {
+        String selectedAction = null;
+        final String[] commands = new String[]{actionDelete};
+        
+        public void setSelectedItem(Object anItem)
+        {
+            selectedAction = (String)anItem;
+        }
+        public String getSelectedAction()
+        {
+            return selectedAction;
+        }
+        
+        public Object getSelectedItem()
+        {
+            return "           Edit";
+        }
+        public int getSize()
+        {
+            return commands.length;
+        }
+        public Object getElementAt(int index)
+        {
+            return commands[index];
+        }
+    }
+    
     /**
      * 
      */
@@ -120,6 +152,23 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 				});
 			}
 		});
+        editMenu.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                final EditComboBoxModel model = (EditComboBoxModel)editMenu.getModel();
+                final String action = model.getSelectedAction();
+                if(action.equals(actionDelete))
+                {
+                    final int option = JOptionPane.showConfirmDialog(cellPanel, "This item will be permanently deleted. Continue?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                    if(option == JOptionPane.YES_OPTION)
+                    {
+                        currentTrans.delete();
+                        currentTrans.commit();
+                    }
+                }
+            }
+        });
         addMouseListener(memoField);
         addMouseListener(withdrawField);
         addMouseListener(depositField);
@@ -196,7 +245,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	cellPanel.add(splitPanel);
     	cellPanel.add(btnEnter);
     	cellPanel.add(btnSplit);
-    	cellPanel.add(btnDelete);
+    	cellPanel.add(editMenu);
     	
     	withdrawField.setDocument(withdrawDoc);
     	depositField.setDocument(depositDoc);
@@ -282,15 +331,13 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     	categoryLabel.setEnabled(enable);
     	btnEnter.setEnabled(enable);
     	btnSplit.setEnabled(enable);
-    	btnDelete.setEnabled(enable);
+        editMenu.setEnabled(enable);
     }
     
     
     public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column)
     {
-   	
-        final Transaction currentTrans = (Transaction)value;
-
+        currentTrans = (Transaction)value;
         setPanelEnabled(false);
         
         if(currentTrans == null)
