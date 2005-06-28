@@ -33,12 +33,15 @@ import org.jpas.util.JpasDataChange;
 import org.jpas.util.JpasObservable;
 import org.jpas.util.JpasObserver;
 
+import org.apache.log4j.*;
 /**
  * @author jsmith
  *
  */
 public abstract class JpasListModel <T> extends AbstractListModel implements ComboBoxModel 
 {
+    private static final Logger defaultLogger = Logger.getLogger(JpasListModel.class);
+    
 	private Object selected = null;
 	
 	private List<T> data = new ArrayList<T>();
@@ -47,6 +50,7 @@ public abstract class JpasListModel <T> extends AbstractListModel implements Com
     {
         public void update(final JpasObservable obs, final JpasDataChange change)
         {
+            defaultLogger.debug("List model reloading.");
             populateData();
 
             fireContentsChanged(this, 0, data.size());

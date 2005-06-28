@@ -119,9 +119,12 @@ public class Transaction extends JpasObservableImpl
 
     private void amountChanged()
     {
-        final JpasDataChange myChange = new JpasDataChange.AmountModify(this);
-        amountLoaded = false;
-        notifyObservers(myChange);
+        if(!isDeleted)
+        {
+            final JpasDataChange myChange = new JpasDataChange.AmountModify(this);
+            amountLoaded = false;
+            notifyObservers(myChange);
+        }
     }
 	
     public void commit()
@@ -139,8 +142,9 @@ public class Transaction extends JpasObservableImpl
                 }
 				change = new JpasDataChange.Delete(this);
                 DAFactory.getTransactionDA().deleteTransaction(id);
+                isModified = false;
+                notifyObservers(change);
 		        deleteObservers();
-				isModified = false;
 			}
 			else
 			{
@@ -148,8 +152,8 @@ public class Transaction extends JpasObservableImpl
                 DAFactory.getTransactionDA().updateTransaction(id, payee, memo, num,
                         new java.sql.Date(date.getTime()));
 				isModified = false;
+                notifyObservers(change);
 			}
-	        notifyObservers(change);
     	}
     }
     

@@ -56,6 +56,17 @@ class AccountImpl extends JpasObservableImpl implements Category, Account
 				}
 			}
 		});
+        ModelFactory.getInstance().getTransactionTransferObservable().addObserver(new JpasObserver()
+        {
+            public void update(JpasObservable observable, JpasDataChange change) 
+            {
+                if(change instanceof JpasDataChange.Delete || change instanceof JpasDataChange.AmountModify)
+                {
+                    final TransactionTransfer transfer = (TransactionTransfer)change.getValue();
+                    ModelFactory.getInstance().getAccountImplForID(((AccountImpl)transfer.getCategory()).id).amountChanged();
+                }
+            }
+        });
     }
     
     AccountImpl(final Integer id)

@@ -57,8 +57,10 @@ public class TransactionTableModel extends AbstractTableModel
                 {
             		public void update(final JpasObservable observable, final JpasDataChange change)
             		{
-            		    if(account != null && ((Transaction)change.getValue()).affects(account))
+            		    final Transaction trans = (Transaction)change.getValue();
+                        if(account != null && (trans.isDeleted() || trans.affects(account)))
             		    {
+                            defaultLogger.debug("Reloading table data.");
             		        loadData();
             		    }
             		}
@@ -69,6 +71,7 @@ public class TransactionTableModel extends AbstractTableModel
     {
         transactionList.clear();
         final Transaction[] transArray = ModelFactory.getInstance().getAllTransactionsAffecting(account);
+        defaultLogger.debug("Found " + transArray.length + " transactions.");
         Arrays.sort(transArray, Transaction.getDateComparator());
 	    transactionList.addAll(Arrays.asList(transArray));
         fireTableStructureChanged();

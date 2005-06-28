@@ -71,6 +71,7 @@ public class ModelFactory implements JpasObserver
 		}
 		else if(value instanceof Transaction)
 		{
+            defaultLogger.debug("announcing Transaction change");
 			if(change instanceof JpasDataChange.Delete)
 			{
 				transactionCache.remove(((Transaction)value).id);
@@ -122,12 +123,12 @@ public class ModelFactory implements JpasObserver
 
     public JpasObservable getReminderObservable()
     {
-        return transactionObservable;
+        return reminderObservable;
     }
 
     public JpasObservable getReminderTransferObservable()
     {
-        return transactionTransferObservable;
+        return reminderTransferObservable;
     }
     
     public TransactionTransfer[] getTransfersForTransaction(final Transaction trans)

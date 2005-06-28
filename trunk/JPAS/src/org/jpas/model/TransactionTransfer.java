@@ -92,16 +92,16 @@ public class TransactionTransfer extends JpasObservableImpl
     		{
 	    		final JpasDataChange change = new JpasDataChange.Delete(this);
                 DAFactory.getTransAccountMappingDA().deleteTransAccountMapping(transactionID, accountID);
-	    		notifyObservers(change);
+                isModified = false;
+                notifyObservers(change);
 	    		deleteObservers();
-	    		isModified = false;
 	    	}
 	    	else
 	    	{
 	    		final JpasDataChange change = new JpasDataChange.AmountModify(this);
                 DAFactory.getTransAccountMappingDA().updateTAMAmount(transactionID, accountID, amount);
-	    		notifyObservers(change);
-	    		isModified = false;
+                isModified = false;
+                notifyObservers(change);
 	    	}
     	}
     }
