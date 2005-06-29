@@ -29,13 +29,11 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
-import org.jpas.gui.util.CheckpointDocumentListener;
-import org.jpas.gui.util.Checkpointable;
+import org.jpas.gui.util.*;
 
 public class CheckpointTextField extends JTextField implements Checkpointable
 {
     private boolean valueAltered = false;
-    protected static final Color highlightColor = new Color(255, 223, 223);
     
     private final DocumentListener docListener = new CheckpointDocumentListener(this);
     
@@ -92,36 +90,21 @@ public class CheckpointTextField extends JTextField implements Checkpointable
     {
         return docListener;
     }
-    
-    protected Color getDisabledColor()
-    {
-        return Color.lightGray;
-    }
-    
-    protected Color getStandardColor()
-    {
-        return Color.white;
-    }
-    
-    protected Color getHighlightColor()
-    {
-        return highlightColor;
-    }
-    
+
     public void setChanged(final boolean changed)
     {
         valueAltered = changed;
         if(valueAltered)
         {
-            setBackground(getHighlightColor());
+            setBackground(Appearance.getInstance().getModifyIndicationColor());
         }
         else if(isEditable())
         {
-            setBackground(getStandardColor());
+            setBackground(Appearance.getInstance().getTextFieldEditableBackground());
         }
         else
         {
-            setBackground(getDisabledColor());
+            setBackground(Appearance.getInstance().getTransactionRowColor2());
         }
     }
 

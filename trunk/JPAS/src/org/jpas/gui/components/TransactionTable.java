@@ -30,6 +30,7 @@ import javax.swing.JTable;
 import org.jpas.gui.editors.TransactionTableCellEditor;
 import org.jpas.gui.models.TransactionTableModel;
 import org.jpas.gui.renderers.TransactionTableCellRenderer;
+import org.jpas.gui.util.Appearance;
 import org.jpas.model.Account;
 import org.jpas.model.Transaction;
 
@@ -43,8 +44,8 @@ public class TransactionTable extends JTable
 	private final TransactionTableModel model = new TransactionTableModel();
 	private final TransactionTableCellRenderer transactionRenderer;
 	private final TransactionTableCellEditor transactionEditor;
-	private final Color topColor = new Color(231, 255, 231);
-	private final Color bottomColor = new Color(229, 227, 208);
+	//private final Color topColor = new Color(231, 255, 231);
+	//private final Color bottomColor = new Color(229, 227, 208);
 	
 	private final int[] columnWidths;
 	private final int[] rowHeights;
@@ -64,7 +65,7 @@ public class TransactionTable extends JTable
         this.setDefaultEditor(Transaction.class, transactionEditor);
         this.setRowHeight(total(rowHeights) + 1);
         this.setSurrendersFocusOnKeystroke(true);
-        this.setBackground(bottomColor);
+        this.setBackground(Appearance.getInstance().getTransactionRowColor2());
         dim = transactionRenderer.getPreferredSize();
     }
 
@@ -122,7 +123,7 @@ public class TransactionTable extends JTable
 	
 	    	    for(int y = 0; y < rect.height; y += rowHeight)
 		    	{
-	    	        sg.setColor(topColor);
+	    	        sg.setColor(Appearance.getInstance().getTransactionRowColor1());
 		    	    sg.fillRect(0, y, rect.width, halfHeight);
 		    	    sg.setColor(Color.gray);
 		    	    sg.drawLine(0, y, rect.width, y);
