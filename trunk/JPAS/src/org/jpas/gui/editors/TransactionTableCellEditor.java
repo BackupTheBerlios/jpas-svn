@@ -160,12 +160,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
                 final String action = model.getSelectedAction();
                 if(action.equals(actionDelete))
                 {
-                    final int option = JOptionPane.showConfirmDialog(cellPanel, "This item will be permanently deleted. Continue?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-                    if(option == JOptionPane.YES_OPTION)
-                    {
-                        currentTrans.delete();
-                        currentTrans.commit();
-                    }
+                    deleteTransaction();
                 }
             }
         });
@@ -176,6 +171,26 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         addMouseListener((JTextField)payeeList.getEditor().getEditorComponent());
 	}
     
+    private void deleteTransaction()
+    {
+        final int option = JOptionPane.showConfirmDialog(cellPanel, "This item will be permanently deleted. Continue?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if(option == JOptionPane.YES_OPTION)
+        {
+            if(currentTrans.getAccount().equals(account))
+            {
+                currentTrans.delete();
+                currentTrans.commit();
+            }
+            else
+            {
+                final ModelFactory modelFactory = ModelFactory.getInstance();
+                final TransactionTransfer transfer = modelFactory.getTransfer(currentTrans, modelFactory.getCategoryForAccount(account));
+                assert(transfer != null);
+                transfer.delete();
+                transfer.commit();
+            }
+        }
+    }
    
     private void addMouseListener(final JTextField tf)
     {

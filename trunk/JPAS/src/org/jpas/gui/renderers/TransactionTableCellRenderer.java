@@ -203,7 +203,8 @@ public class TransactionTableCellRenderer extends JPanel implements TableCellRen
         	else
         	{
         	    final Category cat = ModelFactory.getInstance().getCategoryForAccount(account);
-	            final long amount = ModelFactory.getInstance().getTransfer(trans, cat).getAmount();
+                final TransactionTransfer transfer = ModelFactory.getInstance().getTransfer(trans, cat);
+	            final long amount = transfer == null ? 0 : transfer.getAmount();
 
 	            if(amount <= 0)
 	            {

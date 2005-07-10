@@ -46,6 +46,17 @@ public class TransactionTableModel extends AbstractTableModel
 	
     private Account account = null;
     
+    private final JpasObserver acountObserver = new JpasObserver()
+    {
+
+        public void update(JpasObservable observable, JpasDataChange change)
+        {
+            if(change instanceof JpasDataChange.AmountModify)
+            {
+                loadData();
+            }
+        }
+    };
     
     private List<Transaction> transactionList = new ArrayList<Transaction>();
     /**
@@ -54,17 +65,17 @@ public class TransactionTableModel extends AbstractTableModel
     public TransactionTableModel()
     {
     	ModelFactory.getInstance().getTransactionObservable().addObserver(new JpasObserver()
-                {
-            		public void update(final JpasObservable observable, final JpasDataChange change)
-            		{
-            		    final Transaction trans = (Transaction)change.getValue();
-                        if(account != null && (trans.isDeleted() || trans.affects(account)))
-            		    {
-                            defaultLogger.debug("Reloading table data.");
-            		        loadData();
-            		    }
-            		}
-                });
+        {
+    		public void update(final JpasObservable observable, final JpasDataChange change)
+    		{
+    		    final Transaction trans = (Transaction)change.getValue();
+                if(account != null && (trans.isDeleted() || trans.affects(account)))
+    		    {
+                    defaultLogger.debug("Reloading table data.");
+    		        loadData();
+    		    }
+    		}
+        });
     }
 
     private void loadData()
@@ -77,9 +88,15 @@ public class TransactionTableModel extends AbstractTableModel
         fireTableStructureChanged();
     }
     
+    
     public void setAccount(final Account account)
     {
+        if(this.account != null)
+        {
+            this.account.deleteObserver(acountObserver);
+        }
         this.account = account;
+        this.account.addObserver(acountObserver);
         loadData();
     }
     
