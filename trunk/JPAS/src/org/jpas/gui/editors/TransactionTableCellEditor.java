@@ -120,7 +120,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         this.rowHeights = rowHeights;
 
         cellPanel.setOpaque(false);
-    	dateChooser = new JDateChooser("MM/dd/yyyy", false);
+    	dateChooser = new JpasDateChooser("MM/dd/yyyy", false);
 		// TODO create a "real" combo box for the "num" field
     	numList = new CheckpointComboBox(new String[]{"TXFR", "ATM", "100"});
     	numList.setEditable(true);
