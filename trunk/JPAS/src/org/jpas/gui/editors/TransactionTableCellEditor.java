@@ -27,8 +27,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.prefs.Preferences;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -42,7 +43,8 @@ import org.jpas.gui.documents.AmountDocument;
 import org.jpas.gui.layouts.FlexGridLayout;
 import org.jpas.model.*;
 
-import com.toedter.calendar.JDateChooser;
+
+
 
 /**
  * @author jsmith
@@ -55,7 +57,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
     
 	private final JPanel cellPanel = new JPanel();
     
-	private final JDateChooser dateChooser;
+	private final JpasDateChooser dateChooser;
 	private final CheckpointComboBox numList;
 	private final PayeeComboBox payeeList;
 	private final CheckpointTextField withdrawField;
@@ -119,6 +121,7 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         this.columnWidths = columnWidths;
         this.rowHeights = rowHeights;
 
+        
         cellPanel.setOpaque(false);
     	dateChooser = new JpasDateChooser("MM/dd/yyyy", false);
 		// TODO create a "real" combo box for the "num" field
@@ -142,9 +145,23 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
 		{
 			public void actionPerformed(final ActionEvent ae)
 			{
+                final Date newDate = dateChooser.getDate();
+                if(currentTrans != null)
+                {
+                    final Date oldDate = currentTrans.getDate();
+                    final int dayChangeMax = Preferences.userRoot().getInt("trans/max_date_change", 7);
+                    if(Math.abs(newDate.getTime() - oldDate.getTime()) > (1000 * 60 * 60 * 24 * dayChangeMax))
+                    {
+                        int reply = JOptionPane.showConfirmDialog(cellPanel, "The date of this transaction has been altered by more than a week.  Continue with save?", "Date change exceeds threshold", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        if(reply == JOptionPane.NO_OPTION)
+                        {
+                            return;
+                        }
+                    }
+                }
+
 				SwingUtilities.invokeLater(new Runnable()
 				{
-
 					public void run() 
 					{
                         TransactionTableCellEditor.super.stopCellEditing();
@@ -169,7 +186,70 @@ public class TransactionTableCellEditor extends AbstractCellEditor implements Ta
         addMouseListener(depositField);
         addMouseListener((JTextField)numList.getEditor().getEditorComponent());
         addMouseListener((JTextField)payeeList.getEditor().getEditorComponent());
+        
+        addFocusListener(numList);
+        addFocusListener(payeeList);
+        addFocusListener(withdrawField);
+        addFocusListener(depositField);
+        addFocusListener(memoField);
+        addFocusListener(categoryList);
+        addFocusListener(btnEnter);
+        addFocusListener(btnSplit);
+        addFocusListener(editMenu);
+
 	}
+    
+    private void addFocusListener(final JComponent comp)
+    {
+        comp.addFocusListener(new FocusAdapter()
+        {
+            @Override
+            public void focusGained(FocusEvent e)
+            {
+                dateChooser.closePopup();
+            }
+        });
+    }
+    
+    private void addFocusListener(final JComboBox combo)
+    {
+        if(combo.isEditable())
+        {
+            combo.getEditor().getEditorComponent().addFocusListener(new FocusAdapter()
+            {
+                @Override
+                public void focusGained(FocusEvent e)
+                {
+                    dateChooser.closePopup();
+                    SwingUtilities.invokeLater(new Runnable()
+                    {
+                        public void run()
+                        {
+                            combo.setPopupVisible(true);
+                        }
+                    });
+                }
+            });
+        }
+        else
+        {
+            combo.addFocusListener(new FocusAdapter()
+            {
+                @Override
+                public void focusGained(FocusEvent e)
+                {
+                    dateChooser.closePopup();
+                    SwingUtilities.invokeLater(new Runnable()
+                    {
+                        public void run()
+                        {
+                            combo.setPopupVisible(true);
+                        }
+                    });
+                }
+            });
+        }
+    }
     
     private void deleteTransaction()
     {
