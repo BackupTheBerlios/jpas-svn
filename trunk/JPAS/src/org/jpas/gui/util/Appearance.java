@@ -24,14 +24,15 @@
 package org.jpas.gui.util;
 
 import java.awt.Color;
+import java.util.prefs.*;
 
 public abstract class Appearance
 {
     private static final Appearance instance = new Appearance()
     {
-        private final Color transactionRowColor1 = new Color(231, 255, 231);
-        private final Color transactionRowColor2 = new Color(229, 227, 208);
-        private final Color modifyIndicationColor = new Color(255, 223, 223);
+        private final Color transactionRowColor1 = new Color(Preferences.userRoot().getInt("/gui/color/transaction/row1", new Color(231, 255, 231).getRGB()));
+        private final Color transactionRowColor2 = new Color(Preferences.userRoot().getInt("/gui/color/transaction/row2", new Color(229, 227, 208).getRGB()));
+        private final Color modifyIndicationColor = new Color(Preferences.userRoot().getInt("/gui/color/indicator/modify", new Color(255, 223, 223).getRGB()));
         public Color getTransactionRowColor1()
         {
             return transactionRowColor1;

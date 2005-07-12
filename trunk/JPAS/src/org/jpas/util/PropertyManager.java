@@ -1,11 +1,10 @@
 package org.jpas.util;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Observable;
 import java.util.Properties;
+
+import java.util.prefs.*;
 
 import org.apache.log4j.Logger;
 
@@ -56,11 +55,14 @@ public class PropertyManager
 		}
 	}
 
-	public static PropertyManagerKey DB_FILE_DIR = new PropertyManagerKey("DB_FILE_DIR");
-	public static PropertyManagerKey DB_FILE_PREFIX = new PropertyManagerKey("DB_FILE_PREFIX");
-	public static PropertyManagerKey DB_NAME = new PropertyManagerKey("DB_NAME");
-	public static PropertyManagerKey DB_MODE = new PropertyManagerKey("DB_MODE");
-	public static PropertyManagerKey DB_IMPL = new PropertyManagerKey("DB_IMPL");
+	public static PropertyManagerKey DB_FILE_DIR = new PropertyManagerKey("db.file.dir");
+	public static PropertyManagerKey DB_FILE_PREFIX = new PropertyManagerKey("db.file.prefix");
+	public static PropertyManagerKey DB_NAME = new PropertyManagerKey("db.name");
+	public static PropertyManagerKey DB_MODE = new PropertyManagerKey("db.mode");
+	public static PropertyManagerKey DB_IMPL = new PropertyManagerKey("db.impl");
+    public static PropertyManagerKey PREFS_USER_FILE = new PropertyManagerKey("prefs.user_file");
+    public static PropertyManagerKey PREFS_SYSTEM_FILE = new PropertyManagerKey("prefs.system_file");
+    
 
 	private final Properties props = new Properties();
 
@@ -79,17 +81,37 @@ public class PropertyManager
 			defaultLogger.error("Exception while loading properties!", ioe);
 		}
 
+        try
+        {
+            Preferences.importPreferences(new FileInputStream(getProperty(PREFS_USER_FILE, "userPrefs.xml")));
+            Preferences.importPreferences(new FileInputStream(getProperty(PREFS_SYSTEM_FILE, "systemPrefs.xml")));
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
 		Runtime.getRuntime().addShutdownHook(new Thread()
 			{
 				public void run()
 				{
 					try
 					{
+                        try
+                        {
+                            Preferences.userRoot().exportSubtree(new FileOutputStream(getProperty(PREFS_USER_FILE, "userPrefs.xml"), false));
+                            Preferences.systemRoot().exportSubtree(new FileOutputStream(getProperty(PREFS_SYSTEM_FILE, "systemPrefs.xml"), false));
+                        }
+                        catch(final BackingStoreException bse)
+                        {
+                            defaultLogger.error("Cannot write preferences to file.");
+                        }
 						props.store(new FileOutputStream(propFileName, false), "JPAS Properties");
 					}
 					catch(final IOException ioe)
 					{
-						defaultLogger.warn("Cannot write properties to file: " + propFileName);
+						defaultLogger.error("Cannot write properties to file: " + propFileName);
 					}
 				}
 			});
