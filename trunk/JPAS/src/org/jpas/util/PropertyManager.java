@@ -19,7 +19,16 @@ import org.apache.log4j.Logger;
 
 public class PropertyManager
 {
-	private static final Logger defaultLogger = Logger.getLogger(PropertyManager.class);
+    public static PropertyManagerKey DB_FILE_DIR = new PropertyManagerKey("db.file.dir");
+    public static PropertyManagerKey DB_FILE_PREFIX = new PropertyManagerKey("db.file.prefix");
+    public static PropertyManagerKey DB_NAME = new PropertyManagerKey("db.name");
+    public static PropertyManagerKey DB_MODE = new PropertyManagerKey("db.mode");
+    public static PropertyManagerKey DB_IMPL = new PropertyManagerKey("db.impl");
+    public static PropertyManagerKey PREFS_USER_FILE = new PropertyManagerKey("prefs.user_file");
+    public static PropertyManagerKey PREFS_SYSTEM_FILE = new PropertyManagerKey("prefs.system_file");
+
+    
+    private static final Logger defaultLogger = Logger.getLogger(PropertyManager.class);
 	private static final PropertyManager instance = new PropertyManager();
     
     public static final PropertyManager getInstance()
@@ -54,15 +63,6 @@ public class PropertyManager
 			throw new UnsupportedOperationException("notifyObservers not supported!");
 		}
 	}
-
-	public static PropertyManagerKey DB_FILE_DIR = new PropertyManagerKey("db.file.dir");
-	public static PropertyManagerKey DB_FILE_PREFIX = new PropertyManagerKey("db.file.prefix");
-	public static PropertyManagerKey DB_NAME = new PropertyManagerKey("db.name");
-	public static PropertyManagerKey DB_MODE = new PropertyManagerKey("db.mode");
-	public static PropertyManagerKey DB_IMPL = new PropertyManagerKey("db.impl");
-    public static PropertyManagerKey PREFS_USER_FILE = new PropertyManagerKey("prefs.user_file");
-    public static PropertyManagerKey PREFS_SYSTEM_FILE = new PropertyManagerKey("prefs.system_file");
-    
 
 	private final Properties props = new Properties();
 
