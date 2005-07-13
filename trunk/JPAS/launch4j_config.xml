@@ -1,0 +1,19 @@
+<launch4jConfig>
+  <headerType>0</headerType>
+  <jar>D:\workspace\JPAS\dist\JPAS\JPAS.jar</jar>
+  <outfile>D:\workspace\JPAS\dist\JPAS\JPAS.exe</outfile>
+  <errTitle></errTitle>
+  <jarArgs></jarArgs>
+  <chdir></chdir>
+  <customProcName>false</customProcName>
+  <stayAlive>true</stayAlive>
+  <icon></icon>
+  <jre>
+    <path>jre1.5.0_03</path>
+    <minVersion>1.5.0</minVersion>
+    <maxVersion></maxVersion>
+    <initialHeapSize>0</initialHeapSize>
+    <maxHeapSize>0</maxHeapSize>
+    <args></args>
+  </jre>
+</launch4jConfig>

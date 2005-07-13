@@ -1,0 +1,7 @@
+JPAS Changelog.
+
+Pre-alpha preview release:
+
+- All data stored in an internal HSQL database (http://hsqldb.org/)
+- Transactions may be Added, Deleted or Modified.
+- Balances are dynamically updated.

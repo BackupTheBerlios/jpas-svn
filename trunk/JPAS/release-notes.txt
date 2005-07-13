@@ -1,0 +1,61 @@
+*******************************************************************************
+*                         JPAS Pre-alpha preview release.                     *
+*******************************************************************************
+
+The current release will be in two forms:
+
+1) JPAS-20050712.zip: 
+
+Contains:
+	Jar files needed to execute the program.
+	Sample Accounts/Categories/Transactions (already in the database).
+	Recommended for a user with Java experience.
+
+Requires:
+	Java JRE 1.5.0+
+	
+Execution:
+	1) Open a command prompt
+	2) Change to the directory to which JPAS was installed
+	3) Type: java -jar JPAS.jar
+
+2) JPAS-win32-JRE-20050712.zip:
+
+Contains:
+	Jar files needed to execute the program.
+	Sample Accounts/Categories/Transactions (already in the database).
+	Recommended for a user with Java experience.
+	JRE 1.5.0 for windows.
+	A windows executable (JPAS.exe).
+
+Requires:
+	Windows
+	
+Execution:
+	1) Double click the "JPAS.exe"
+
+*******************************************************************************
+Installation:
+
+Currently the installation involves nothing more than unzipping one of the 
+above files into the directory of your choice.  
+
+*******************************************************************************
+Features:
+
+- All data stored in an internal HSQL database (http://hsqldb.org/)
+- Transactions may be Added, Deleted or Modified.
+- Balances are dynamically updated.
+
+Features (coming soon):
+- Transaction may be split across accounts.
+- Transaction Reminders may be created.
+- Accounts may be Added, Deleted or Modified.
+- Categories may be Added, Deleted or Modified.
+
+Features (planned):
+- Improved installer
+- Reporting (internally web based)
+- Import/Export of xml, csv
+- Import from financial institution (OFX?, QIF?)
+
